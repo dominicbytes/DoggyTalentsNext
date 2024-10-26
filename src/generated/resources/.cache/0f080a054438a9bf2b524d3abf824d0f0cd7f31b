@@ -1,4 +1,4 @@
-// 1.21.1	2024-10-25T15:30:31.5876425	DoggyTalents Item Models
+// 1.21.1	2024-10-26T12:58:22.6532795	DoggyTalents Item Models
 3e180cbbb49f37fb307e710e9c20bb259237d7db assets/doggytalents/models/item/aburaage.json
 4c72c6dd9c1ea802470a31d428edf70bfadf3dc1 assets/doggytalents/models/item/amnesia_bone.json
 576747e29ded49df195a33e020635920692b8bce assets/doggytalents/models/item/angel_halo.json
@@ -31,6 +31,9 @@ e6928e128e709eed661a926a6341052c5dee3952 assets/doggytalents/models/item/doggy_c
 d7d1edf4ba2e22a722df08baa0d660f52ab65240 assets/doggytalents/models/item/dog_bath.json
 aa0e5ccc2a5183ecdf5ba2c3fedc832eca34f39f assets/doggytalents/models/item/dog_bed.json
 3e834b3edef3a73ce8751e4c2c1363d7983d72b1 assets/doggytalents/models/item/dog_plushie_toy_item.json
+d4e16dd49b3b9367913eed29f9d7e4c9cb56ff85 assets/doggytalents/models/item/dragon_costume_head.json
+89723e9319ed5a15907d0f1ef04d39c1b6bafd81 assets/doggytalents/models/item/dragon_costume_suit.json
+d38e5e92b7b0677d84b44b0d1e02a8a6867aafb3 assets/doggytalents/models/item/dragon_costume_wings.json
 e573b037300087bb973ec849784125738b482122 assets/doggytalents/models/item/drool_scent_treat.json
 54845463612496361d248445a4e723fdfc0a0529 assets/doggytalents/models/item/edamame.json
 c308c809213ff3393bfd94da560555797d4097cc assets/doggytalents/models/item/edamame_unpodded.json

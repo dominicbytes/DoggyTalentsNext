@@ -1,4 +1,4 @@
-// 1.21.1	2024-10-26T10:49:16.1828701	Recipes
+// 1.21.1	2024-10-26T12:58:22.6562778	Recipes
 bbca6218af9c6665b272a2b26d607c67d9087527 data/doggytalents/advancement/recipes/building_blocks/dog_bath.json
 06d4b3a9cd262399bbfc6828dc4510f10511ea09 data/doggytalents/advancement/recipes/building_blocks/dog_bed_def.json
 668fa033a5c76698a21e984fa7d3ee54abb9a53a data/doggytalents/advancement/recipes/building_blocks/food_bowl.json
@@ -22,6 +22,9 @@ e537fc17b465fb76acdd9852fae8f7edcc74627d data/doggytalents/advancement/recipes/d
 449195358a9008d92f49bbf0ca3a5148ad6eb78d data/doggytalents/advancement/recipes/decorations/divine_retribution.json
 845c64f29e4f2d5006d56328a8906cd65881f34b data/doggytalents/advancement/recipes/decorations/doggy_contacts.json
 c1f78a0db261c52d2b6db412adacd086599c664a data/doggytalents/advancement/recipes/decorations/dog_plushie_toy_item.json
+9a54d60c5377b0e0116e9789f4c55e47f8eca2ae data/doggytalents/advancement/recipes/decorations/dragon_costume_head.json
+9f69821cb7719c5e5fdc99dedba306dfd538adf5 data/doggytalents/advancement/recipes/decorations/dragon_costume_suit.json
+b2383a59e89f561df54fdc8ccca7fa78930d9aab data/doggytalents/advancement/recipes/decorations/dragon_costume_wings.json
 099d2090a9b86913fb6e6da1ffec43b60d72795c data/doggytalents/advancement/recipes/decorations/fedora.json
 4b082942c679dcd2f523adb17fe03daabbfaa3d4 data/doggytalents/advancement/recipes/decorations/flatcap.json
 09eb12b18f497a12c4fe650adcba943eb88388dc data/doggytalents/advancement/recipes/decorations/flying_cape.json
@@ -144,6 +147,9 @@ fff89ee383ce3152024a7d9a3a7552c320d251a5 data/doggytalents/recipe/dog_bath.json
 30795cfb06b2ba29e40f04e2cad25301266587fb data/doggytalents/recipe/dog_bed.json
 7a3f4ddc696268e628c673dac064601926db7173 data/doggytalents/recipe/dog_bed_def.json
 f196f384c38739d89f569e8445e8c9f5a99daec4 data/doggytalents/recipe/dog_plushie_toy_item.json
+3e6095b2a0145236fcd6db25fcca544ed125a73b data/doggytalents/recipe/dragon_costume_head.json
+4747f6c4736d9cb1aff43c97f68f317d3b40dec6 data/doggytalents/recipe/dragon_costume_suit.json
+f6b72b6e35a84c061a9c2dc7425aa98cd1753718 data/doggytalents/recipe/dragon_costume_wings.json
 f25f5319a403bdb42351a51e139675e62812897b data/doggytalents/recipe/edamame.json
 7cbecc7be74348e8a1e41435e00313a9c6c8bc4c data/doggytalents/recipe/egg_sandwich.json
 1eac566b63d51569e41f0be282d5419fe93e173d data/doggytalents/recipe/empty_locator_orb.json
