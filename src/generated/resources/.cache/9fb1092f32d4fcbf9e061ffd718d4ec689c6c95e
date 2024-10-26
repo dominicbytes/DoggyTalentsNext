@@ -1,4 +1,4 @@
-// 1.21.1	2024-09-07T10:13:19.5469959	Recipes
+// 1.21.1	2024-10-26T10:49:16.1828701	Recipes
 bbca6218af9c6665b272a2b26d607c67d9087527 data/doggytalents/advancement/recipes/building_blocks/dog_bath.json
 06d4b3a9cd262399bbfc6828dc4510f10511ea09 data/doggytalents/advancement/recipes/building_blocks/dog_bed_def.json
 668fa033a5c76698a21e984fa7d3ee54abb9a53a data/doggytalents/advancement/recipes/building_blocks/food_bowl.json
@@ -120,7 +120,7 @@ cae3e1ab4e802e1c436c2619c12ffaa88bc15896 data/doggytalents/recipe/aburaage_smelt
 53733515601c7c80658cdc598c2f3f435e389a4d data/doggytalents/recipe/bach_wig.json
 eb90d6ba1e86e96a023214e6d1bd72d44f8072e8 data/doggytalents/recipe/baker_hat.json
 66ead2941a668c9b47d004e651a803169ae1e772 data/doggytalents/recipe/bandaid.json
-793aa782bce8cae96ce5e9176dfe9d6f792a852f data/doggytalents/recipe/bat_wings.json
+4e8ac6a0910afc32ced17f16522482d77e27a39f data/doggytalents/recipe/bat_wings.json
 6e025eed470823f107bceebc08b0e7e3ea6fdd3c data/doggytalents/recipe/beastars_uniform_female.json
 e1d755fb96f2c2fcfc9149030817153495d248ae data/doggytalents/recipe/beastars_uniform_male.json
 26b26742d740d81cbccfbb0865635bd4a9dc545e data/doggytalents/recipe/birthday_hat.json
@@ -133,8 +133,8 @@ f111042ebb8f65b5304f7efe2679a5b44b9a7436 data/doggytalents/recipe/ceremonial_gar
 08719906e1b65c7d2fe786ad314f0dc7264cd431 data/doggytalents/recipe/chef_hat.json
 9865498159a79770e1e51d8da97c070c4596bcd9 data/doggytalents/recipe/conan_suit.json
 31c7303528ceb2fea7601ebfbe504131dc9c2da3 data/doggytalents/recipe/conducting_bone.json
-bc825e63fd77b8eccd0b424e1d1a7b5c9d757225 data/doggytalents/recipe/crow_wings.json
-92506b9305ef5caca91e6045cc5dd113ccd0e6d0 data/doggytalents/recipe/crow_wings_alt.json
+7a558b235245dd4820a0f9377653fc1e557c8809 data/doggytalents/recipe/crow_wings.json
+33270647557c496ea909c8d7efd52710b6e0e9d8 data/doggytalents/recipe/crow_wings_alt.json
 dd878d39976648b77a498a7cd13cfa7b55ef3d74 data/doggytalents/recipe/death_hood.json
 ceee70ac4992bfdbaf200229691179f43091dce5 data/doggytalents/recipe/deer_antlers.json
 ba72c00d461bb0f2ebc16e0ef8e0ae42ce9ce179 data/doggytalents/recipe/demon_horns.json
@@ -151,7 +151,7 @@ f25f5319a403bdb42351a51e139675e62812897b data/doggytalents/recipe/edamame.json
 b297d4576c2a46d18f6e237ae0504ce0e4445a00 data/doggytalents/recipe/feathered_mantle.json
 758a4c909960478583adcd5f997d0b39788c6ab8 data/doggytalents/recipe/fedora.json
 67d424d8c4f6519d86b19402837e535e74bbe5e2 data/doggytalents/recipe/flatcap.json
-32d21f81909599e5b95460f72dab7f516a18b8a1 data/doggytalents/recipe/flying_cape.json
+298fa7eff84a719acf363846a5dfba82f61313c4 data/doggytalents/recipe/flying_cape.json
 a2567977e509753e00a69f72cb2e4cc8867a0a89 data/doggytalents/recipe/food_bowl.json
 4250ebf55e1484d374104a10b5c1c882463b2261 data/doggytalents/recipe/frisbee.json
 117fac493d92e72a806fd815d1bdf75efda9eebf data/doggytalents/recipe/gender_bone.json
