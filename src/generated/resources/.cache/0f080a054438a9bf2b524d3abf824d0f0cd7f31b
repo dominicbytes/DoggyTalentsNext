@@ -1,4 +1,4 @@
-// 1.21.1	2024-10-26T12:58:22.6532795	DoggyTalents Item Models
+// 1.21.1	2024-10-26T20:12:25.1132427	DoggyTalents Item Models
 3e180cbbb49f37fb307e710e9c20bb259237d7db assets/doggytalents/models/item/aburaage.json
 4c72c6dd9c1ea802470a31d428edf70bfadf3dc1 assets/doggytalents/models/item/amnesia_bone.json
 576747e29ded49df195a33e020635920692b8bce assets/doggytalents/models/item/angel_halo.json
@@ -42,6 +42,10 @@ c308c809213ff3393bfd94da560555797d4097cc assets/doggytalents/models/item/edamame
 2b241a97c7a75299f0df2a8b38a741693e92e5b2 assets/doggytalents/models/item/energizer_stick.json
 fcce3621bda79bfb2c94031ae8ab9eabef319edc assets/doggytalents/models/item/feathered_mantle.json
 567e3bd3453bd6c927f463931d62c0da0c254443 assets/doggytalents/models/item/fedora.json
+a9e76a3ca12634b07b45b85566a88b9569f354aa assets/doggytalents/models/item/firefighter_suit_black.json
+c89fa9979d888ecd06d32f8e9a0cec71b7edefd2 assets/doggytalents/models/item/firefighter_suit_blue.json
+997ed12d98396cf1307449f39ceafcdd12a69912 assets/doggytalents/models/item/firefighter_suit_kaki.json
+c32fcf2897ef1da941ba92415fbf2c651a15bc85 assets/doggytalents/models/item/firefighter_suit_red.json
 a4bc3a31db081fb8923a0112d32bd4650d41c4f9 assets/doggytalents/models/item/flatcap.json
 fd14db626434a2c48c8ee30395f56f64c64879c8 assets/doggytalents/models/item/flying_cape.json
 7cdb64b50b71c47cea28a9126f474fa5795001a3 assets/doggytalents/models/item/food_bowl.json
