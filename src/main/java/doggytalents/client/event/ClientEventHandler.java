@@ -51,11 +51,11 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.neoforge.client.event.ClientPlayerNetworkEvent;
 import net.neoforged.neoforge.client.event.InputEvent;
 import net.neoforged.neoforge.client.event.ModelEvent;
 import net.neoforged.neoforge.client.event.MovementInputUpdateEvent;
 import net.neoforged.neoforge.client.event.ScreenEvent;
-import net.neoforged.neoforge.client.event.ClientPlayerNetworkEvent.LoggingOut;
 import doggytalents.common.network.PacketDistributor;
 
 import java.util.List;
@@ -320,7 +320,7 @@ public class ClientEventHandler {
     }
 
     @SubscribeEvent
-    public void onPlayerLoggingOut(LoggingOut event) {
+    public void onPlayerLoggingOut(ClientPlayerNetworkEvent.LoggingOut event) {
         CanineTrackerLocateRenderer.onWorldLogOut();
     }
 
