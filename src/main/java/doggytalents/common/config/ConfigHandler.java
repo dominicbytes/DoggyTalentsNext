@@ -313,6 +313,7 @@ ModLoadingContext.get().getActiveContainer().registerConfig(ModConfig.Type.CLIEN
         public ModConfigSpec.BooleanValue DOG_DONT_PUSH_OWNER;
         public ModConfigSpec.BooleanValue INJURED_DOG_BLOCK_PORTAL;
         public ModConfigSpec.BooleanValue WANDERING_DOG_WHISTLE;
+        public ModConfigSpec.BooleanValue DISABLE_KILL_STATS;
 
         public Map<String, ModConfigSpec.BooleanValue> DISABLED_TALENTS;
 
@@ -546,6 +547,10 @@ ModLoadingContext.get().getActiveContainer().registerConfig(ModConfig.Type.CLIEN
                 .comment("Enable this to make them respond as usual.")
                 .translation("doggytalents.wandering_dog_whistle")
                 .define("wandering_dog_whistle", false);
+            DISABLE_KILL_STATS = builder
+                .comment("Prevent all Dogs' kills from being recorded into its Kill Stats.")
+                .translation("doggytalents.disable_kill_stats")
+                .define("disable_kill_stats", false);
 
             builder.pop();
         }
