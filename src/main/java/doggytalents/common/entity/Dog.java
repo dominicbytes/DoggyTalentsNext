@@ -2318,6 +2318,7 @@ public class Dog extends AbstractDog {
         return false;
     }
 
+    public boolean locationUpdatedUponRemove = false;
     //@Override
     public void onRemovedFromWorld() {
         if (this.level() instanceof ServerLevel serverLevel && this.isAlive()) {
@@ -2326,6 +2327,7 @@ public class Dog extends AbstractDog {
             var data = DogLocationStorage.get(serverLevel).getData(this);
             
             if (data != null) data.update(this);
+            locationUpdatedUponRemove = true;
         }
         //super.onRemovedFromWorld();
     }
