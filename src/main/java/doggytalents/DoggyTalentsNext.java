@@ -28,10 +28,6 @@ import doggytalents.common.lib.Constants;
 import doggytalents.common.network.DTNNetworkHandler;
 import doggytalents.common.network.PacketHandler;
 import doggytalents.common.talent.HappyEaterTalent;
-import doggytalents.common.variants_legacy.DTNWolfVariantsProvider;
-import doggytalents.common.variants_legacy.DTNWolfVariantsSpawnOverride;
-import doggytalents.common.variants_legacy.DTNWolfVariantsSpawnPlacements;
-import doggytalents.common.variants_legacy.VSCodeWolfSpawnHandler;
 import net.minecraft.data.DataGenerator;
 import net.minecraft.tags.BlockTags;
 import net.neoforged.api.distmarker.Dist;
@@ -100,15 +96,11 @@ public class DoggyTalentsNext {
         modEventBus.addListener(DTNNetworkHandler::onRegisterPayloadEvent);
         modEventBus.addListener(DoggyChunkController::onChunkControllerRegistryEvent);
         modEventBus.addListener(ClientSetup::setupScreenManagers);
-        modEventBus.addListener(DTNWolfVariantsSpawnPlacements::onRegisterSpawnPlacements);
 
         var forgeEventBus = NeoForge.EVENT_BUS;
         forgeEventBus.addListener(this::serverStarting);
         forgeEventBus.addListener(this::registerCommands);
-        forgeEventBus.addListener(DoggyBrewingRecipes::onRegisterEvent);
-        forgeEventBus.addListener(DTNWolfVariantsSpawnOverride::onWolfSpawn);
-        forgeEventBus.addListener(DTNWolfVariantsSpawnPlacements::onPositionCheck);
-        forgeEventBus.addListener(VSCodeWolfSpawnHandler::onRightClickBlock);        
+        forgeEventBus.addListener(DoggyBrewingRecipes::onRegisterEvent); 
         forgeEventBus.addListener(ChopinRecordItem::onRightClickBlock);
 
 
