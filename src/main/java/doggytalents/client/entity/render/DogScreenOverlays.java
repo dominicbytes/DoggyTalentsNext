@@ -3,6 +3,7 @@ package doggytalents.client.entity.render;
 import com.mojang.blaze3d.systems.RenderSystem;
 
 import doggytalents.client.screen.ScreenUtil;
+import doggytalents.common.config.ConfigHandler;
 import doggytalents.common.entity.Dog;
 import doggytalents.common.util.Util;
 import net.minecraft.client.Minecraft;
@@ -17,6 +18,8 @@ public class DogScreenOverlays {
     public static final ResourceLocation GUI_ICONS_LOCATION = Util.getResource("textures/gui/minecraft/icons_health.png");
 
     public static final LayeredDraw.Layer FOOD_LEVEL_ELEMENT = (mStack, partialTicks) -> {
+        if (ConfigHandler.CLIENT.HIDE_WOLF_MOUNT_STATUS.get())
+            return;
         Minecraft mc = Minecraft.getInstance();
         var gui = mc.gui;
         boolean isMounted = mc.player.getVehicle() instanceof Dog;
@@ -58,6 +61,8 @@ public class DogScreenOverlays {
     };
 
     public static final LayeredDraw.Layer AIR_LEVEL_ELEMENT = (mStack, partialTicks) -> {
+        if (ConfigHandler.CLIENT.HIDE_WOLF_MOUNT_STATUS.get())
+            return;
         Minecraft mc = Minecraft.getInstance();
         var gui = mc.gui;
         boolean isMounted = mc.player.getVehicle() instanceof Dog;
