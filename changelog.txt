@@ -1651,6 +1651,3 @@ GUI Changes
 # Dog Auto Mount option is now saved.
 - Removed Legacy DTN Wolf Variant Support.
 * Fix Enter Bug on Conducting Bone Screen.
-
-**1.18.35 - 13th November 2024**
-*(1.21+ only) Fix GUI rendering background twice.
