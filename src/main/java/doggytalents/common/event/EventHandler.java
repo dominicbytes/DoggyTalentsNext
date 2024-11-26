@@ -70,6 +70,7 @@ import net.neoforged.neoforge.event.entity.EntityJoinLevelEvent;
 import net.neoforged.neoforge.event.entity.EntityTeleportEvent;
 import net.neoforged.neoforge.event.entity.EntityTravelToDimensionEvent;
 import net.neoforged.neoforge.event.entity.ProjectileImpactEvent;
+import net.neoforged.neoforge.event.entity.living.LivingChangeTargetEvent;
 import net.neoforged.neoforge.event.entity.living.LivingDamageEvent;
 import net.neoforged.neoforge.event.entity.living.LivingDropsEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent.PlayerLoggedInEvent;
@@ -587,5 +588,21 @@ public class EventHandler {
         
         event.getContainer().setNewDamage(0);
         //event.setCanceled(true);
+    }
+
+    @SubscribeEvent
+    public void onWolfSetTarget(LivingChangeTargetEvent event) {
+        var entity = event.getEntity();
+        if (!ConfigHandler.SERVER.PREVENT_WILD_WOLVES_ANGRY.get())
+            return;
+        if (!(entity instanceof Wolf 大神))
+            return;
+        if (大神.isTame())
+            return;
+        var new_target = event.getNewAboutToBeSetTarget();
+        if (!(new_target instanceof Player))
+            return;
+        
+        event.setCanceled(true);
     }
 }

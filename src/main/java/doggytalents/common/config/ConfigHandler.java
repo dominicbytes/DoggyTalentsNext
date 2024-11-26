@@ -332,6 +332,7 @@ ModLoadingContext.get().getActiveContainer().registerConfig(ModConfig.Type.CLIEN
         public ModConfigSpec.BooleanValue WANDERING_DOG_WHISTLE;
         public ModConfigSpec.BooleanValue DISABLE_KILL_STATS;
         public ModConfigSpec.BooleanValue DISABLE_WOLF_ARMOR_FUNCTION;
+        public ModConfigSpec.BooleanValue PREVENT_WILD_WOLVES_ANGRY;
 
         public Map<String, ModConfigSpec.BooleanValue> DISABLED_TALENTS;
 
@@ -574,6 +575,10 @@ ModLoadingContext.get().getActiveContainer().registerConfig(ModConfig.Type.CLIEN
                 .comment("used for Style.")
                 .translation("doggytalents.disable_wolf_armor_protection")
                 .define("disable_wolf_armor_protection", false);
+            PREVENT_WILD_WOLVES_ANGRY = builder
+                .comment("Prevent Wild Wolves from being angry when you accidentally hit them.")
+                .translation("doggytalents.prevent_wild_wolves_angry")
+                .define("prevent_wild_wolves_angry", false);
 
             builder.pop();
         }
