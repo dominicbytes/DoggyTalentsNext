@@ -155,7 +155,7 @@ String vscodeFetchProgramArguments(Closure programArgsGetter) {
     return StringEscapeUtils.escapeJava(programArgs);
 }
 
-String modifySystemPropertyToIgnoreDuplicates(String str) {
+String vscodeModifySystemPropertyToFixDuplicates(String str) {
     def to_insert = "asm-9.5.jar,asm-commons-9.5.jar,asm-tree-9.5.jar,asm-util-9.5.jar,asm-analysis-9.5.jar,"
     int equal_start = str.indexOf("=");
     def new_str = str.substring(0, equal_start + 1) + to_insert + str.substring(equal_start + 1, str.length());
