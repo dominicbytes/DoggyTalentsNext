@@ -132,7 +132,7 @@ task vscodePrintRunData {
 
 import groovy.json.StringEscapeUtils;
 
-String vscodeFetchJVMArguments(Closure<String> vmArgsGetter) {
+String vscodeFetchJVMArguments(Closure vmArgsGetter) {
     def vmArgs = "";
     List<String> args = vmArgsGetter();
     for (item in args) {
@@ -145,7 +145,7 @@ String vscodeFetchJVMArguments(Closure<String> vmArgsGetter) {
     return StringEscapeUtils.escapeJava(vmArgs);
 }
 
-String vscodeFetchProgramArguments(Closure<String> programArgsGetter) {
+String vscodeFetchProgramArguments(Closure programArgsGetter) {
     def programArgs = "";
     List<String> args = programArgsGetter();
     for (item in args) {
