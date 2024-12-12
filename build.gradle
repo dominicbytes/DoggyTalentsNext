@@ -98,46 +98,67 @@ tasks.withType(JavaCompile).configureEach {
     options.encoding = 'UTF-8'
 }
 
+
 task vscodePrintRunClient {
     doFirst {
-
         println("vmArgs:")
-        def vmArgs = "";
-        for (item in runs.client.realiseJvmArguments()) {
-            vmArgs = vmArgs + item + " "
-        }
+        def vmArgs = vscodeFetchJVMArguments({ runs.client.realiseJvmArguments() })
         println(vmArgs)
         println("==================================")
         println("args:")
-        def args1 = ""
-        for (item in runs.client.getProgramArguments().get()) {
-            args1 = args1 + item + " "
-        }
-        println(args1)
+        def programArgs = vscodeFetchProgramArguments({ runs.client.getProgramArguments().get() })
+        println(programArgs)
         println("==================================")
         println("")
         println("")
     }
 }
 
+
 task vscodePrintRunData {
     doFirst {
-
         println("vmArgs:")
-        def vmArgs = "";
-        for (item in runs.data.realiseJvmArguments()) {
-            vmArgs = vmArgs + item + " "
-        }
+        def vmArgs = vscodeFetchJVMArguments({ runs.data.realiseJvmArguments() })
         println(vmArgs)
         println("==================================")
         println("args:")
-        def args1 = ""
-        for (item in runs.data.getProgramArguments().get()) {
-            args1 = args1 + item + " "
-        }
-        println(args1)
+        def programArgs = vscodeFetchProgramArguments({ runs.data.getProgramArguments().get() })
+        println(programArgs)
         println("==================================")
         println("")
         println("")
     }
+}
+
+import groovy.json.StringEscapeUtils;
+
+String vscodeFetchJVMArguments(Closure vmArgsGetter) {
+    def vmArgs = "";
+    List<String> args = vmArgsGetter();
+    for (item in args) {
+        def item1 = item;
+        if (item.startsWith("-DignoreList=")) {
+            item1 = modifySystemPropertyToIgnoreDuplicates(item);
+        }
+        vmArgs = vmArgs + item1 + " "
+    }
+    return StringEscapeUtils.escapeJava(vmArgs);
+}
+
+String vscodeFetchProgramArguments(Closure<String> programArgsGetter) {
+    def programArgs = "";
+    List<String> args = programArgsGetter();
+    for (item in args) {
+        def item1 = item;
+        programArgs = programArgs + item1 + " "
+    }
+    return StringEscapeUtils.escapeJava(programArgs);
+}
+
+
+String modifySystemPropertyToIgnoreDuplicates(String str) {
+    def to_insert = "asm-9.5.jar,asm-commons-9.5.jar,asm-tree-9.5.jar,asm-util-9.5.jar,asm-analysis-9.5.jar,"
+    int equal_start = str.indexOf("=");
+    def new_str = str.substring(0, equal_start + 1) + to_insert + str.substring(equal_start + 1, str.length());
+    return new_str;
 }
