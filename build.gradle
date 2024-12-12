@@ -132,7 +132,7 @@ task vscodePrintRunData {
 
 import groovy.json.StringEscapeUtils;
 
-String vscodeFetchJVMArguments(Closure vmArgsGetter) {
+String vscodeFetchJVMArguments(Closure<String> vmArgsGetter) {
     def vmArgs = "";
     List<String> args = vmArgsGetter();
     for (item in args) {
@@ -154,7 +154,6 @@ String vscodeFetchProgramArguments(Closure<String> programArgsGetter) {
     }
     return StringEscapeUtils.escapeJava(programArgs);
 }
-
 
 String modifySystemPropertyToIgnoreDuplicates(String str) {
     def to_insert = "asm-9.5.jar,asm-commons-9.5.jar,asm-tree-9.5.jar,asm-util-9.5.jar,asm-analysis-9.5.jar,"
