@@ -1,7 +1,0 @@
-{
-  "parent": "minecraft:item/generated",
-  "textures": {
-    "layer0": "doggytalents:item/dog_present_costume",
-    "layer1": "doggytalents:item/dog_present_costume_overlay"
-  }
-}
