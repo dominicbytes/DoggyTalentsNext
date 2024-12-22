@@ -1,4 +1,4 @@
-// 1.21.1	2024-12-22T22:04:57.6911991	DoggyTalents Item Models
+// 1.21.1	2024-12-23T00:52:34.0667165	DoggyTalents Item Models
 3e180cbbb49f37fb307e710e9c20bb259237d7db assets/doggytalents/models/item/aburaage.json
 4c72c6dd9c1ea802470a31d428edf70bfadf3dc1 assets/doggytalents/models/item/amnesia_bone.json
 576747e29ded49df195a33e020635920692b8bce assets/doggytalents/models/item/angel_halo.json
@@ -32,6 +32,7 @@ e6928e128e709eed661a926a6341052c5dee3952 assets/doggytalents/models/item/doggy_c
 fb2564063ed899e0bb9358ae7ac1540828e11b29 assets/doggytalents/models/item/dog_anim_debug_stick.json
 d7d1edf4ba2e22a722df08baa0d660f52ab65240 assets/doggytalents/models/item/dog_bath.json
 aa0e5ccc2a5183ecdf5ba2c3fedc832eca34f39f assets/doggytalents/models/item/dog_bed.json
+94d28c328ec36fff2e890105abd8cfddfc692ab1 assets/doggytalents/models/item/dog_christmas_star.json
 65bea454c523228562a168ef99d9608af0088243 assets/doggytalents/models/item/dog_christmas_tree.json
 61950cc916377c1fbfbc898d186f9e6c36bc595c assets/doggytalents/models/item/dog_gift_costume.json
 3e834b3edef3a73ce8751e4c2c1363d7983d72b1 assets/doggytalents/models/item/dog_plushie_toy_item.json
