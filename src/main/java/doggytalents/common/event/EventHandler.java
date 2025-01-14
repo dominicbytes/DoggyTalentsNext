@@ -78,6 +78,7 @@ import net.neoforged.neoforge.event.entity.player.PlayerEvent.PlayerLoggedInEven
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent.RightClickBlock;
 import net.neoforged.neoforge.event.entity.player.CanContinueSleepingEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
+import net.neoforged.neoforge.event.entity.player.PlayerWakeUpEvent;
 import net.neoforged.neoforge.event.level.LevelEvent;
 import net.neoforged.neoforge.event.level.SleepFinishedTimeEvent;
 import net.neoforged.neoforge.event.server.ServerStoppedEvent;
@@ -618,5 +619,11 @@ public class EventHandler {
     @SubscribeEvent
     public void beforeAllPlayerWakeUp(SleepFinishedTimeEvent event) {
         DogSleepOnManager.beforeSleepFinishedForAllPlayer(event);
+    }
+
+    @SubscribeEvent
+    public void playerWakeUpEvent(PlayerWakeUpEvent event) {
+        if (!event.getEntity().level().isClientSide)
+            DogSleepOnManager.onPlayerWakeUp(event.getEntity());
     }
 }
