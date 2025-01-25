@@ -177,6 +177,7 @@ public class ClientSetup {
     public static final ModelLayerLocation OINA_TUSUKURU = new ModelLayerLocation(Util.getResource("oina_tusukuru"), "main");
     public static final ModelLayerLocation OINA_WARI = new ModelLayerLocation(Util.getResource("oina_wari"), "main");
 
+    public static final ModelLayerLocation DOG_SOL_HOPE = new ModelLayerLocation(Util.getResource("sol_hope"), "main");
     public static final ModelLayerLocation DOG_ARCANINE = new ModelLayerLocation(Util.getResource("dog_arcanine"), "main");
     public static final ModelLayerLocation DOG_POCHITA = new ModelLayerLocation(Util.getResource("pochita"), "main");   
     public static final ModelLayerLocation DOG_DACHSHUND = new ModelLayerLocation(Util.getResource("dachshund"), "main");
@@ -289,6 +290,7 @@ public class ClientSetup {
         event.registerLayerDefinition(OINA_TODO, TodoModel::createBodyLayer);
         event.registerLayerDefinition(OINA_TUSUKURU, TusukuruModel::createBodyLayer);
         event.registerLayerDefinition(OINA_WARI, WariModel::createBodyLayer);
+        event.registerLayerDefinition(DOG_SOL_HOPE, HopeModel::createBodyLayer);
 
         event.registerLayerDefinition(DOG_ARCANINE, ArcanineModel::createBodyLayer);
         event.registerLayerDefinition(DOG_POCHITA, PochitaModel::createBodyLayer);
