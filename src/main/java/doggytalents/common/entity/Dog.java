@@ -4298,7 +4298,7 @@ public class Dog extends AbstractDog {
     }
 
     public boolean canDogFly() {
-        return alterationProps.canFly() && this.getNavigation() instanceof DogFlyingNavigation;
+        return alterationProps.canFly() && alterationProps.willFly();
     }
 
     // @Override
