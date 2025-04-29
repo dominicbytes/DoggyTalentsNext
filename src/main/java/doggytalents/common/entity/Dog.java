@@ -238,7 +238,7 @@ public class Dog extends AbstractDog {
     private ArrayList<AccessoryInstance> clientAccessories
         = new ArrayList<AccessoryInstance>();
 
-    
+    private ResourceLocation missingDogVariant = null;
         
     public final StatsTracker statsTracker = new StatsTracker();
     public final DogDataSyncManager dogSyncedDataManager
@@ -2716,7 +2716,9 @@ public class Dog extends AbstractDog {
         }
         compound.put("doggy_artifacts", artifactsListTag);
 
-        compound.putString("classicalVariant", DogVariantUtil.toSaveString(this.dogVariant()));
+        compound.putString("classicalVariant", DogVariantUtil.toSaveString(
+            this.dogVariant(), () -> Optional.ofNullable(this.missingDogVariant)));
+        
         compound.putString("mode", this.getMode().getSaveName());
         compound.putString("dogGender", this.getGender().getSaveName());
         compound.putFloat("dogHunger", this.getDogHunger());
@@ -2876,7 +2878,8 @@ public class Dog extends AbstractDog {
 
         try {
             this.setDogVariant(
-                DogVariantUtil.fromSaveString(compound.getString("classicalVariant"))
+                DogVariantUtil.fromSaveString(compound.getString("classicalVariant"), 
+                    id -> { this.missingDogVariant = id; } )
             );
         } catch (Exception e) {
             DoggyTalentsNext.LOGGER.error("Failed to load Dog Variant: " + e.getMessage());
