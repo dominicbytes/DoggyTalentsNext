@@ -9,10 +9,13 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.item.armortrim.ArmorTrim;
 import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.item.component.DyedItemColor;
+import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.enchantment.Enchantment;
+import net.minecraft.world.level.block.Block;
 import net.neoforged.neoforge.items.IItemHandler;
 
 import java.util.HashMap;
@@ -166,5 +169,11 @@ public class ItemUtil {
         if (!holder.isPresent())
             return 0;
         return stack.getEnchantmentLevel(holder.get());
+    }
+
+    public static Optional<Ingredient> getBlockIngredient(Block block) {
+        return Optional.ofNullable(block.asItem())
+            .filter(item -> item != Items.AIR)
+            .map(Ingredient::of);
     }
 }
