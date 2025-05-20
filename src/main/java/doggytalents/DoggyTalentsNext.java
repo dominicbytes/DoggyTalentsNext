@@ -25,6 +25,7 @@ import doggytalents.common.entity.WhitelistFoodHandler;
 import doggytalents.common.entity.DogDrinkMilkHandler;
 import doggytalents.common.event.EventHandler;
 import doggytalents.common.item.ChopinRecordItem;
+import doggytalents.common.item.itemgroup.DTNCompostables;
 import doggytalents.common.item.itemgroup.DTNItemCategory;
 import doggytalents.common.lib.Constants;
 import doggytalents.common.network.DTNNetworkHandler;
@@ -146,6 +147,7 @@ public class DoggyTalentsNext {
             ConfigHandler.initTalentConfig();
             RiceMillBlockEntity.initGrindMap();
             DTNItemCategory.init();
+            DTNCompostables.init();
         });
     }
 
