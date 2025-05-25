@@ -7,6 +7,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
+import net.minecraft.world.food.FoodProperties;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -156,6 +157,10 @@ public class ItemUtil {
         if (!stack.has(DataComponents.TRIM))
             return Optional.empty();
         return Optional.ofNullable(stack.get(DataComponents.TRIM));
+    }
+
+    public static FoodProperties food(ItemStack stack) {
+        return stack.getFoodProperties(null);
     }
 
     public static CustomData getWrappedTag(ItemStack stack) {
