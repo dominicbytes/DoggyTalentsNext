@@ -32,6 +32,7 @@ import doggytalents.common.util.InventoryUtil;
 import doggytalents.common.util.ItemUtil;
 import doggytalents.common.util.Util;
 import doggytalents.common.variant.DogVariant;
+import doggytalents.mixin.ModelBakeryMixinAccessor;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.LevelLoadingScreen;
 import net.minecraft.client.gui.screens.Screen;
@@ -86,7 +87,7 @@ public class ClientEventHandler {
 
             var model = modelRegistry.get(ModelResourceLocation.standalone(bakedModelLoc));
 
-            var modelUnbaked = (BlockModel) event.getModelBakery().topLevelModels.get(ModelResourceLocation.standalone(bakedModelLoc));
+            var modelUnbaked = (BlockModel) (((ModelBakeryMixinAccessor)event.getModelBakery()).dtn__getTopLevelModels().get(ModelResourceLocation.standalone(bakedModelLoc)));
 
             BakedModel customModel = new DogBedModel(event.getModelBakery(), modelUnbaked, model, ConfigHandler.CLIENT.MAX_DOG_BED_MODEL_CACHE.get());
 
