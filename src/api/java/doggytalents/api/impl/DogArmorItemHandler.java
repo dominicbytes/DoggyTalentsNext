@@ -3,6 +3,7 @@ package doggytalents.api.impl;
 import org.jetbrains.annotations.NotNull;
 
 import doggytalents.api.inferface.AbstractDog;
+import doggytalents.common.util.ItemUtil;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
@@ -10,6 +11,7 @@ import net.minecraft.nbt.Tag;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.item.ArmorItem;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.enchantment.Enchantments;
 import net.neoforged.neoforge.items.ItemStackHandler;
 
 public class DogArmorItemHandler extends ItemStackHandler {
@@ -97,7 +99,18 @@ public class DogArmorItemHandler extends ItemStackHandler {
             return false;
         var wantSlot = armor.getType().getSlot();
 
-        return wantSlot == equip;
+        if (wantSlot != equip)
+            return false;
+
+        //Workaround for depth strider being a bit overpowered on dogs.    
+        boolean is_depth_strider = 
+            wantSlot == EquipmentSlot.FEET
+            && ItemUtil.getEnchantmentLevelForItem(Enchantments.DEPTH_STRIDER, 
+                dog.level().registryAccess(), stack) > 0;
+        if (is_depth_strider)
+            return false;
+
+        return true;
     }
 
     public void onPropsUpdated(DogAlterationProps props) {
