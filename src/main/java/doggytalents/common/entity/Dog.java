@@ -19,6 +19,7 @@ import doggytalents.api.registry.*;
 import doggytalents.client.DogTextureManager;
 import doggytalents.client.DTNClientPettingManager;
 import doggytalents.client.entity.skin.DogSkin;
+import doggytalents.client.entity.skin.DogSkinHolder;
 import doggytalents.client.entity.versionfix.FixClientTeleportDesync_1_21;
 import doggytalents.client.event.ClientEventHandler;
 import doggytalents.client.screen.DogNewInfoScreen.DogNewInfoScreen;
@@ -237,7 +238,7 @@ public class Dog extends AbstractDog {
     private final List<IDogFoodHandler> foodHandlers = new ArrayList<>(4);
     public final DogAnimationManager animationManager = new DogAnimationManager(this);
 
-    private DogSkin clientSkin = DogSkin.CLASSICAL;
+    private DogSkinHolder clientSkin = DogSkinHolder.getNone();
     private ArrayList<AccessoryInstance> clientAccessories
         = new ArrayList<AccessoryInstance>();
 
@@ -3222,10 +3223,7 @@ public class Dog extends AbstractDog {
         }
 
         if (this.level().isClientSide && CUSTOM_SKIN.equals(key)) {
-            this.setClientSkin(
-                DogTextureManager.INSTANCE
-                    .getDogSkin(
-                        this.getSkinData().getHash()));
+            this.clientSkin = DogSkinHolder.pendingResolve();
         }
 
         if (ANIMATION.equals(key)) {
@@ -5282,7 +5280,9 @@ public class Dog extends AbstractDog {
     public DogSkin getClientSkin() {
         if (ConfigHandler.CLIENT.ALWAYS_RENDER_CLASSICAL.get())
             return DogSkin.CLASSICAL;
-        return this.clientSkin;
+        
+        this.clientSkin = DogSkinHolder.update(this, this.clientSkin);
+        return this.clientSkin.getOrElse(DogSkin.CLASSICAL);
     }
 
     //Client
@@ -5292,12 +5292,12 @@ public class Dog extends AbstractDog {
     }
 
     //Client
-    public void setClientSkin(DogSkin skin) {
-        if (skin == null) {
-            this.clientSkin = DogSkin.CLASSICAL;
-        } else {
-            this.clientSkin = skin;
-        }
+    public void setClientSkinHolder(DogSkinHolder skin) {
+        if (skin == null) skin = DogSkinHolder.getNone();
+        this.clientSkin = skin;
+    }
+    public DogSkinHolder getClientSkinHolder() {
+        return this.clientSkin;
     }
 
     //Client
