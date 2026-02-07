@@ -200,6 +200,7 @@ public class DTBlockstateProvider extends BlockStateProvider {
       return extend(blockTexture(block), "/stage_" + age);
     }
 
+    @Override
     public ResourceLocation blockTexture(Block block) {
         ResourceLocation base = BuiltInRegistries.BLOCK.getKey(block);
         return prextend(base, ModelProvider.BLOCK_FOLDER + "/");
