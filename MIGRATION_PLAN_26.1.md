@@ -1,0 +1,831 @@
+# DoggyTalentsNext Migration Plan: Minecraft 1.21 → 26.1.2
+
+**Status**: Infrastructure Updated, Code Migration Pending
+**Date**: 2025-04-15
+**Target**: NeoForge 26.1.x for Minecraft 26.1
+
+## Executive Summary
+
+This document outlines the complete migration strategy for DoggyTalentsNext from Minecraft 1.21.1 to Minecraft 26.1.2. The migration addresses breaking API changes across 8 major systems.
+
+### Current Migration Status
+
+✅ **Phase 1 - Build System** (COMPLETED)
+- ✅ Gradle upgraded to 9.1.0
+- ✅ ModDevGradle 2.0.141 configured
+- ✅ NeoForge version set to 26.1.1.15-beta (latest available)
+- ⚠️  Java 21 (temporarily - Java 25 required for production)
+
+### Critical Dependencies Issue
+
+**IMPORTANT**: As of this migration attempt, NeoForge 26.1.x dependencies are not fully resolving. This may indicate:
+1. The ecosystem is still in beta/unstable state
+2. Java 25 runtime is strictly required (not just for compilation)
+3. Additional toolchain configuration is needed
+
+**Recommendation**: Monitor NeoForge releases and retry migration when 26.1.2.x stable is released.
+
+---
+
+## Phase 2: Inventory System Migration (HIGH PRIORITY)
+
+### 2.1 Replace ItemStackHandler with ResourceHandler
+
+**Impact**: 5 core inventory files, ~500 lines of code
+
+#### Files to Migrate:
+
+1. `/src/api/java/doggytalents/api/inferface/DogArmorItemHandler.java`
+2. `/src/main/java/doggytalents/common/inventory/DogArmorItemHandlerImpl.java`
+3. `/src/main/java/doggytalents/common/inventory/PackPuppyItemHandler.java`
+4. `/src/main/java/doggytalents/common/inventory/TreatBagItemHandler.java`
+5. `/src/main/java/doggytalents/common/inventory/DoggyToolsItemHandler.java`
+
+#### Migration Pattern:
+
+**OLD CODE** (1.21):
+```java
+package doggytalents.api.inferface;
+
+import net.neoforged.neoforge.items.ItemStackHandler;
+
+public abstract class DogArmorItemHandler extends ItemStackHandler {
+
+    public DogArmorItemHandler(AbstractDog dog) {
+        super(4); // 4 armor slots
+    }
+
+    @Override
+    public ItemStack extractItem(int slot, int amount, boolean simulate) {
+        // Logic here
+    }
+}
+```
+
+**NEW CODE** (26.1.2):
+```java
+package doggytalents.api.inferface;
+
+import net.neoforged.neoforge.items.item.ItemResource;
+import net.neoforged.neoforge.items.wrapper.ResourceHandler;
+import net.neoforged.neoforge.common.transaction.Transaction;
+
+public abstract class DogArmorItemHandler implements ResourceHandler<ItemResource> {
+
+    protected final List<ItemStack> stacks;
+    protected final AbstractDog dog;
+
+    public DogArmorItemHandler(AbstractDog dog) {
+        this.dog = dog;
+        this.stacks = NonNullList.withSize(4, ItemStack.EMPTY);
+    }
+
+    @Override
+    public int size() {
+        return 4;
+    }
+
+    @Override
+    public long getCapacityAsLong(int slot) {
+        return 64; // Stack size
+    }
+
+    @Override
+    public ItemResource getResource(int slot) {
+        ItemStack stack = stacks.get(slot);
+        return stack.isEmpty() ? null : ItemResource.of(stack);
+    }
+
+    @Override
+    public long getAmountAsLong(int slot) {
+        return stacks.get(slot).getCount();
+    }
+
+    @Override
+    public long extract(int slot, ItemResource resource, long amount, Transaction tx) {
+        if (slot < 0 || slot >= size()) return 0;
+
+        ItemStack existing = stacks.get(slot);
+        if (existing.isEmpty() || !resource.matches(existing)) return 0;
+
+        long extracted = Math.min(amount, existing.getCount());
+
+        tx.addOuterCloseCallback(result -> {
+            if (result.wasCommitted()) {
+                existing.shrink((int) extracted);
+                if (existing.isEmpty()) {
+                    stacks.set(slot, ItemStack.EMPTY);
+                }
+                onContentsChanged(slot);
+            }
+        });
+
+        return extracted;
+    }
+
+    @Override
+    public long insert(int slot, ItemResource resource, long amount, Transaction tx) {
+        if (slot < 0 || slot >= size()) return 0;
+        if (!isItemValid(slot, resource.toStack())) return 0;
+
+        ItemStack existing = stacks.get(slot);
+
+        if (existing.isEmpty()) {
+            long toInsert = Math.min(amount, getCapacityAsLong(slot));
+
+            tx.addOuterCloseCallback(result -> {
+                if (result.wasCommitted()) {
+                    stacks.set(slot, resource.toStack((int) toInsert));
+                    onContentsChanged(slot);
+                }
+            });
+
+            return toInsert;
+        } else if (resource.matches(existing)) {
+            long toInsert = Math.min(amount, getCapacityAsLong(slot) - existing.getCount());
+
+            tx.addOuterCloseCallback(result -> {
+                if (result.wasCommitted()) {
+                    existing.grow((int) toInsert);
+                    onContentsChanged(slot);
+                }
+            });
+
+            return toInsert;
+        }
+
+        return 0;
+    }
+
+    protected abstract boolean isItemValid(int slot, ItemStack stack);
+    protected abstract void onContentsChanged(int slot);
+}
+```
+
+#### Transactional Logic Updates
+
+**Every inventory operation must use transactions**:
+
+```java
+// OLD
+ItemStack extracted = dogInventory.extractItem(slot, 1, false);
+if (!extracted.isEmpty()) {
+    dog.heal(4.0F);
+}
+
+// NEW
+try (Transaction tx = Transaction.openRoot()) {
+    ItemResource resource = dogInventory.getResource(slot);
+    if (resource != null) {
+        long extracted = dogInventory.extract(slot, resource, 1, tx);
+        if (extracted > 0) {
+            dog.heal(4.0F);
+            tx.commit();
+        }
+    }
+}
+```
+
+#### Legacy Compatibility Wrappers
+
+For code that cannot be immediately refactored:
+
+```java
+import net.neoforged.neoforge.items.wrapper.IItemHandler;
+
+// Wrap ResourceHandler as legacy IItemHandler
+IItemHandler legacyHandler = IItemHandler.of(resourceHandler);
+```
+
+**⚠️ WARNING**: Wrappers will be removed in future NeoForge versions. Migrate ASAP.
+
+---
+
+## Phase 3: GUI Rendering System (HIGH PRIORITY)
+
+### 3.1 Screen Method Refactoring
+
+**Impact**: 28 screen files
+
+#### Files Requiring Changes:
+
+**Main Screens**:
+- `DogInventoriesScreen.java`
+- `DogArmorScreen.java`
+- `DogNewInfoScreen/DogNewInfoScreen.java`
+- `PackPuppyScreen.java`
+- `TreatBagScreen.java`
+- `WhistleScreen.java`
+- `CanineTrackerScreen.java`
+- `ConductingBoneScreen.java`
+- ... (20 more files)
+
+#### Method Rename Mapping:
+
+| Old Method (1.21)                          | New Method (26.1.2)                                  |
+|--------------------------------------------|-----------------------------------------------------|
+| `render(GuiGraphics, int, int, float)`     | `extractRenderState(GuiGraphicsExtractor, ...)`     |
+| `renderBackground(...)`                    | `extractBackground(...)`                            |
+| `renderBg(...)`                           | `extractBackground(...)`                            |
+| `renderLabels(...)`                       | `extractLabels(...)`                                |
+
+#### Migration Example:
+
+**OLD CODE**:
+```java
+public class DogInventoriesScreen extends AbstractContainerScreen<DogInventoriesContainer> {
+
+    @Override
+    protected void renderBg(GuiGraphics graphics, float partialTicks, int mouseX, int mouseY) {
+        RenderSystem.setShaderTexture(0, TEXTURE);
+        int x = (this.width - this.imageWidth) / 2;
+        int y = (this.height - this.imageHeight) / 2;
+        graphics.blit(TEXTURE, x, y, 0, 0, this.imageWidth, this.imageHeight);
+    }
+
+    @Override
+    protected void renderLabels(GuiGraphics graphics, int mouseX, int mouseY) {
+        graphics.drawString(this.font, this.title, 8, 6, 4210752, false);
+        graphics.drawString(this.font, this.playerInventoryTitle, 8, this.imageHeight - 96 + 2, 4210752, false);
+    }
+}
+```
+
+**NEW CODE**:
+```java
+public class DogInventoriesScreen extends AbstractContainerScreen<DogInventoriesContainer> {
+
+    @Override
+    protected void extractBackground(GuiGraphicsExtractor extractor, float partialTicks, int mouseX, int mouseY) {
+        int x = (this.width - this.imageWidth) / 2;
+        int y = (this.height - this.imageHeight) / 2;
+        extractor.blit(TEXTURE, x, y, 0, 0, this.imageWidth, this.imageHeight);
+    }
+
+    @Override
+    protected void extractLabels(GuiGraphicsExtractor extractor, int mouseX, int mouseY) {
+        extractor.drawString(this.font, this.title, 8, 6, 4210752, false);
+        extractor.drawString(this.font, this.playerInventoryTitle, 8, this.imageHeight - 96 + 2, 4210752, false);
+    }
+}
+```
+
+### 3.2 Entity Render State Pattern
+
+For screens that render dog models (e.g., Talent GUI):
+
+**Create Render State Record**:
+```java
+public record DogRenderState(
+    ResourceLocation texture,
+    DogPose pose,
+    float ageInTicks,
+    int talentLevel,
+    List<AccessoryRenderData> accessories
+) {}
+```
+
+**Implement State Extraction**:
+```java
+public class DogRenderer extends EntityRenderer<Dog> {
+
+    @Override
+    public DogRenderState createRenderState() {
+        return new DogRenderState(null, DogPose.STANDING, 0, 0, List.of());
+    }
+
+    @Override
+    public void extractRenderState(Dog dog, DogRenderState state, float partialTick) {
+        state = new DogRenderState(
+            dog.getTexture(),
+            dog.getPose(),
+            dog.tickCount + partialTick,
+            dog.getTalentLevel(),
+            dog.getAccessories()
+        );
+    }
+}
+```
+
+---
+
+## Phase 4: Networking System Refactor (MEDIUM-HIGH PRIORITY)
+
+### 4.1 Packet System Migration
+
+**Impact**: 73+ packet classes
+
+#### Current Architecture (Compatibility Wrapper):
+
+```
+PacketHandler (registers 73+ packets)
+    ↓
+DTNNetworkHandler (compatibility layer)
+    ↓
+CustomPacketPayload + StreamCodec (26.1.2 API)
+```
+
+#### Target Architecture (Direct):
+
+```
+RegisterPayloadHandlersEvent
+    ↓
+PayloadRegistrar
+    ↓
+CustomPacketPayload records with StreamCodec
+```
+
+#### Migration Steps:
+
+**Step 1**: Convert packet classes to records
+
+**OLD**:
+```java
+public class DogModePacket extends DogPacket<DogModeData> {
+    @Override
+    public void encode(DogModeData data, FriendlyByteBuf buf) {
+        super.encode(data, buf);
+        buf.writeInt(data.mode.getIndex());
+    }
+
+    @Override
+    public DogModeData decode(FriendlyByteBuf buf) {
+        int entityId = buf.readInt();
+        int modeIndex = buf.readInt();
+        return new DogModeData(entityId, DogMode.byIndex(modeIndex));
+    }
+
+    @Override
+    public void handleDog(Dog dog, DogModeData data, Supplier<Context> ctx) {
+        if (!dog.canInteract(ctx.get().getSender())) return;
+        dog.setMode(data.mode);
+    }
+}
+```
+
+**NEW**:
+```java
+public record DogModePayload(int dogId, int modeIndex) implements CustomPacketPayload {
+
+    public static final Type<DogModePayload> TYPE =
+        new Type<>(ResourceLocation.fromNamespaceAndPath("doggytalents", "dog_mode"));
+
+    public static final StreamCodec<ByteBuf, DogModePayload> STREAM_CODEC =
+        StreamCodec.composite(
+            ByteBufCodecs.VAR_INT, DogModePayload::dogId,
+            ByteBufCodecs.VAR_INT, DogModePayload::modeIndex,
+            DogModePayload::new
+        );
+
+    @Override
+    public Type<? extends CustomPacketPayload> type() {
+        return TYPE;
+    }
+
+    public static void handle(DogModePayload payload, IPayloadContext ctx) {
+        ctx.enqueueWork(() -> {
+            if (ctx.flow() == PacketFlow.SERVERBOUND) {
+                ServerPlayer sender = (ServerPlayer) ctx.player();
+                Entity entity = sender.level().getEntity(payload.dogId());
+                if (entity instanceof Dog dog && dog.canInteract(sender)) {
+                    dog.setMode(DogMode.byIndex(payload.modeIndex()));
+                }
+            }
+        });
+    }
+}
+```
+
+**Step 2**: Register payloads in event
+
+**Delete**: `PacketHandler.java`, `DTNNetworkHandler.java` (compatibility wrappers)
+
+**Create**: `DoggyTalentsNetworking.java`
+
+```java
+@EventBusSubscriber(modid = Constants.MOD_ID, bus = EventBusSubscriber.Bus.MOD)
+public class DoggyTalentsNetworking {
+
+    @SubscribeEvent
+    public static void registerPayloads(RegisterPayloadHandlersEvent event) {
+        var registrar = event.registrar(Constants.PROTOCOL_VERSION);
+
+        // Server-bound (client → server)
+        registrar.playToServer(
+            DogModePayload.TYPE,
+            DogModePayload.STREAM_CODEC,
+            DogModePayload::handle
+        );
+
+        registrar.playToServer(
+            DogObeyPayload.TYPE,
+            DogObeyPayload.STREAM_CODEC,
+            DogObeyPayload::handle
+        );
+
+        // Client-bound (server → client)
+        registrar.playToClient(
+            DogSyncDataPayload.TYPE,
+            DogSyncDataPayload.STREAM_CODEC,
+            DogSyncDataPayload::handle
+        );
+
+        // Bidirectional
+        registrar.playBidirectional(
+            DogTexturePayload.TYPE,
+            DogTexturePayload.STREAM_CODEC,
+            DogTexturePayload::handle
+        );
+
+        // ... register remaining 70+ payloads
+    }
+}
+```
+
+**Step 3**: Use RegistryFriendlyByteBuf for ItemStack packets
+
+```java
+public record DogEquipmentPayload(int dogId, ItemStack equipment) implements CustomPacketPayload {
+
+    // Use RegistryFriendlyByteBuf for ItemStack codec
+    public static final StreamCodec<RegistryFriendlyByteBuf, DogEquipmentPayload> STREAM_CODEC =
+        StreamCodec.composite(
+            ByteBufCodecs.VAR_INT,
+            DogEquipmentPayload::dogId,
+            ItemStack.STREAM_CODEC,  // Requires RegistryFriendlyByteBuf
+            DogEquipmentPayload::equipment,
+            DogEquipmentPayload::new
+        );
+
+    // ... rest of implementation
+}
+```
+
+### 4.2 Packet Migration Checklist
+
+73 packets to migrate. Create subtasks for each:
+
+- [ ] `DogModePayload` (replaces DogModePacket)
+- [ ] `DogObeyPayload` (replaces DogObeyPacket)
+- [ ] `DogTalentPayload` (replaces DogTalentPacket)
+- [ ] `DogNamePayload` (replaces DogNamePacket)
+- [ ] `DogTexturePayload` (replaces DogTexturePacket)
+- [ ] ... (68 more packets)
+
+---
+
+## Phase 5: Data Components Migration (MEDIUM PRIORITY)
+
+### 5.1 Replace NBT with DataComponentType
+
+**Impact**: All custom ItemStack data (whistles, accessories, collars, artifacts)
+
+#### Create Data Components Registry
+
+**File**: `/src/main/java/doggytalents/common/register/DoggyDataComponents.java`
+
+```java
+@EventBusSubscriber(modid = Constants.MOD_ID, bus = EventBusSubscriber.Bus.MOD)
+public class DoggyDataComponents {
+
+    public static final DeferredRegister<DataComponentType<?>> DATA_COMPONENTS =
+        DeferredRegister.create(Registries.DATA_COMPONENT_TYPE, Constants.MOD_ID);
+
+    // Whistle state
+    public static final Supplier<DataComponentType<WhistleState>> WHISTLE_STATE =
+        DATA_COMPONENTS.register("whistle_state", () ->
+            DataComponentType.<WhistleState>builder()
+                .persistent(WhistleState.CODEC)
+                .networkSynchronized(WhistleState.STREAM_CODEC)
+                .build()
+        );
+
+    // Dog collar color
+    public static final Supplier<DataComponentType<Integer>> COLLAR_COLOR =
+        DATA_COMPONENTS.register("collar_color", () ->
+            DataComponentType.<Integer>builder()
+                .persistent(Codec.INT)
+                .networkSynchronized(ByteBufCodecs.VAR_INT)
+                .build()
+        );
+
+    // Accessory data
+    public static final Supplier<DataComponentType<AccessoryData>> ACCESSORY_DATA =
+        DATA_COMPONENTS.register("accessory_data", () ->
+            DataComponentType.<AccessoryData>builder()
+                .persistent(AccessoryData.CODEC)
+                .networkSynchronized(AccessoryData.STREAM_CODEC)
+                .build()
+        );
+
+    // Artifact data
+    public static final Supplier<DataComponentType<ArtifactData>> ARTIFACT_DATA =
+        DATA_COMPONENTS.register("artifact_data", () ->
+            DataComponentType.<ArtifactData>builder()
+                .persistent(ArtifactData.CODEC)
+                .networkSynchronized(ArtifactData.STREAM_CODEC)
+                .build()
+        );
+
+    // Dog owner UUID (for items that store owner)
+    public static final Supplier<DataComponentType<UUID>> DOG_OWNER =
+        DATA_COMPONENTS.register("dog_owner", () ->
+            DataComponentType.<UUID>builder()
+                .persistent(Codec.UUID)
+                .networkSynchronized(ByteBufCodecs.UUID)
+                .build()
+        );
+}
+```
+
+#### Migration Pattern
+
+**OLD (NBT)**:
+```java
+// Writing
+ItemStack whistle = new ItemStack(Items.WHISTLE);
+CompoundTag tag = whistle.getOrCreateTag();
+tag.putInt("mode", 1);
+tag.putString("name", "Home");
+
+// Reading
+if (whistle.hasTag() && whistle.getTag().contains("mode")) {
+    int mode = whistle.getTag().getInt("mode");
+}
+```
+
+**NEW (Data Components)**:
+```java
+// Writing
+ItemStack whistle = new ItemStack(Items.WHISTLE);
+whistle.set(DoggyDataComponents.WHISTLE_STATE.get(),
+    new WhistleState(1, "Home"));
+
+// Reading
+WhistleState state = whistle.getOrDefault(
+    DoggyDataComponents.WHISTLE_STATE.get(),
+    WhistleState.DEFAULT
+);
+int mode = state.mode();
+```
+
+### 5.2 Define Data Records
+
+```java
+public record WhistleState(int mode, String name) {
+    public static final WhistleState DEFAULT = new WhistleState(0, "");
+
+    public static final Codec<WhistleState> CODEC = RecordCodecBuilder.create(instance ->
+        instance.group(
+            Codec.INT.fieldOf("mode").forGetter(WhistleState::mode),
+            Codec.STRING.fieldOf("name").forGetter(WhistleState::name)
+        ).apply(instance, WhistleState::new)
+    );
+
+    public static final StreamCodec<ByteBuf, WhistleState> STREAM_CODEC =
+        StreamCodec.composite(
+            ByteBufCodecs.VAR_INT, WhistleState::mode,
+            ByteBufCodecs.STRING_UTF8, WhistleState::name,
+            WhistleState::new
+        );
+}
+```
+
+---
+
+## Phase 6: Attribute Modifiers (LOW PRIORITY - ALREADY COMPLIANT)
+
+### 6.1 Status Check
+
+✅ **GOOD NEWS**: The codebase already uses `ResourceLocation` for attribute modifiers!
+
+**Verified in**: `/src/api/java/doggytalents/api/inferface/AbstractDog.java:46-67`
+
+```java
+AttributeModifier currentModifier = attributeInst.getModifier(modifierLoc);  // ✅ ResourceLocation
+attributeInst.removeModifier(modifierLoc);  // ✅ ResourceLocation
+```
+
+**No changes needed** for this phase.
+
+---
+
+## Phase 7: Codec Updates (LOW PRIORITY)
+
+### 7.1 Replace Deprecated ExtraCodecs
+
+**Find**: All uses of `ExtraCodecs`
+**Replace with**: Standard `Codec` methods
+
+```java
+// OLD
+ExtraCodecs.strictOptionalField(codec, "fieldName")
+
+// NEW
+codec.optionalFieldOf("fieldName")  // Now strict by default in 26.1.2
+```
+
+**Files likely affected**: Talent configuration, recipe serializers
+
+---
+
+## Phase 8: Testing & Validation
+
+### 8.1 Unit Tests
+
+Create tests for:
+- [ ] Inventory transactions (commit/abort scenarios)
+- [ ] Packet serialization/deserialization
+- [ ] Data component persistence
+- [ ] Screen rendering (mock tests)
+
+### 8.2 Integration Tests
+
+- [ ] Dog inventory operations (add/remove armor)
+- [ ] Multiplayer synchronization (spawn dog, sync to clients)
+- [ ] Save/load world with dogs
+- [ ] GUI interactions (all 28 screens)
+- [ ] Talent system functionality
+
+### 8.3 Performance Tests
+
+- [ ] Inventory transaction overhead vs. old system
+- [ ] Rendering performance (extraction pattern)
+- [ ] Network packet size comparison
+
+---
+
+## Critical Files Checklist
+
+### Inventory System (5 files)
+- [ ] `DogArmorItemHandler.java` (API)
+- [ ] `DogArmorItemHandlerImpl.java`
+- [ ] `PackPuppyItemHandler.java`
+- [ ] `TreatBagItemHandler.java`
+- [ ] `DoggyToolsItemHandler.java`
+
+### Screen/GUI (28 files)
+- [ ] `DogInventoriesScreen.java`
+- [ ] `DogArmorScreen.java`
+- [ ] `DogNewInfoScreen.java`
+- [ ] `PackPuppyScreen.java`
+- [ ] `TreatBagScreen.java`
+- [ ] `WhistleScreen.java`
+- [ ] `CanineTrackerScreen.java`
+- [ ] `ConductingBoneScreen.java`
+- [ ] ... (20 more)
+
+### Networking (73+ files)
+- [ ] Delete `PacketHandler.java`
+- [ ] Delete `DTNNetworkHandler.java`
+- [ ] Create `DoggyTalentsNetworking.java`
+- [ ] Convert 73+ packet classes to payload records
+
+### Data Components
+- [ ] Create `DoggyDataComponents.java`
+- [ ] Migrate whistle item data
+- [ ] Migrate accessory item data
+- [ ] Migrate artifact item data
+
+---
+
+## Known Issues & Blockers
+
+### 1. Dependency Resolution Failure
+
+**Status**: BLOCKING
+**Issue**: NeoForge 26.1.1.15-beta dependencies not resolving
+**Error**: `net.neoforged:neoform:26.1.1-1 FAILED`
+
+**Potential Causes**:
+- Java 25 runtime strictly required (not just for compilation)
+- NeoForge 26.1.x still in unstable beta
+- ModDevGradle 2.0 configuration incomplete
+
+**Resolution Path**:
+1. Wait for stable NeoForge 26.1.2.x release
+2. Ensure Java 25 JDK installed
+3. Re-test dependency resolution
+4. Consider reaching out to NeoForge Discord for support
+
+### 2. Java 25 Requirement
+
+**Status**: PENDING
+**Current**: Java 21 (temporary for development)
+**Required**: Java 25 (production deployment)
+
+**Action Items**:
+- [ ] Install Java 25 JDK (https://jdk.java.net/25/)
+- [ ] Update `build.gradle` line 18: `JavaLanguageVersion.of(25)`
+- [ ] Update `build.gradle` line 107: `JavaVersion.VERSION_25`
+- [ ] Test full build with Java 25
+
+### 3. API Coverage Gaps
+
+The following NeoForge 26.1.2 APIs are mentioned in the report but not fully documented:
+- `MutableQuad` usage for BakedQuad manipulation
+- `GuiGraphicsExtractor` detailed API
+- `SubmitNodeCollector` for render state submission
+
+**Mitigation**: Consult NeoForge docs when stable release is available.
+
+---
+
+## Timeline Estimate
+
+**Prerequisites**: Stable NeoForge 26.1.2.x + Java 25 installed
+**Total Effort**: 35-50 hours
+
+| Phase | Complexity | Estimated Time |
+|-------|------------|----------------|
+| Phase 1: Build System | Low | ✅ DONE (30 min) |
+| Phase 2: Inventory | High | 8-12 hours |
+| Phase 3: GUI Rendering | Medium-High | 4-6 hours |
+| Phase 4: Networking | High | 10-15 hours |
+| Phase 5: Data Components | Medium | 3-5 hours |
+| Phase 6: Attribute Modifiers | None | ✅ DONE (0 hours) |
+| Phase 7: Codec Updates | Low | 1-2 hours |
+| Phase 8: Testing | Ongoing | 5-10 hours |
+
+**Recommended Schedule**:
+- **Week 1**: Phases 2-3 (Inventory + GUI)
+- **Week 2**: Phase 4 (Networking)
+- **Week 3**: Phases 5-7 (Data Components + Polish)
+- **Week 4**: Phase 8 (Testing + Bugfixes)
+
+---
+
+## Next Steps
+
+1. **Monitor NeoForge Releases**
+   Watch https://neoforged.net/releases/ for stable 26.1.2.x
+
+2. **Install Java 25**
+   Download from https://jdk.java.net/25/
+
+3. **Test Dependency Resolution**
+   ```bash
+   ./gradlew dependencies --configuration compileClasspath
+   ```
+
+4. **Begin Phase 2**
+   Once dependencies resolve, start with `DogArmorItemHandler.java`
+
+5. **Create Feature Branch**
+   ```bash
+   git checkout -b feature/mc-26.1-migration
+   ```
+
+---
+
+## Support Resources
+
+- **NeoForge Documentation**: https://docs.neoforged.net/
+- **NeoForge Discord**: https://discord.neoforged.net/
+- **Migration Guide**: https://neoforged.net/news/26.1release/
+- **Transfer Rework Guide**: https://neoforged.net/news/21.9-transfer-rework/
+
+---
+
+## Appendix A: Build Configuration Files
+
+### build.gradle (Updated)
+```gradle
+plugins {
+    id 'java-library'
+    id 'eclipse'
+    id 'maven-publish'
+    id 'net.neoforged.moddev' version '2.0.141'
+}
+
+version = '26.1.2'
+
+// TODO: Update to Java 25 when JDK available
+java.toolchain.languageVersion = JavaLanguageVersion.of(21)
+
+neoForge {
+    version = "26.1.1.15-beta"  // Latest available
+    // ... rest of configuration
+}
+```
+
+### gradle.properties (Updated)
+```properties
+target_mc_version=26.1
+neoforge_version=26.1.1.15-beta
+
+minecraft_version_range=[26,27)
+neoforge_version_range=[26,27)
+```
+
+### gradle-wrapper.properties (Updated)
+```properties
+distributionUrl=https\://services.gradle.org/distributions/gradle-9.1.0-bin.zip
+```
+
+---
+
+**Document Version**: 1.0
+**Last Updated**: 2025-04-15
+**Author**: Migration Analysis Tool
+**Status**: Ready for execution pending ecosystem stability
