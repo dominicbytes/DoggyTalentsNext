@@ -2,7 +2,7 @@
 
 **Status**: Infrastructure Updated, Code Migration Pending
 **Date**: 2025-04-15
-**Target**: NeoForge 26.1.x for Minecraft 26.1
+**Target**: NeoForge 26.1.2.x for Minecraft 26.1
 
 ## Executive Summary
 
@@ -14,16 +14,7 @@ This document outlines the complete migration strategy for DoggyTalentsNext from
 - ✅ Gradle upgraded to 9.1.0
 - ✅ ModDevGradle 2.0.141 configured
 - ✅ NeoForge version set to 26.1.1.15-beta (latest available)
-- ⚠️  Java 21 (temporarily - Java 25 required for production)
-
-### Critical Dependencies Issue
-
-**IMPORTANT**: As of this migration attempt, NeoForge 26.1.x dependencies are not fully resolving. This may indicate:
-1. The ecosystem is still in beta/unstable state
-2. Java 25 runtime is strictly required (not just for compilation)
-3. Additional toolchain configuration is needed
-
-**Recommendation**: Monitor NeoForge releases and retry migration when 26.1.2.x stable is released.
+- ✅ Java 25
 
 ---
 
@@ -691,35 +682,6 @@ Create tests for:
 
 ## Known Issues & Blockers
 
-### 1. Dependency Resolution Failure
-
-**Status**: BLOCKING
-**Issue**: NeoForge 26.1.1.15-beta dependencies not resolving
-**Error**: `net.neoforged:neoform:26.1.1-1 FAILED`
-
-**Potential Causes**:
-- Java 25 runtime strictly required (not just for compilation)
-- NeoForge 26.1.x still in unstable beta
-- ModDevGradle 2.0 configuration incomplete
-
-**Resolution Path**:
-1. Wait for stable NeoForge 26.1.2.x release
-2. Ensure Java 25 JDK installed
-3. Re-test dependency resolution
-4. Consider reaching out to NeoForge Discord for support
-
-### 2. Java 25 Requirement
-
-**Status**: PENDING
-**Current**: Java 21 (temporary for development)
-**Required**: Java 25 (production deployment)
-
-**Action Items**:
-- [ ] Install Java 25 JDK (https://jdk.java.net/25/)
-- [ ] Update `build.gradle` line 18: `JavaLanguageVersion.of(25)`
-- [ ] Update `build.gradle` line 107: `JavaVersion.VERSION_25`
-- [ ] Test full build with Java 25
-
 ### 3. API Coverage Gaps
 
 The following NeoForge 26.1.2 APIs are mentioned in the report but not fully documented:
@@ -733,8 +695,6 @@ The following NeoForge 26.1.2 APIs are mentioned in the report but not fully doc
 
 ## Timeline Estimate
 
-**Prerequisites**: Stable NeoForge 26.1.2.x + Java 25 installed
-**Total Effort**: 35-50 hours
 
 | Phase | Complexity | Estimated Time |
 |-------|------------|----------------|
@@ -757,24 +717,14 @@ The following NeoForge 26.1.2 APIs are mentioned in the report but not fully doc
 
 ## Next Steps
 
-1. **Monitor NeoForge Releases**
-   Watch https://neoforged.net/releases/ for stable 26.1.2.x
-
-2. **Install Java 25**
-   Download from https://jdk.java.net/25/
-
-3. **Test Dependency Resolution**
-   ```bash
-   ./gradlew dependencies --configuration compileClasspath
-   ```
-
-4. **Begin Phase 2**
-   Once dependencies resolve, start with `DogArmorItemHandler.java`
-
-5. **Create Feature Branch**
+1. **Create Feature Branch**
    ```bash
    git checkout -b feature/mc-26.1-migration
    ```
+
+2. **Begin Phase 2**
+   Once dependencies resolve, start with `DogArmorItemHandler.java`
+
 
 ---
 
@@ -784,44 +734,6 @@ The following NeoForge 26.1.2 APIs are mentioned in the report but not fully doc
 - **NeoForge Discord**: https://discord.neoforged.net/
 - **Migration Guide**: https://neoforged.net/news/26.1release/
 - **Transfer Rework Guide**: https://neoforged.net/news/21.9-transfer-rework/
-
----
-
-## Appendix A: Build Configuration Files
-
-### build.gradle (Updated)
-```gradle
-plugins {
-    id 'java-library'
-    id 'eclipse'
-    id 'maven-publish'
-    id 'net.neoforged.moddev' version '2.0.141'
-}
-
-version = '26.1.2'
-
-// TODO: Update to Java 25 when JDK available
-java.toolchain.languageVersion = JavaLanguageVersion.of(21)
-
-neoForge {
-    version = "26.1.1.15-beta"  // Latest available
-    // ... rest of configuration
-}
-```
-
-### gradle.properties (Updated)
-```properties
-target_mc_version=26.1
-neoforge_version=26.1.1.15-beta
-
-minecraft_version_range=[26,27)
-neoforge_version_range=[26,27)
-```
-
-### gradle-wrapper.properties (Updated)
-```properties
-distributionUrl=https\://services.gradle.org/distributions/gradle-9.1.0-bin.zip
-```
 
 ---
 
