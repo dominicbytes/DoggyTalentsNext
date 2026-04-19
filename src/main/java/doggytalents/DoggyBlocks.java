@@ -8,13 +8,10 @@ import doggytalents.common.block.crops.RiceCropBlock;
 import doggytalents.common.block.crops.SoyCropBlock;
 import doggytalents.common.lib.Constants;
 import doggytalents.common.util.Util;
-import net.minecraft.client.color.block.BlockColors;
-import net.minecraft.client.renderer.BiomeColors;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
-import net.neoforged.neoforge.client.event.RegisterColorHandlersEvent;
 import net.neoforged.neoforge.registries.DeferredRegister;
 
 import javax.annotation.Nullable;
@@ -65,15 +62,8 @@ public class DoggyBlocks {
         return BLOCKS.register(name, blockSupplier);
     }
 
-    public static void registerBlockColours(final RegisterColorHandlersEvent.Block event) {
-        //BlockColors blockColors = event.getBlockColors();
-
-        //Util.acceptOrElse(DoggyBlocks.DOG_BATH, (block) -> {
-            event.register((state, world, pos, tintIndex) -> {
-                return world != null && pos != null ? BiomeColors.getAverageWaterColor(world, pos) : -1;
-             }, DoggyBlocks.DOG_BATH.get());
-        //}, DoggyBlocks::logError);
-    }
+    // TODO: Block color system changed in 26.1. Block tinting now uses data-driven BlockTintSource.
+    // public static void registerBlockColours(final RegisterColorHandlersEvent.BlockTintSources event) { }
 
     public static void logError() {
         // Only try to register if blocks were successfully registered

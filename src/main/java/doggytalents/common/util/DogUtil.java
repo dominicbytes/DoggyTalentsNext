@@ -43,7 +43,7 @@ import net.minecraft.util.StringUtil;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.ProjectileUtil;
-import net.minecraft.world.item.ArmorMaterials;
+import net.minecraft.world.item.equipment.ArmorMaterials;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.ChunkPos;
@@ -603,9 +603,9 @@ public class DogUtil {
     public static void attemptToTeleportDogToBedOrSendPromise(@Nonnull Dog dog) {
         var bedPos = dog.getBedPos();
         if (!bedPos.isPresent()) return;
-        var chunkpos = new ChunkPos(bedPos.get());
+        var chunkpos = ChunkPos.containing(bedPos.get());
         var owner = dog.getOwner();
-        if (dog.level().hasChunk(chunkpos.x, chunkpos.z)) {
+        if (dog.level().hasChunk(chunkpos.x(), chunkpos.z())) {
             if (isTeleportSafeBlockMidAir(dog, bedPos.get().above())) {
                 teleportDogAbs(dog, bedPos.get().above());
                 dog.setOrderedToSit(true);

@@ -40,6 +40,11 @@ public class DogPathNavigation extends PathNavigation implements IDogNavLock {
     }
 
     @Override
+    public boolean canNavigateGround() {
+        return true;
+    }
+
+    @Override
     public void tick() {
         super.tick();
         if (this.isDone()) {

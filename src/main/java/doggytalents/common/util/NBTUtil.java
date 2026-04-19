@@ -4,11 +4,12 @@ import doggytalents.DoggyTalentsNext;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.Registry;
+import net.minecraft.core.UUIDUtil;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.ComponentSerialization;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.Vec3;
 
@@ -31,8 +32,12 @@ public class NBTUtil {
      */
     public static void putUniqueId(CompoundTag compound, String key, @Nullable UUID uuid) {
         if (uuid != null) {
-            compound.putUUID(key, uuid);
+            compound.putIntArray(key, UUIDUtil.uuidToIntArray(uuid));
         }
+    }
+
+    public static boolean hasUniqueId(CompoundTag compound, String key) {
+        return compound.getIntArray(key).map(arr -> arr.length == 4).orElse(false);
     }
 
     /**
@@ -40,8 +45,9 @@ public class NBTUtil {
      */
     @Nullable
     public static UUID getUniqueId(CompoundTag compound, String key) {
-        if (compound.hasUUID(key)) {
-            return compound.getUUID(key);
+        var arr = compound.getIntArray(key).orElse(null);
+        if (arr != null && arr.length == 4) {
+            return UUIDUtil.uuidFromIntArray(arr);
         } else if (NBTUtil.hasOldUniqueId(compound, key)) {
             return NBTUtil.getOldUniqueId(compound, key);
         }
@@ -54,7 +60,7 @@ public class NBTUtil {
     }
 
     public static boolean hasOldUniqueId(CompoundTag compound, String key) {
-        return compound.contains(key + "Most", Tag.TAG_ANY_NUMERIC) && compound.contains(key + "Least", Tag.TAG_ANY_NUMERIC);
+        return compound.contains(key + "Most") && compound.contains(key + "Least");
     }
 
     public static void removeOldUniqueId(CompoundTag compound, String key) {
@@ -62,16 +68,16 @@ public class NBTUtil {
         compound.remove(key + "Least");
     }
 
-    public static void putResourceLocation(CompoundTag compound, String key, @Nullable ResourceLocation rl) {
+    public static void putResourceLocation(CompoundTag compound, String key, @Nullable Identifier rl) {
         if (rl != null) {
             compound.putString(key, rl.toString());
         }
     }
 
     @Nullable
-    public static ResourceLocation getResourceLocation(CompoundTag compound, String key) {
-        if (compound.contains(key, Tag.TAG_STRING)) {
-            return ResourceLocation.tryParse(compound.getString(key));
+    public static Identifier getResourceLocation(CompoundTag compound, String key) {
+        if (compound.contains(key)) {
+            return Identifier.tryParse(compound.getString(key));
         }
 
         return null;
@@ -87,8 +93,8 @@ public class NBTUtil {
 
     @Nullable
     public static Vec3 getVector3d(CompoundTag compound) {
-        if (compound.contains("x", Tag.TAG_ANY_NUMERIC) && compound.contains("y", Tag.TAG_ANY_NUMERIC) && compound.contains("z", Tag.TAG_ANY_NUMERIC)) {
-            return new Vec3(compound.getDouble("x"), compound.getDouble("y"), compound.getDouble("z"));
+        if (compound.contains("x") && compound.contains("y") && compound.contains("z")) {
+            return new Vec3(compound.getDoubleOr("x", 0.0), compound.getDoubleOr("y", 0.0), compound.getDoubleOr("z", 0.0));
         }
 
         return null;
@@ -104,7 +110,7 @@ public class NBTUtil {
     @Nullable
     public static Component getTextComponent(CompoundTag compound, String key) {
         
-        if (compound.contains(key, Tag.TAG_STRING)) { 
+        if (compound.contains(key)) { 
             return parseComponentJsonStr(compound.getString(key));
         }
 
@@ -144,7 +150,7 @@ public class NBTUtil {
 
     @Nullable
     public static <T> T getRegistryValue(CompoundTag compound, String key, Registry<T> registry) {
-        ResourceLocation rl = NBTUtil.getResourceLocation(compound, key);
+        Identifier rl = NBTUtil.getResourceLocation(compound, key);
         if (rl != null) {
             if (registry.containsKey(rl)) {
                 return registry.get(rl);
@@ -158,7 +164,7 @@ public class NBTUtil {
         return null;
     }
 
-    public static void putRegistryValue(CompoundTag compound, String key, ResourceLocation value) {
+    public static void putRegistryValue(CompoundTag compound, String key, Identifier value) {
         if (value != null) {
             NBTUtil.putResourceLocation(compound, key, value);
         }
@@ -174,8 +180,8 @@ public class NBTUtil {
 
     @Nullable
     public static BlockPos getBlockPos(CompoundTag compound) {
-        if (compound.contains("x", Tag.TAG_ANY_NUMERIC) && compound.contains("y", Tag.TAG_ANY_NUMERIC) && compound.contains("z", Tag.TAG_ANY_NUMERIC)) {
-            return new BlockPos(compound.getInt("x"), compound.getInt("y"), compound.getInt("z"));
+        if (compound.contains("x") && compound.contains("y") && compound.contains("z")) {
+            return new BlockPos(compound.getIntOr("x", 0), compound.getIntOr("y", 0), compound.getIntOr("z", 0));
         }
 
         return null;
@@ -191,8 +197,8 @@ public class NBTUtil {
     }
 
     public static Optional<BlockPos> getBlockPos(CompoundTag compound, String key) {
-        if (compound.contains(key, Tag.TAG_COMPOUND)) {
-            return Optional.of(getBlockPos(compound.getCompound(key)));
+        if (compound.contains(key)) {
+            return Optional.of(getBlockPos(compound.getCompoundOrEmpty(key)));
         }
 
         return Optional.empty();
@@ -208,7 +214,7 @@ public class NBTUtil {
 
 //    @Nullable
 //    public static BlockPos getBlockPos(CompoundNBT compound, String key) {
-//        if (compound.contains(key, Tag.TAG_COMPOUND)) {
+//        if (compound.contains(key)) {
 //            return getBlockPos(compound.getCompound(key));
 //        }
 //
@@ -223,7 +229,7 @@ public class NBTUtil {
 
     @Nonnull
     public static ItemStack readItemStack(HolderLookup.Provider prov, CompoundTag compound, String key) {
-        if (compound.contains(key, Tag.TAG_COMPOUND)) {
+        if (compound.contains(key)) {
             return ItemStack.parse(prov, compound.getCompound(key)).orElse(ItemStack.EMPTY);
         }
 

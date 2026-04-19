@@ -49,7 +49,7 @@ public class ForceChangeOwnerPacket extends DogPacket<ForceChangeOwnerData> {
         
         dog.migrateOwner(newOwnerUUID);
         
-        sender.getCooldowns().addCooldown(DoggyItems.AMNESIA_BONE.get(), 40);
+        sender.getCooldowns().addCooldown(new net.minecraft.world.item.ItemStack(DoggyItems.AMNESIA_BONE.get()), 40);
     }
 
 }

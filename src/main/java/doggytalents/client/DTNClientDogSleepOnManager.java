@@ -16,7 +16,7 @@ import doggytalents.common.entity.DogSleepOnManager.DogSleepOnState;
 import doggytalents.mixin.CameraMixinAccessor;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.model.PlayerModel;
+import net.minecraft.client.model.player.PlayerModel;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
@@ -123,8 +123,8 @@ public class DTNClientDogSleepOnManager {
         return view_vec.normalize().scale(-translate_amount);
     }
 
-    public void afterPlayerModelSetupAnim(LivingEntity living, float limbSwing, 
-        float limbSwingAmount, float ageInTicks, float relativeHeadYRot, float headPitch, PlayerModel<?> model) {
+    public void afterPlayerModelSetupAnim(LivingEntity living, float limbSwing,
+        float limbSwingAmount, float ageInTicks, float relativeHeadYRot, float headPitch, PlayerModel model) {
         var player_optional = checkIsSleepingOnDog(living);
         if (!player_optional.isPresent())
             return;

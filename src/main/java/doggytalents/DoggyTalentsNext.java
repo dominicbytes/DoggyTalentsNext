@@ -33,8 +33,6 @@ import doggytalents.common.lib.Constants;
 import doggytalents.common.network.DTNNetworkHandler;
 import doggytalents.common.network.PacketHandler;
 import doggytalents.common.talent.HappyEaterTalent;
-import net.minecraft.data.DataGenerator;
-import net.minecraft.tags.BlockTags;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
 import net.neoforged.fml.ModLoadingContext;
@@ -46,8 +44,6 @@ import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.data.event.GatherDataEvent;
 import net.neoforged.neoforge.event.RegisterCommandsEvent;
 import net.neoforged.neoforge.event.server.ServerStartingEvent;
-import net.neoforged.neoforge.network.PacketDistributor;
-import net.neoforged.neoforge.network.registration.NetworkRegistry;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -57,13 +53,6 @@ public class DoggyTalentsNext {
 
     public static final Logger LOGGER = LogManager.getLogger(Constants.MOD_ID);
 
-    // public static final SimpleChannel HANDLER = NetworkRegistry.ChannelBuilder.named(Constants.CHANNEL_NAME)
-    //         .clientAcceptedVersions(Constants.PROTOCOL_VERSION::equals)
-    //         .serverAcceptedVersions(Constants.PROTOCOL_VERSION::equals)
-    //         .networkProtocolVersion(Constants.PROTOCOL_VERSION::toString)
-    //         .simpleChannel();
-            
-    
     //TODO AUTOMATION CURSEFORGE !!!
     public DoggyTalentsNext() {
         var modEventBus = ModLoadingContext.get().getActiveContainer().getEventBus();
@@ -71,7 +60,6 @@ public class DoggyTalentsNext {
         // Mod lifecycle
         modEventBus.addListener(this::gatherData);
         modEventBus.addListener(this::commonSetup);
-        //modEventBus.addListener(this::interModProcess);
 
         // Registries
         DogVariants.DOG_VARIANT.register(modEventBus);
@@ -105,25 +93,25 @@ public class DoggyTalentsNext {
         var forgeEventBus = NeoForge.EVENT_BUS;
         forgeEventBus.addListener(this::serverStarting);
         forgeEventBus.addListener(this::registerCommands);
-        forgeEventBus.addListener(DoggyBrewingRecipes::onRegisterEvent); 
+        forgeEventBus.addListener(DoggyBrewingRecipes::onRegisterEvent);
         forgeEventBus.addListener(ChopinRecordItem::onRightClickBlock);
         forgeEventBus.addListener(DogAllowedSkinManager::onRegisterReloadListener);
         forgeEventBus.addListener(DogAllowedSkinManager::onDataPackSyncServer);
 
-
         forgeEventBus.register(new EventHandler());
 
-        if (FMLEnvironment.dist == Dist.CLIENT) {
+        if (FMLEnvironment.getDist() == Dist.CLIENT) {
             modEventBus.addListener(DoggyKeybinds::registerDTKeyMapping);
             modEventBus.addListener(this::clientSetup);
-            modEventBus.addListener(DoggyBlocks::registerBlockColours);
-            modEventBus.addListener(DoggyItems::registerItemColours);
+            // modEventBus.addListener(DoggyBlocks::registerBlockColours); // TODO: migrate to ItemTintSource
+            // modEventBus.addListener(DoggyItems::registerItemColours); // TODO: migrate to ItemTintSource
             modEventBus.addListener(ClientEventHandler::registerModelForBaking);
             modEventBus.addListener(ClientEventHandler::modifyBakedModels);
             modEventBus.addListener(ClientSetup::setupTileEntityRenderers);
             modEventBus.addListener(ClientSetup::setupEntityRenderers);
             modEventBus.addListener(ClientSetup::addClientReloadListeners);
             modEventBus.addListener(ClientSetup::registerOverlay);
+            modEventBus.addListener(ClientSetup::registerClientExtensions);
             forgeEventBus.register(new ClientEventHandler());
             forgeEventBus.addListener(BedFinderRenderer::onWorldRenderLast);
             forgeEventBus.addListener(CanineTrackerLocateRenderer::onWorldRenderLast);
@@ -140,13 +128,11 @@ public class DoggyTalentsNext {
     public void commonSetup(final FMLCommonSetupEvent event) {
         DTNNetworkHandler.init();
         PacketHandler.init();
-        //TODO CriteriaTriggers.register(criterion)
         FoodHandler.registerHandler(new MeatFoodHandler());
         FoodHandler.registerHandler(new BoostingFoodHandler());
         FoodHandler.registerHandler(new DogDrinkMilkHandler());
         FoodHandler.registerHandler(new WhitelistFoodHandler());
 
-        //InteractHandler.registerHandler(new HelmetInteractHandler());
         event.enqueueWork(() -> {
             ConfigHandler.initTalentConfig();
             RiceMillBlockEntity.initGrindMap();
@@ -156,7 +142,6 @@ public class DoggyTalentsNext {
     }
 
     public void serverStarting(final ServerStartingEvent event) {
-
     }
 
     public void registerCommands(final RegisterCommandsEvent event) {
@@ -165,41 +150,30 @@ public class DoggyTalentsNext {
 
     @OnlyIn(Dist.CLIENT)
     public void clientSetup(final FMLClientSetupEvent event) {
-        //ClientSetup.setupScreenManagers(event);
-
         ClientSetup.onClientSetup(event);
     }
 
-    // protected void interModProcess(final InterModProcessEvent event) {
-    //     IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
-
-    //     //AddonManager.init();
-    // }
-
     private void gatherData(final GatherDataEvent event) {
-        DataGenerator gen = event.getGenerator();
-        var packOutput = gen.getPackOutput();
+        var packOutput = event.getGenerator().getPackOutput();
         var lookup = event.getLookupProvider();
 
         DTNPackMetadataProvider.start(event);
 
-        if (event.includeClient()) {
-            DTBlockstateProvider blockstates = new DTBlockstateProvider(packOutput, event.getExistingFileHelper());
-            gen.addProvider(true, blockstates);
-            gen.addProvider(true, new DTItemModelProvider(packOutput, blockstates.getExistingHelper()));
+        if (event instanceof GatherDataEvent.Client) {
+            event.addProvider(new DTBlockstateProvider(packOutput));
+            event.addProvider(new DTItemModelProvider(packOutput));
         }
 
-        if (event.includeServer()) {
-            // gen.addProvider(new DTBlockTagsProvider(gen));
-            gen.addProvider(true, new DTAdvancementProvider(packOutput, lookup, event.getExistingFileHelper()));
-            
-            DTBlockTagsProvider blockTagProvider = new DTBlockTagsProvider(packOutput, lookup, event.getExistingFileHelper());
-            gen.addProvider(true, blockTagProvider);
-            gen.addProvider(true, new DTItemTagsProvider(packOutput, lookup ,blockTagProvider.contentsGetter(), event.getExistingFileHelper()));
-            gen.addProvider(true, new DTRecipeProvider(packOutput, lookup));
-            gen.addProvider(true, new DTLootTableProvider(packOutput, lookup));
-            gen.addProvider(true, new DTLootModifierProvider(packOutput, lookup));
-            gen.addProvider(true, new DTEntityTagsProvider(packOutput, lookup, event.getExistingFileHelper()));
+        if (event instanceof GatherDataEvent.Server) {
+            event.addProvider(new DTAdvancementProvider(packOutput, lookup));
+
+            DTBlockTagsProvider blockTagProvider = new DTBlockTagsProvider(packOutput, lookup);
+            event.addProvider(blockTagProvider);
+            event.addProvider(new DTItemTagsProvider(packOutput, lookup));
+            event.addProvider(new DTRecipeProvider.Runner(packOutput, lookup));
+            event.addProvider(new DTLootTableProvider(packOutput, lookup));
+            event.addProvider(new DTLootModifierProvider(packOutput, lookup));
+            event.addProvider(new DTEntityTagsProvider(packOutput, lookup));
         }
 
         DTNDatapackProvider.start(event);

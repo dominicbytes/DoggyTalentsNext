@@ -12,7 +12,7 @@ public class RiceCropBlock extends DogCropBlock {
     public RiceCropBlock() {
         super(Block.Properties.of()
             .mapColor(MapColor.PLANT)
-            .noCollission()
+            .noCollision()
             .randomTicks()
             .instabreak()
             .sound(SoundType.CROP)

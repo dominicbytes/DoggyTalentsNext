@@ -24,6 +24,12 @@ sourceSets {
     }
 }
 
+afterEvaluate {
+    // The 'api' sourceSet needs NeoForge/Minecraft on its classpath to compile
+    configurations.apiCompileClasspath.extendsFrom(configurations.modDevCompileDependencies)
+    configurations.apiRuntimeClasspath.extendsFrom(configurations.modDevRuntimeDependencies)
+}
+
 // --- NEW NEOFORGE BLOCK (Replaces old 'minecraft' and top-level 'runs') ---
 neoForge {
     // This handles the version and the 'neoforge' dependency automatically
@@ -186,6 +192,7 @@ tasks.named('publishMods') {
 tasks.withType(JavaCompile).configureEach {
 
     options.encoding = 'UTF-8'
+    options.compilerArgs << "-Xmaxerrs" << "10000"
 
 }
 

@@ -12,7 +12,7 @@ public class SoyCropBlock extends DogCropBlock {
     public SoyCropBlock() {
         super(Block.Properties.of()
             .mapColor(MapColor.PLANT)
-            .noCollission()
+            .noCollision()
             .randomTicks()
             .instabreak()
             .sound(SoundType.CROP)

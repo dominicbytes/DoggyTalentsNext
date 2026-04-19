@@ -38,7 +38,7 @@ public class DogUntamePacket extends DogPacket<DogUntameData> {
         dog.level().broadcastEntityEvent(dog, Constants.EntityState.WOLF_SMOKE);
         
         var tag = ItemUtil.getTag(stack);
-        int usedTime = tag.getInt("amnesia_bone_used_time");
+        int usedTime = tag.getIntOr("amnesia_bone_used_time", 0);
         
         ++usedTime;
         if (usedTime >= AmnesiaBoneItem.getUseCap()) {
@@ -48,7 +48,7 @@ public class DogUntamePacket extends DogPacket<DogUntameData> {
 
         tag.putInt("amnesia_bone_used_time", usedTime);
 
-        sender.getCooldowns().addCooldown(DoggyItems.AMNESIA_BONE.get(), 60);
+        sender.getCooldowns().addCooldown(new net.minecraft.world.item.ItemStack(DoggyItems.AMNESIA_BONE.get()), 60);
         ItemUtil.putTag(stack, tag);
     }
     

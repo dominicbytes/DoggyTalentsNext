@@ -139,7 +139,7 @@ public class DogBridging {
     }
 
     public static void useBridgingWhistle(WhistleItem item, Player owner, Level level) {
-        if (level.isClientSide)
+        if (level.isClientSide())
             return;
         if (!ConfigHandler.SERVER.DOGGY_TOOLS_BRIDGING.get())
             return;
@@ -147,7 +147,7 @@ public class DogBridging {
             owner.sendSystemMessage(
                 Component.translatable("dogcommand.bridging.limit_exceeded",
                 getBridgingLimit().orElse(0)).withStyle(ChatFormatting.RED));
-            owner.getCooldowns().addCooldown(item, 20);
+            owner.getCooldowns().addCooldown(new net.minecraft.world.item.ItemStack(item), 20);
             return;
         }
         var pair_optional = getNearestBridgingDog(owner, level);
@@ -165,7 +165,7 @@ public class DogBridging {
         owner.sendSystemMessage(
             Component.translatable("dogcommand.bridging",
             dog.getName().getString()));
-        owner.getCooldowns().addCooldown(item, 20);
+        owner.getCooldowns().addCooldown(new net.minecraft.world.item.ItemStack(item), 20);
     }
 
     public static void onBridgingActionStop(LivingEntity owner) {

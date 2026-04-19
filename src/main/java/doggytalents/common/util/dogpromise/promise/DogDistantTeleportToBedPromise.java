@@ -53,8 +53,8 @@ public class DogDistantTeleportToBedPromise extends AbstractPromise {
         }
         var bedPos0 = bedPosOptional.get();
         this.bedPos = bedPos0;
-        var chunkpos = new ChunkPos(bedPos);
-        if (dog.level().hasChunk(chunkpos.x, chunkpos.z)) {
+        var chunkpos = ChunkPos.containing(bedPos);
+        if (dog.level().hasChunk(chunkpos.x(), chunkpos.z())) {
             this.rejectedMsg = "ALREADYREQUESTORLOADED";
             this.setState(State.REJECTED);
             return;

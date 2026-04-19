@@ -2,9 +2,9 @@ package doggytalents.client.screen.DogNewInfoScreen.element.view.MainInfoView.vi
 
 import javax.annotation.Nonnull;
 
-import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.platform.DestFactor;
+import com.mojang.blaze3d.platform.SourceFactor;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.PoseStack;
 
 import doggytalents.common.entity.Dog;
 import doggytalents.common.lib.Resources;
@@ -13,11 +13,10 @@ import doggytalents.common.network.packet.data.ChangeAccessoriesData;
 import doggytalents.common.network.packet.data.ChangeArtifactData;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.client.renderer.GameRenderer;
-import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
 import net.minecraft.world.item.ItemStack;
@@ -26,7 +25,6 @@ import doggytalents.common.network.PacketDistributor;
 
 public class ArtifactShowBox extends AbstractWidget {
 
-    private ItemRenderer itemRenderer;
     private Dog dog;
 
     public static final int ITEM_SIZE_ORG = 32;
@@ -40,23 +38,22 @@ public class ArtifactShowBox extends AbstractWidget {
     private final int order;
     private final Font font;
 
-    public ArtifactShowBox(int x, int y, ItemRenderer renderer, Dog dog, int order) {
+    public ArtifactShowBox(int x, int y, Dog dog, int order) {
         super(x, y, WIDGET_SIZE, WIDGET_SIZE, Component.empty());
-        this.itemRenderer = renderer;
         this.dog = dog;
         this.order = order;
         this.font = Minecraft.getInstance().font;
     }
 
     @Override
-    public void renderWidget(GuiGraphics graphics, int mouseX, int mouseY, float pTicks) {
+    public void renderWidget(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float pTicks) {
         this.isHovered = mouseX >= this.getX() && mouseY >= this.getY() && mouseX < this.getX() + this.width && mouseY < this.getY() + this.height;
         this.active = !this.itemStack.isEmpty();
         graphics.fill(this.getX(), this.getY(), this.getX()+this.width, this.getY()+this.height, BKGCOL);
         if (!this.active) {
             var order_str = "" + (this.order + 1);
             int order_width = font.width(order_str);
-            graphics.drawString(font, order_str, 
+            graphics.text(font, order_str, 
                 this.getX() + this.width/2 - order_width/2,
                 this.getY() + this.height/2 - font.lineHeight/2, TXTCOL);
             return;
@@ -74,7 +71,7 @@ public class ArtifactShowBox extends AbstractWidget {
         RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
         RenderSystem.enableBlend();
         RenderSystem.defaultBlendFunc();
-        RenderSystem.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
+        RenderSystem.blendFunc(SourceFactor.SRC_ALPHA, DestFactor.ONE_MINUS_SRC_ALPHA);
         int iX = ICON_REM_X;
         graphics.blit(Resources.STYLE_ADD_REMOVE, this.getX()+this.width - 2, getY()+this.height -2, iX, 0, 9, 9);
     }
@@ -90,7 +87,7 @@ public class ArtifactShowBox extends AbstractWidget {
     }
 
     // @Override
-    // public void renderWidget(GuiGraphics p_268228_, int p_268034_, int p_268009_, float p_268085_) {
+    // public void renderWidget(GuiGraphicsExtractor p_268228_, int p_268034_, int p_268009_, float p_268085_) {
     // }
 
     @Override

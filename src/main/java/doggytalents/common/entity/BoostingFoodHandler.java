@@ -27,7 +27,7 @@ public class BoostingFoodHandler implements IDogFoodHandler  {
 
     @Override
     public InteractionResult consume(AbstractDog dog, ItemStack stack, @Nullable Entity entityIn) {
-        if (!dog.level().isClientSide) {
+        if (!dog.level().isClientSide()) {
             
             var item = stack.getItem();
 
@@ -51,7 +51,7 @@ public class BoostingFoodHandler implements IDogFoodHandler  {
                     dog, new ItemStack(item));
             }
             dog.playSound(
-                SoundEvents.GENERIC_EAT, 
+                SoundEvents.GENERIC_EAT.value(), 
                 dog.getSoundVolume(), 
                 (dog.getRandom().nextFloat() - dog.getRandom().nextFloat()) * 0.2F + 1.0F
             );

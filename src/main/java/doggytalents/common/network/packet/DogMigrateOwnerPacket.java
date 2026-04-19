@@ -91,8 +91,8 @@ public class DogMigrateOwnerPacket extends DogPacket<DogMigrateOwnerData> {
         
         //Proccess sender
         sender.giveExperienceLevels(-AmnesiaBoneItem.getMigrateOwnerXPCost());
-        sender.getCooldowns().addCooldown(DoggyItems.AMNESIA_BONE.get(), 60);
-        int usedTime = tag.getInt("amnesia_bone_used_time");
+        sender.getCooldowns().addCooldown(new net.minecraft.world.item.ItemStack(DoggyItems.AMNESIA_BONE.get()), 60);
+        int usedTime = tag.getIntOr("amnesia_bone_used_time", 0);
         ++usedTime;
         if (usedTime >= AmnesiaBoneItem.getUseCap()) {
             stack.shrink(1);

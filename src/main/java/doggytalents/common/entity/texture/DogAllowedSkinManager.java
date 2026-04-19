@@ -29,13 +29,13 @@ import doggytalents.common.network.PacketDistributor;
 import doggytalents.common.network.PacketHandler;
 import doggytalents.common.util.Util;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.SimpleJsonResourceReloadListener;
 import net.minecraft.util.StringRepresentable;
 import net.minecraft.util.profiling.ProfilerFiller;
-import net.neoforged.neoforge.event.AddReloadListenerEvent;
+import net.neoforged.neoforge.event.AddServerReloadListenersEvent;
 import net.neoforged.neoforge.event.OnDatapackSyncEvent;
 
 public class DogAllowedSkinManager extends SimpleJsonResourceReloadListener {
@@ -45,7 +45,7 @@ public class DogAllowedSkinManager extends SimpleJsonResourceReloadListener {
     // Overriable via datapacks.
 
     public static final Logger LOGGER = LogManager.getLogger(Constants.MOD_ID + "/dogAllowedSkin");
-    private static final ResourceLocation ALLOWED_SKIN_PATH = Util.getResource("allowed_skin");
+    private static final Identifier ALLOWED_SKIN_PATH = Util.getResource("allowed_skin");
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create();
 
     private AllowedSkinEntry entries = AllowedSkinEntry.EMPTY;
@@ -61,7 +61,7 @@ public class DogAllowedSkinManager extends SimpleJsonResourceReloadListener {
     }
 
     @Override
-    protected void apply(Map<ResourceLocation, JsonElement> contents, ResourceManager resourceManager,
+    protected void apply(Map<Identifier, JsonElement> contents, ResourceManager resourceManager,
             ProfilerFiller profiler) {
         
         this.entries = AllowedSkinEntry.EMPTY;
@@ -123,7 +123,7 @@ public class DogAllowedSkinManager extends SimpleJsonResourceReloadListener {
         });
     }
 
-    public static void onRegisterReloadListener(AddReloadListenerEvent event) {
+    public static void onRegisterReloadListener(AddServerReloadListenersEvent event) {
         event.addListener(getServer());
     }
 

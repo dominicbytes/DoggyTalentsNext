@@ -22,7 +22,7 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.projectile.AbstractArrow;
+import net.minecraft.world.entity.projectile.arrow.AbstractArrow;
 import net.minecraft.world.item.ArrowItem;
 import net.minecraft.world.item.BowItem;
 import net.minecraft.world.item.CrossbowItem;
@@ -350,7 +350,7 @@ public interface ShootHandler {
             }
 
 
-            dog.playSound(SoundEvents.CROSSBOW_LOADING_END.value(), 1.0F,
+            dog.playSound(SoundEvents.CROSSBOW_LOADING_END.value().value(), 1.0F,
                 1.0F / (dog.getRandom().nextFloat() * 0.5F + 1.0F) + 0.2F);
         }
 

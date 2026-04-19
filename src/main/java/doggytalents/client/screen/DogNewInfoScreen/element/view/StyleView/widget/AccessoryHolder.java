@@ -2,21 +2,18 @@ package doggytalents.client.screen.DogNewInfoScreen.element.view.StyleView.widge
 
 import javax.annotation.Nonnull;
 
-import com.mojang.blaze3d.platform.GlStateManager;
-import com.mojang.blaze3d.platform.GlStateManager.DestFactor;
-import com.mojang.blaze3d.platform.GlStateManager.SourceFactor;
+import com.mojang.blaze3d.platform.DestFactor;
+import com.mojang.blaze3d.platform.SourceFactor;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.PoseStack;
 
 import doggytalents.common.entity.Dog;
 import doggytalents.common.lib.Resources;
 import doggytalents.common.network.PacketHandler;
 import doggytalents.common.network.packet.data.ChangeAccessoriesData;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.client.renderer.GameRenderer;
-import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -24,7 +21,6 @@ import doggytalents.common.network.PacketDistributor;
 
 public class AccessoryHolder extends AbstractWidget {
 
-    ItemRenderer itemRenderer;
     Dog dog;
 
     public static final int ITEM_SIZE_ORG = 16;
@@ -41,15 +37,14 @@ public class AccessoryHolder extends AbstractWidget {
     int inventorySlotId = 0;
     public boolean warning;
 
-    public AccessoryHolder(int x, int y, ItemRenderer renderer, Dog dog, boolean add) {
+    public AccessoryHolder(int x, int y, Dog dog, boolean add) {
         super(x, y, WIDGET_SIZE, WIDGET_SIZE, Component.empty());
-        this.itemRenderer = renderer;
         this.add = add;
         this.dog = dog;
     }
 
     @Override
-    public void renderWidget(GuiGraphics graphics, int mouseX, int mouseY, float pTicks) {
+    public void renderWidget(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float pTicks) {
         this.isHovered = mouseX >= this.getX() && mouseY >= this.getY() && mouseX < this.getX() + this.width && mouseY < this.getY() + this.height;
         this.active = !this.itemStack.isEmpty();
         if (!this.active) return;
@@ -63,7 +58,7 @@ public class AccessoryHolder extends AbstractWidget {
         RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
         RenderSystem.enableBlend();
         RenderSystem.defaultBlendFunc();
-        RenderSystem.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
+        RenderSystem.blendFunc(SourceFactor.SRC_ALPHA, DestFactor.ONE_MINUS_SRC_ALPHA);
         int iX = add ? ICON_ADD_X : ICON_REM_X;
         if (warning) iX = ICON_WARN_X;
         graphics.blit(Resources.STYLE_ADD_REMOVE, getX()+14, getY()+14, iX, 0, 9, 9);
@@ -101,7 +96,7 @@ public class AccessoryHolder extends AbstractWidget {
     }
 
     // @Override
-    // public void renderWidget(GuiGraphics graphics, int p_268034_, int p_268009_, float p_268085_) {
+    // public void renderWidget(GuiGraphicsExtractor graphics, int p_268034_, int p_268009_, float p_268085_) {
     // }
     
 }

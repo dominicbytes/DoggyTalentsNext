@@ -11,7 +11,7 @@ import net.minecraft.world.food.FoodProperties;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.minecraft.world.item.armortrim.ArmorTrim;
+import net.minecraft.world.item.equipment.trim.ArmorTrim;
 import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.item.component.DyedItemColor;
 import net.minecraft.world.item.crafting.Ingredient;
@@ -99,9 +99,9 @@ public class ItemUtil {
 
     public static CompoundTag getTagElement(ItemStack stack, String id) {
         var tag = getTag(stack);
-        if (!tag.contains(id, Tag.TAG_COMPOUND))
+        if (!tag.contains(id))
             return null;
-        return tag.getCompound(id);
+        return tag.getCompoundOrEmpty(id);
     }
 
     public static boolean hasTag(ItemStack stack) {

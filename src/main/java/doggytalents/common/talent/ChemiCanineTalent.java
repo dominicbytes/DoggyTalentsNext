@@ -22,7 +22,7 @@ import net.minecraft.world.effect.MobEffectCategory;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.animal.Wolf;
+import net.minecraft.world.entity.animal.wolf.Wolf;
 import net.minecraft.world.entity.player.Player;
 
 public class ChemiCanineTalent extends TalentInstance {
@@ -39,7 +39,7 @@ public class ChemiCanineTalent extends TalentInstance {
 
     @Override
     public void livingTick(AbstractDog abstractDog) {
-        if (abstractDog.level().isClientSide) {
+        if (abstractDog.level().isClientSide()) {
             return;
         }
 
@@ -75,16 +75,16 @@ public class ChemiCanineTalent extends TalentInstance {
     @Override
     public void readFromNBT(AbstractDog dogIn, CompoundTag compound) {
         super.readFromNBT(dogIn, compound);
-        if (!compound.contains("DTN_ChemiCanine", Tag.TAG_COMPOUND))
+        if (!compound.contains("DTN_ChemiCanine"))
             return;
-        var tg0 = compound.getCompound("DTN_ChemiCanine");
-        this.tickTillEffectDecay = tg0.getInt("tickTillEffectDecay");
-        if (!tg0.contains("effects", Tag.TAG_LIST))
+        var tg0 = compound.getCompoundOrEmpty("DTN_ChemiCanine");
+        this.tickTillEffectDecay = tg0.getIntOr("tickTillEffectDecay", 0);
+        if (!tg0.contains("effects"))
             return;
-        var effectTags = tg0.getList("effects", Tag.TAG_COMPOUND);
+        var effectTags = tg0.getListOrEmpty("effects");
         for (int i = 0; i < effectTags.size(); ++i) {
             try {
-                var effectTag = effectTags.getCompound(i);
+                var effectTag = effectTags.getCompoundOrEmpty(i);
                 var effectInst = MobEffectInstance.load(effectTag);
                 if (effectInst != null)
                     this.storedEffects.add(effectInst);   

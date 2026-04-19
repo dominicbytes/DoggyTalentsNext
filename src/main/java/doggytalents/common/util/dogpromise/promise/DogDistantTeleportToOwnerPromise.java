@@ -148,8 +148,8 @@ public class DogDistantTeleportToOwnerPromise extends AbstractPromise {
         }
 
         this.timeOutTick = TIMEOUT;
-        ChunkPos chunkpos = new ChunkPos(dogPos);
-        if (this.level.hasChunk(chunkpos.x, chunkpos.z)) {
+        ChunkPos chunkpos = ChunkPos.containing(dogPos);
+        if (this.level.hasChunk(chunkpos.x(), chunkpos.z())) {
             this.rejectedMsg = "ALREADYREQUESTORLOADED";
             this.setState(State.REJECTED);
             return;

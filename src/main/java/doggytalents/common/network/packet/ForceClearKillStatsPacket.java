@@ -40,7 +40,7 @@ public class ForceClearKillStatsPacket extends DogPacket<ForceClearKillStatsData
         
         dogIn.getStatTracker().clearAllStatsKill();
 
-        sender.getCooldowns().addCooldown(DoggyItems.AMNESIA_BONE.get(), 20);
+        sender.getCooldowns().addCooldown(new net.minecraft.world.item.ItemStack(DoggyItems.AMNESIA_BONE.get()), 20);
     }
     
 }

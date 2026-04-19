@@ -21,7 +21,7 @@ public class FieryReflectorItem extends AccessoryItem {
     }
 
     @Override
-    public void appendHoverText(ItemStack stack, Item.TooltipContext context, List<Component> components,
+    public void appendHoverText(ItemStack stack, Item.TooltipContext context, net.minecraft.world.item.component.TooltipDisplay tooltipDisplay, java.util.function.Consumer<net.minecraft.network.chat.Component> components,
             TooltipFlag flags) {
         var desc_id = "item.doggytalents.divine_retribution.description";
         components.add(Component.translatable(desc_id).withStyle(

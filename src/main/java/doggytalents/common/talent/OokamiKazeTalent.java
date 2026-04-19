@@ -48,7 +48,7 @@ public class OokamiKazeTalent extends TalentInstance {
 
     @Override
     public void tick(AbstractDog dogIn) {
-        if (dogIn.level().isClientSide)
+        if (dogIn.level().isClientSide())
             return;
         if (this.cooldown > 0)
             --this.cooldown;
@@ -277,7 +277,7 @@ public class OokamiKazeTalent extends TalentInstance {
         }
 
         public void explode() {
-            if (dog.level().isClientSide)
+            if (dog.level().isClientSide())
                 return;
             dog.level().gameEvent(dog, GameEvent.EXPLODE, dog.position());
             hurtEntities();
@@ -413,10 +413,10 @@ public class OokamiKazeTalent extends TalentInstance {
     public static void explodeClient(Dog dog) {
         var level = dog.level();
         var dog_pos = dog.position();
-        if (level.isClientSide) {
+        if (level.isClientSide()) {
             level.playLocalSound(dog_pos.x, dog_pos.y, dog_pos.z, 
                 SoundEvents.GENERIC_EXPLODE.value(), SoundSource.BLOCKS, 4.0F, 
-                (1.0F + (level.random.nextFloat() - level.random.nextFloat()) * 0.2F) * 0.7F, false);
+                (1.0F + (level.getRandom().nextFloat() - level.getRandom().nextFloat()) * 0.2F) * 0.7F, false);
         }
         level.addParticle(ParticleTypes.EXPLOSION, dog_pos.x, dog_pos.y, dog_pos.z, 1.0D, 0.0D, 0.0D);
         level.addParticle(ParticleTypes.EXPLOSION_EMITTER, dog_pos.x, dog_pos.y, dog_pos.z, 1.0D, 0.0D, 0.0D);

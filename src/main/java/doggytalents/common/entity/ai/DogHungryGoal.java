@@ -90,7 +90,7 @@ public class DogHungryGoal extends Goal {
                 IThrowableItem throwableItem = this.dog.getThrowableItem();
                 ItemStack fetchItem = throwableItem != null ? throwableItem.getReturnStack(this.dog.getBoneVariant()) : this.dog.getBoneVariant();
 
-                this.dog.spawnAtLocation(fetchItem, 0.0F);
+                this.dog.spawnAtLocation((net.minecraft.server.level.ServerLevel) this.dog.level(), fetchItem, 0.0F);
                 this.dog.setBoneVariant(ItemStack.EMPTY);
             }
         }

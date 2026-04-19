@@ -35,7 +35,7 @@ public class WhistleEditHotKeyPacket implements IPacket<WhisltleEditHotKeyData> 
             var stack = player.getMainHandItem();
             if (!(stack.getItem() == DoggyItems.WHISTLE.get())) return;
             var tag = ItemUtil.getTag(stack);
-            if (!tag.contains("hotkey_modes", Tag.TAG_INT_ARRAY)) {
+            if (!tag.contains("hotkey_modes")) {
                 tag.putIntArray("hotkey_modes", new int[]{-1, -1, -1, -1});
                 ItemUtil.putTag(stack, tag);
             }

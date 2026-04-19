@@ -8,14 +8,14 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import doggytalents.client.DTNWolfMountCustomGuiOverlay;
 import net.minecraft.client.gui.Gui;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.world.entity.LivingEntity;
 
 @Mixin(Gui.class)
 public class GuiMixin {
     
-    @Inject(at = @At("HEAD"),  method = "renderVehicleHealth(Lnet/minecraft/client/gui/GuiGraphics;)V", cancellable = true)
-    protected void dtn__renderVehicleHealth(GuiGraphics graphics, CallbackInfo info) {
+    @Inject(at = @At("HEAD"),  method = "renderVehicleHealth(Lnet/minecraft/client/gui/GuiGraphicsExtractor;)V", cancellable = true)
+    protected void dtn__renderVehicleHealth(GuiGraphicsExtractor graphics, CallbackInfo info) {
         var self = (Gui)(Object)this;
         if (DTNWolfMountCustomGuiOverlay.onRenderVehicleHealth(graphics, self))
             info.cancel();

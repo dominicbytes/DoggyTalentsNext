@@ -38,12 +38,12 @@ public class PackPuppyItemHandler extends ItemStackHandler {
 
     @Override
     public void deserializeNBT(HolderLookup.Provider prov, CompoundTag compound) {
-        if (compound.contains("items", Tag.TAG_LIST)) {
+        if (compound.contains("items")) {
             try {
-                ListTag tagList = compound.getList("items", Tag.TAG_COMPOUND);
+                ListTag tagList = compound.getListOrEmpty("items");
                 for (int i = 0; i < tagList.size(); i++) {
-                    CompoundTag itemTag = tagList.getCompound(i);
-                    int slot = itemTag.getInt("Slot");
+                    CompoundTag itemTag = tagList.getCompoundOrEmpty(i);
+                    int slot = itemTag.getIntOr("Slot", 0);
 
                     if (slot >= 0 && slot < this.stacks.size()) {
                         ItemStack.parse(prov, itemTag).ifPresent(stack -> stacks.set(slot, stack));
@@ -53,11 +53,11 @@ public class PackPuppyItemHandler extends ItemStackHandler {
             } catch (Exception e) {
 
             }
-        } else if (compound.contains("packpuppyitems", Tag.TAG_LIST)) {
-            ListTag tagList = compound.getList("packpuppyitems", Tag.TAG_COMPOUND);
+        } else if (compound.contains("packpuppyitems")) {
+            ListTag tagList = compound.getListOrEmpty("packpuppyitems");
             for (int i = 0; i < tagList.size(); i++) {
-                CompoundTag itemTag = tagList.getCompound(i);
-                int slot = itemTag.getInt("Slot");
+                CompoundTag itemTag = tagList.getCompoundOrEmpty(i);
+                int slot = itemTag.getIntOr("Slot", 0);
 
                 if (slot >= 0 && slot < this.stacks.size()) {
                     ItemStack.parse(prov, itemTag).ifPresent(stack -> stacks.set(slot, stack));

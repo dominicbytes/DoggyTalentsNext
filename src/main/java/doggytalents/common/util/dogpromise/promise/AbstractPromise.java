@@ -89,7 +89,7 @@ public abstract class AbstractPromise {
             if (chunks.isEmpty())
                 continue;
             for (var chunk : chunks) {
-                DTNForcedChunkManager.dropChunk(source, this, new ChunkPos(chunk));
+                DTNForcedChunkManager.dropChunk(source, this, ChunkPos.unpack(chunk));
                 ++drop_count;
             }
         }

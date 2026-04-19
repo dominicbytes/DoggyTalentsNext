@@ -15,16 +15,17 @@ import doggytalents.common.config.ConfigHandler.ClientConfig;
 import doggytalents.common.entity.Dog;
 import doggytalents.common.entity.DogIncapacitatedMananger.IncapacitatedSyncState;
 import doggytalents.common.lib.Resources;
-import net.minecraft.Util;
+import net.minecraft.util.Util;
 import net.minecraft.client.model.EntityModel;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.rendertype.RenderType;
+import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.LivingEntityRenderer;
 import net.minecraft.client.renderer.entity.RenderLayerParent;
 import net.minecraft.client.renderer.entity.layers.RenderLayer;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.FastColor;
+import net.minecraft.resources.Identifier;
+import net.minecraft.util.ARGB;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.LivingEntity;
 
@@ -71,7 +72,7 @@ public class IncapacitatedRenderer extends RenderLayer<Dog, DogModel> {
         }
         //Bandaid layer
         var bandaid_state = sync_state.bandaid;
-        ResourceLocation bandaid_texture_rl = null;
+        Identifier bandaid_texture_rl = null;
         switch (bandaid_state) {
         case FULL:
             bandaid_texture_rl = Resources.BANDAID_OVERLAY_FULL;
@@ -87,7 +88,7 @@ public class IncapacitatedRenderer extends RenderLayer<Dog, DogModel> {
         renderTranslucentModel(dogModel, bandaid_texture_rl, poseStack, buffer, packedLight, dog, 1.0F, 1.0F, 1.0F, 1);
     }
 
-    private ResourceLocation pickInjuredTexture(Dog dog, IncapacitatedSyncState state) {
+    private Identifier pickInjuredTexture(Dog dog, IncapacitatedSyncState state) {
         if (dog.isDogVariantRenderEffective()) {
             var variant_custom_overlay = dog.dogVariant().customInjuredTexture();
             if (variant_custom_overlay.isPresent())
@@ -136,8 +137,8 @@ public class IncapacitatedRenderer extends RenderLayer<Dog, DogModel> {
         return Mth.clamp(ret, 0, 1);
     }
 
-    public static <T extends LivingEntity> void renderTranslucentModel(EntityModel<T> p_117377_, ResourceLocation p_117378_, PoseStack p_117379_, MultiBufferSource p_117380_, int p_117381_, T p_117382_, float p_117383_, float p_117384_, float p_117385_, float opascity) {
-        VertexConsumer vertexconsumer = p_117380_.getBuffer(RenderType.entityTranslucent(p_117378_));
-        p_117377_.renderToBuffer(p_117379_, vertexconsumer, p_117381_, LivingEntityRenderer.getOverlayCoords(p_117382_, 0.0F), FastColor.ARGB32.colorFromFloat(opascity, p_117383_, p_117384_, p_117385_));
+    public static <T extends LivingEntity> void renderTranslucentModel(EntityModel<T> p_117377_, Identifier p_117378_, PoseStack p_117379_, MultiBufferSource p_117380_, int p_117381_, T p_117382_, float p_117383_, float p_117384_, float p_117385_, float opascity) {
+        VertexConsumer vertexconsumer = p_117380_.getBuffer(RenderTypes.entityTranslucent(p_117378_));
+        p_117377_.renderToBuffer(p_117379_, vertexconsumer, p_117381_, LivingEntityRenderer.getOverlayCoords(p_117382_, 0.0F), ARGB.colorFromFloat(opascity, p_117383_, p_117384_, p_117385_));
     }
 }

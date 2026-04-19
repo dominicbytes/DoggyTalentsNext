@@ -61,9 +61,9 @@ import doggytalents.common.network.DTNNetworkHandler.NetworkEvent.Context;
         }
         
         if (ConfigHandler.WHISTLE_SOUNDS)
-        owner.level().playSound(null, owner.blockPosition(), DoggySounds.WHISTLE_LONG.get(), SoundSource.PLAYERS, 0.6F + owner.level().random.nextFloat() * 0.1F, 0.4F + owner.level().random.nextFloat() * 0.2F);
+        owner.level().playSound(null, owner.blockPosition(), DoggySounds.WHISTLE_LONG.get(), SoundSource.PLAYERS, 0.6F + owner.level().getRandom().nextFloat() * 0.1F, 0.4F + owner.level().getRandom().nextFloat() * 0.2F);
         owner.sendSystemMessage(Component.translatable("dogcommand.heel_by_name", dog.getName().getString()));
-        owner.getCooldowns().addCooldown(DoggyItems.WHISTLE.get(), 20);
+        owner.getCooldowns().addCooldown(new net.minecraft.world.item.ItemStack(DoggyItems.WHISTLE.get()), 20);
 
         var stack = owner.getMainHandItem();
         if (stack.getItem() instanceof WhistleItem) {

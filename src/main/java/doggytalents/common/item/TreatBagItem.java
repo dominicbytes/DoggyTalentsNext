@@ -21,7 +21,6 @@ import net.minecraft.network.chat.Style;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
-import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
@@ -53,11 +52,11 @@ public class TreatBagItem extends Item implements IDogFoodHandler {
     }
 
     @Override
-    public InteractionResultHolder<ItemStack> use(Level worldIn, Player playerIn, InteractionHand handIn) {
+    public InteractionResult use(Level worldIn, Player playerIn, InteractionHand handIn) {
         ItemStack stack = playerIn.getItemInHand(handIn);
 
-        if (worldIn.isClientSide) {
-            return new InteractionResultHolder<ItemStack>(InteractionResult.SUCCESS, stack);
+        if (worldIn.isClientSide()) {
+            return InteractionResult.SUCCESS; // consumed stack: stack);
         }
         else {
             if (!playerIn.isShiftKeyDown()) {
@@ -65,7 +64,7 @@ public class TreatBagItem extends Item implements IDogFoodHandler {
                     findFoodAndShootOut(sP, stack);
                 }
 
-                return new InteractionResultHolder<ItemStack>(InteractionResult.SUCCESS, stack);
+                return InteractionResult.SUCCESS; // consumed stack: stack);
             }
             if (playerIn instanceof ServerPlayer) {
                 ServerPlayer serverPlayer = (ServerPlayer) playerIn;
@@ -73,7 +72,7 @@ public class TreatBagItem extends Item implements IDogFoodHandler {
                 Screens.openTreatBagScreen(serverPlayer, stack, playerIn.getInventory().selected);
             }
 
-            return new InteractionResultHolder<ItemStack>(InteractionResult.SUCCESS, stack);
+            return InteractionResult.SUCCESS; // consumed stack: stack);
         }
     }
 
@@ -95,7 +94,7 @@ public class TreatBagItem extends Item implements IDogFoodHandler {
         foodStack.shrink(1);
         itemHandler.setStackInSlot(foodStackId, foodStack);
 
-        player.getCooldowns().addCooldown(this, 20);
+        player.getCooldowns().addCooldown(new net.minecraft.world.item.ItemStack(this), 20);
     }
 
     private void throwFood(Player player, Item item) {
@@ -131,42 +130,42 @@ public class TreatBagItem extends Item implements IDogFoodHandler {
 
     @Override
     @OnlyIn(Dist.CLIENT)
-    public void appendHoverText(ItemStack stack, Item.TooltipContext context, List<Component> tooltip, TooltipFlag flagIn) {
-        super.appendHoverText(stack, context, tooltip, flagIn);
+    public void appendHoverText(ItemStack stack, Item.TooltipContext context, net.minecraft.world.item.component.TooltipDisplay tooltipDisplay, java.util.function.Consumer<net.minecraft.network.chat.Component> tooltip,TooltipFlag flagIn) {
+        super.appendHoverText(stack, context, tooltipDisplay, tooltip, flagIn);
 
-        tooltip.add(Component.translatable("item.doggytalents.treat_bag.help").withStyle(
+        tooltip.accept(Component.translatable("item.doggytalents.treat_bag.help").withStyle(
             Style.EMPTY.withItalic(true)
         ));
 
         displayContents(stack, tooltip, flagIn);
-        
-        
+
+
     }
 
-    private void displayContents(ItemStack stack, List<Component> tooltip, TooltipFlag flagIn) {
+    private void displayContents(ItemStack stack, java.util.function.Consumer<net.minecraft.network.chat.Component> tooltip, TooltipFlag flagIn) {
         var inv = new TreatBagItemHandler(stack);
         // if (inv == null)
-        //     return; 
+        //     return;
         var contentsOverview = ItemUtil.getContentOverview(inv);
         var contentsMap = contentsOverview.contents();
         if (contentsMap.isEmpty())
             return;
-        tooltip.add(Component.translatable("item.doggytalents.treat_bag.contents"));
+        tooltip.accept(Component.translatable("item.doggytalents.treat_bag.contents"));
         for (var entry : contentsMap.entrySet()) {
             var c1 = Component.translatable("item.doggytalents.starter_bundle.contains",
                 entry.getValue(), entry.getKey().getDescription()).withStyle(
                     Style.EMPTY.withColor(0xffa3a3a3)
                 );
-            tooltip.add(c1);
+            tooltip.accept(c1);
         }
         if (contentsOverview.isMore() > 0) {
-            tooltip.add(Component.translatable("item.doggytalents.treat_bag.contents.more",
+            tooltip.accept(Component.translatable("item.doggytalents.treat_bag.contents.more",
                 contentsOverview.isMore()).withStyle(
                 Style.EMPTY.withColor(0xffa3a3a3)
             ));
         }
-        
-        
+
+
     }
 
     public static List<ItemStack> inventory(ItemStack stack) {
@@ -203,7 +202,7 @@ public class TreatBagItem extends Item implements IDogFoodHandler {
 
     @Override
     public InteractionResult consume(AbstractDog dogIn, ItemStack stackIn, Entity entityIn) {
-        if (dogIn.level().isClientSide)
+        if (dogIn.level().isClientSide())
             return InteractionResult.SUCCESS;
 
         IItemHandlerModifiable treatBag = new TreatBagItemHandler(stackIn);

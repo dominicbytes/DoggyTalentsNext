@@ -35,13 +35,13 @@ public class GenderBoneItem extends Item implements IDogItem{
         if (playerIn.getCooldowns().isOnCooldown(DoggyItems.GENDER_BONE.get()))
             return InteractionResult.CONSUME;
             
-        if (dog.level().isClientSide)
+        if (dog.level().isClientSide())
             return InteractionResult.SUCCESS;
         
         dog.setGender(dog.getGender() == DogGender.MALE ?
             DogGender.FEMALE
             : DogGender.MALE);
-        playerIn.getCooldowns().addCooldown(DoggyItems.GENDER_BONE.get(), 40);
+        playerIn.getCooldowns().addCooldown(new net.minecraft.world.item.ItemStack(DoggyItems.GENDER_BONE.get()), 40);
         dog.playSound(SoundEvents.EXPERIENCE_ORB_PICKUP);
         if (dog.level() instanceof ServerLevel sL) {
             var item = dog.getGender() == DogGender.MALE ? 

@@ -21,7 +21,7 @@ import doggytalents.common.util.DogUtil;
 
 import static doggytalents.common.network.packet.data.ConductingBoneData.*;
 
-import net.minecraft.Util;
+import net.minecraft.util.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.level.ServerLevel;
@@ -178,7 +178,7 @@ public class ConductingBonePackets {
                         }
                     }
 
-                    sender.getCooldowns().addCooldown(DoggyItems.CONDUCTING_BONE.get(), 20);
+                    sender.getCooldowns().addCooldown(new net.minecraft.world.item.ItemStack(DoggyItems.CONDUCTING_BONE.get()), 20);
 
                 }
 

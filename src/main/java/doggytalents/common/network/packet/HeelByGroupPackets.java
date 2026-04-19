@@ -176,7 +176,7 @@ public class HeelByGroupPackets {
                 );
 
                 if (ConfigHandler.WHISTLE_SOUNDS)
-                sender.level().playSound(null, sender.blockPosition(), DoggySounds.WHISTLE_LONG.get(), SoundSource.PLAYERS, 0.6F + sender.level().random.nextFloat() * 0.1F, 0.4F + sender.level().random.nextFloat() * 0.2F);
+                sender.level().playSound(null, sender.blockPosition(), DoggySounds.WHISTLE_LONG.get(), SoundSource.PLAYERS, 0.6F + sender.level().getRandom().nextFloat() * 0.1F, 0.4F + sender.level().getRandom().nextFloat() * 0.2F);
                 sender.sendSystemMessage(Component.translatable("dogcommand.heel_by_group", 
                     Component.literal(data.group.name)
                     .withStyle(
@@ -185,7 +185,7 @@ public class HeelByGroupPackets {
                         .withColor(data.group.color)
                     )
                 ));
-                sender.getCooldowns().addCooldown(DoggyItems.WHISTLE.get(), 40);    
+                sender.getCooldowns().addCooldown(new net.minecraft.world.item.ItemStack(DoggyItems.WHISTLE.get()), 40);    
             });
     
             ctx.get().setPacketHandled(true);

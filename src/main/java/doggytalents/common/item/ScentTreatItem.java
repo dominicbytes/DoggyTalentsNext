@@ -33,9 +33,9 @@ public class ScentTreatItem extends Item {
         var pos = context.getClickedPos();
         var state = level.getBlockState(pos);
 
-        if (handleClearScent(state, context).shouldSwing())
+        if (handleClearScent(state, context).consumesAction())
             return InteractionResult.SUCCESS;
-        if (handleAddScent(state, context).shouldSwing())
+        if (handleAddScent(state, context).consumesAction())
             return InteractionResult.SUCCESS;
 
         return InteractionResult.FAIL;
@@ -50,7 +50,7 @@ public class ScentTreatItem extends Item {
         if (!tag.contains(SCENT_BLOCK_ID))
             return InteractionResult.PASS;
 
-        if (context.getLevel().isClientSide)
+        if (context.getLevel().isClientSide())
             return InteractionResult.SUCCESS;
         
         ItemUtil.clearTag(stack);
@@ -67,7 +67,7 @@ public class ScentTreatItem extends Item {
         if (tag.contains(SCENT_BLOCK_ID))
             return InteractionResult.PASS;
 
-        if (context.getLevel().isClientSide)
+        if (context.getLevel().isClientSide())
             return InteractionResult.SUCCESS;
 
         var block = state.getBlock();
@@ -80,9 +80,9 @@ public class ScentTreatItem extends Item {
     }
 
     @Override
-    public void appendHoverText(ItemStack stack, Item.TooltipContext context, List<Component> components,
+    public void appendHoverText(ItemStack stack, Item.TooltipContext context, net.minecraft.world.item.component.TooltipDisplay tooltipDisplay, java.util.function.Consumer<net.minecraft.network.chat.Component> components,
             TooltipFlag flags) {
-        var desc_id = this.getDescriptionId(stack) + ".description";
+        var desc_id = this.getDescriptionId() + ".description";
         components.add(Component.translatable(desc_id).withStyle(
             Style.EMPTY.withItalic(true)
         ));

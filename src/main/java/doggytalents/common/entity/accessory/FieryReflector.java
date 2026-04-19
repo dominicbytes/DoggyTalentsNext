@@ -12,7 +12,7 @@ import doggytalents.client.event.ClientEventHandler;
 import doggytalents.common.entity.Dog;
 import doggytalents.common.entity.anim.DogPose;
 import net.minecraft.core.particles.ParticleTypes;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
@@ -82,7 +82,7 @@ public class FieryReflector extends Accessory implements IAccessoryHasModel {
         private int tickTillRefresh = 0;
         private final Type type;
 
-        private final ArrayList<Pair<Item, ResourceLocation>> recipeCache = new ArrayList<>(5);
+        private final ArrayList<Pair<Item, Identifier>> recipeCache = new ArrayList<>(5);
 
         //Anim Debug workaround, clientside
         public boolean debugForceLowFlameRender = false;
@@ -104,7 +104,7 @@ public class FieryReflector extends Accessory implements IAccessoryHasModel {
         @Override
         public InteractionResult processInteract(AbstractDog dogIn, Level worldIn, Player playerIn,
                 InteractionHand handIn) {
-            if (dogIn.level().isClientSide)
+            if (dogIn.level().isClientSide())
             if (playerIn.getItemInHand(handIn).getItem() == Items.STRING
                 && ((dogIn instanceof Dog dog) && dog.isDogInAnimDebug())) {
                 this.debugForceLowFlameRender = !this.debugForceLowFlameRender;
@@ -116,7 +116,7 @@ public class FieryReflector extends Accessory implements IAccessoryHasModel {
         private void tickReflectorEffect(AbstractDog dogIn) {
             if (dogIn.isDefeated())
                 return;
-            if (dogIn.level().isClientSide) {
+            if (dogIn.level().isClientSide()) {
                 if (dogIn instanceof Dog dog)
                     addFlameParticles(dog);
                 playSizzleSound(dogIn);
@@ -208,7 +208,7 @@ public class FieryReflector extends Accessory implements IAccessoryHasModel {
         }
 
         private void cookAllCooking(AbstractDog dog) {
-            if (dog.level().isClientSide) {
+            if (dog.level().isClientSide()) {
                 cookAllCookingClient(dog);
             } else {
                 cookAllCookingServer(dog);
@@ -322,13 +322,13 @@ public class FieryReflector extends Accessory implements IAccessoryHasModel {
             this.recipeCache.clear();
         }
 
-        private void cacheResult(Item item, ResourceLocation res) {
+        private void cacheResult(Item item, Identifier res) {
             if (item == null || res == null)
                 return;
             this.recipeCache.add(Pair.of(item, res));
         }
 
-        private @Nullable ResourceLocation getCachedRecipeLoc(Item item) {
+        private @Nullable Identifier getCachedRecipeLoc(Item item) {
             for (var pair : this.recipeCache) {
                 if (pair.getLeft() == item)
                     return pair.getRight();
