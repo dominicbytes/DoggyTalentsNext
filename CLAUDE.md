@@ -1,7 +1,7 @@
 # DoggyTalentsNext Migration Plan: Minecraft 1.21 → 26.1.2
 
-**Status**: Infrastructure Updated, Code Migration Pending
-**Date**: 2025-04-15
+**Status**: Mod Loading — Runtime Warnings Remaining
+**Date**: 2026-04-25
 **Target**: NeoForge 26.1.2.x for Minecraft 26.1
 
 ## Executive Summary
@@ -13,12 +13,34 @@ This document outlines the complete migration strategy for DoggyTalentsNext from
 ✅ **Phase 1 - Build System** (COMPLETED)
 - ✅ Gradle upgraded to 9.1.0
 - ✅ ModDevGradle 2.0.141 configured
-- ✅ NeoForge version set to 26.1.1.15-beta (latest available)
+- ✅ NeoForge version updated to 26.1.2.11-beta
 - ✅ Java 25
+- ✅ pack_format updated to 84 with min/max fields
+- ✅ Block/item registration migrated to `DeferredRegister.createBlocks/createItems()`
+
+✅ **Phase 3 - GUI Rendering** (COMPLETED)
+- ✅ All RenderLayer subclasses: `render()` → `submit()`, typed on `DogRenderState`
+- ✅ Entity renderers updated: `cameraOrientation()` → `camera.rotation()`, removed `getTextureLocation` overrides
+- ✅ Model files: `copyFrom()` → `loadPose/storePose()`, removed illegal `renderToBuffer` overrides
+- ✅ `DTNModelLoader`: `SimpleJsonResourceReloadListener` → `SimplePreparableReloadListener`
+- ✅ `DTNAnimationCodec`: `Keyframe.target()` → `preTarget()`
+- ✅ Screen widgets: `renderWidget` → `extractWidgetRenderState/extractContents`, `onPress()` → `onPress(InputWithModifiers)`
+- ✅ Blit calls: old 7-arg → new 10-arg with `RenderPipelines.GUI_TEXTURED`
+- ✅ `DogMouthItemRenderer`: `ItemInHandRenderer` → `ItemModelResolver/ItemStackRenderState`
+- ✅ `FoodBowlScreen`: `imageHeight` final, `extractContents/extractLabels` signatures fixed
+
+✅ **Phase 6 - Attribute Modifiers** (ALREADY COMPLIANT — no changes needed)
+
+⚠️ **Remaining Runtime Warnings** (see Known Issues below)
+- `@OnlyIn` annotation member-stripping no longer active in NeoForge 26.1.2
 
 ---
 
-## Phase 2: Inventory System Migration (HIGH PRIORITY)
+## Remaining Work
+
+---
+
+## Phase 2: Inventory System Migration (LOWER PRIORITY — ItemStackHandler still works)
 
 ### 2.1 Replace ItemStackHandler with ResourceHandler
 
@@ -656,15 +678,7 @@ Create tests for:
 - [ ] `DoggyToolsItemHandler.java`
 
 ### Screen/GUI (28 files)
-- [ ] `DogInventoriesScreen.java`
-- [ ] `DogArmorScreen.java`
-- [ ] `DogNewInfoScreen.java`
-- [ ] `PackPuppyScreen.java`
-- [ ] `TreatBagScreen.java`
-- [ ] `WhistleScreen.java`
-- [ ] `CanineTrackerScreen.java`
-- [ ] `ConductingBoneScreen.java`
-- [ ] ... (20 more)
+- [x] All screens migrated (commit c848bd73)
 
 ### Networking (73+ files)
 - [ ] Delete `PacketHandler.java`
@@ -682,11 +696,26 @@ Create tests for:
 
 ## Known Issues & Blockers
 
-### 3. API Coverage Gaps
+### 1. @OnlyIn Annotation Warnings (ACTIVE)
 
-The following NeoForge 26.1.2 APIs are mentioned in the report but not fully documented:
+NeoForge 26.1.2 no longer strips members annotated with `@OnlyIn` at runtime. The following usages log ERROR-level warnings on startup:
+
+- `doggytalents.DoggyTalentsNext#clientSetup` (method)
+- `doggytalents.client.block.model.DogBedModel` (class)
+- `doggytalents.client.block.model.DogBedItemOverride` (class)
+- `doggytalents.client.entity.model.animation.DogKeyframeAnimations` (class)
+- `doggytalents.common.block.DogBedBlock#addBedTooltip` (method)
+- `doggytalents.common.entity.Dog#getInterestedAngle` (method)
+- `doggytalents.common.entity.Dog#getShakeAngle` (method)
+- `doggytalents.common.entity.Dog#getShadingWhileWet` (method)
+- `doggytalents.common.item.TreatBagItem#appendHoverText` (method)
+
+**Fix**: Remove `@OnlyIn(Dist.CLIENT)` from each location. Client-only methods on common classes should instead use `DistExecutor` or be moved to a `@EventBusSubscriber(value = Dist.CLIENT)` class. Client-only classes in `doggytalents.client.*` do not need the annotation at all since they are already in a client-only package.
+
+### 2. API Coverage Gaps
+
+The following NeoForge 26.1.2 APIs are mentioned in the migration plan but not yet confirmed:
 - `MutableQuad` usage for BakedQuad manipulation
-- `GuiGraphicsExtractor` detailed API
 - `SubmitNodeCollector` for render state submission
 
 **Mitigation**: Consult NeoForge docs when stable release is available.
@@ -696,34 +725,25 @@ The following NeoForge 26.1.2 APIs are mentioned in the report but not fully doc
 ## Timeline Estimate
 
 
-| Phase | Complexity | Estimated Time |
-|-------|------------|----------------|
-| Phase 1: Build System | Low | ✅ DONE (30 min) |
-| Phase 2: Inventory | High | 8-12 hours |
-| Phase 3: GUI Rendering | Medium-High | 4-6 hours |
-| Phase 4: Networking | High | 10-15 hours |
-| Phase 5: Data Components | Medium | 3-5 hours |
-| Phase 6: Attribute Modifiers | None | ✅ DONE (0 hours) |
-| Phase 7: Codec Updates | Low | 1-2 hours |
-| Phase 8: Testing | Ongoing | 5-10 hours |
-
-**Recommended Schedule**:
-- **Week 1**: Phases 2-3 (Inventory + GUI)
-- **Week 2**: Phase 4 (Networking)
-- **Week 3**: Phases 5-7 (Data Components + Polish)
-- **Week 4**: Phase 8 (Testing + Bugfixes)
+| Phase | Complexity | Status |
+|-------|------------|--------|
+| Phase 1: Build System | Low | ✅ DONE |
+| Phase 2: Inventory | High | Working (ItemStackHandler still valid) |
+| Phase 3: GUI Rendering | Medium-High | ✅ DONE |
+| Phase 4: Networking | High | Compatibility wrapper in place — cleanup pending |
+| Phase 5: Data Components | Medium | Pending |
+| Phase 6: Attribute Modifiers | None | ✅ DONE |
+| Phase 7: Codec Updates | Low | Pending |
+| Phase 8: Testing | Ongoing | Pending |
 
 ---
 
 ## Next Steps
 
-1. **Create Feature Branch**
-   ```bash
-   git checkout -b feature/mc-26.1-migration
-   ```
-
-2. **Begin Phase 2**
-   Once dependencies resolve, start with `DogArmorItemHandler.java`
+1. **Remove `@OnlyIn` annotations** — highest-priority cleanup; causes ERROR log spam on every startup.
+2. **Phase 4 Networking** — remove `PacketHandler`/`DTNNetworkHandler` wrappers; convert packets to `CustomPacketPayload` records.
+3. **Phase 5 Data Components** — replace NBT usage in whistle, accessory, and artifact items.
+4. **Phase 7 Codec Updates** — replace any remaining `ExtraCodecs` calls.
 
 
 ---
@@ -737,7 +757,6 @@ The following NeoForge 26.1.2 APIs are mentioned in the report but not fully doc
 
 ---
 
-**Document Version**: 1.0
-**Last Updated**: 2025-04-15
-**Author**: Migration Analysis Tool
-**Status**: Ready for execution pending ecosystem stability
+**Document Version**: 1.2
+**Last Updated**: 2026-04-25
+**Status**: Mod loading on NeoForge 26.1.2.11-beta; @OnlyIn warnings pending cleanup
