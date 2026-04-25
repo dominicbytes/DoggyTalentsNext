@@ -38,7 +38,7 @@ public class AllStandSwitchModePacket implements IPacket<AllStandSwitchModeData>
             //var side = ctx.get().getDirection().getReceptionSide();
             if (!ctx.get().isServerRecipent()) return;
             var sender = ctx.get().getSender();
-            if (sender.getCooldowns().isOnCooldown(DoggyItems.WHISTLE.get())) return;
+            if (sender.getCooldowns().isOnCooldown(new net.minecraft.world.item.ItemStack(DoggyItems.WHISTLE.get()))) return;
 
             var target_mode = data.mode;
             if (target_mode.canWander())

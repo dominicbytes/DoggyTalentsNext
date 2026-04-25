@@ -154,7 +154,7 @@ public class DogBathBlockEntity extends BlockEntity {
             ++animTick;
             if (5 <= animTick && animTick <= 35) {
                 if (animTick % 4 == 0)
-                    this.dog.playSound(SoundEvents.GENERIC_DRINK.value().value(),
+                    this.dog.playSound(SoundEvents.GENERIC_DRINK.value(),
                         0.2F, dog.level().getRandom().nextFloat() * 0.1F + 0.9F); 
             }
             if (animTick == 50) {

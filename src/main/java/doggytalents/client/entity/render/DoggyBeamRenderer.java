@@ -55,16 +55,15 @@ public class DoggyBeamRenderer<T extends Entity> extends EntityRenderer<T, Doggy
         this.itemModelResolver.updateForNonLiving(state.item, new ItemStack(Items.SNOWBALL), ItemDisplayContext.GROUND, entity);
     }
 
-    @Override
     public Identifier getTextureLocation(DoggyBeamRenderState state) {
-        return InventoryMenu.BLOCK_ATLAS;
+        return net.minecraft.client.renderer.texture.TextureAtlas.LOCATION_BLOCKS;
     }
 
     @Override
     public void submit(DoggyBeamRenderState state, PoseStack stack, SubmitNodeCollector collector, CameraRenderState cameraState) {
         stack.pushPose();
         stack.scale(this.scale, this.scale, this.scale);
-        stack.mulPose(this.entityRenderDispatcher.cameraOrientation());
+        stack.mulPose(cameraState.orientation);
         stack.mulPose(Axis.YP.rotationDegrees(180.0F));
         state.item.submit(stack, collector, state.lightCoords, OverlayTexture.NO_OVERLAY, -1);
         stack.popPose();

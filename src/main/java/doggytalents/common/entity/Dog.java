@@ -382,7 +382,7 @@ public class Dog extends AbstractDog {
     @Override
     public void playStepSound(BlockPos pos, BlockState blockIn) {
         var vol = this.isDogSilent() ? 0.01f : 0.15f;
-        this.playSound(SoundEvents.WOLF_STEP.value().value(), vol, 1.0F);
+        this.playSound(SoundEvents.WOLF_STEP.value(), vol, 1.0F);
     }
 
     @Override
@@ -961,7 +961,7 @@ public class Dog extends AbstractDog {
         //         updateWanderRestState();
         //         boolean invalidated = invalidateWanderCenter(25*25);
         //         if (invalidated) {
-        //             this.restrictTo(this.blockPosition(), 12);
+        //             this.setHomeTo(this.blockPosition(), (int)(12));
         //         }
         //     }
         // }

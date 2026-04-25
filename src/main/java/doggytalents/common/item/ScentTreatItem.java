@@ -83,7 +83,7 @@ public class ScentTreatItem extends Item {
     public void appendHoverText(ItemStack stack, Item.TooltipContext context, net.minecraft.world.item.component.TooltipDisplay tooltipDisplay, java.util.function.Consumer<net.minecraft.network.chat.Component> components,
             TooltipFlag flags) {
         var desc_id = this.getDescriptionId() + ".description";
-        components.add(Component.translatable(desc_id).withStyle(
+        components.accept(Component.translatable(desc_id).withStyle(
             Style.EMPTY.withItalic(true)
         ));
         var tag = ItemUtil.getTag(stack);
@@ -92,9 +92,9 @@ public class ScentTreatItem extends Item {
         var block = NBTUtil.getRegistryValue(tag, SCENT_BLOCK_ID, BuiltInRegistries.BLOCK);
         if (block == null)
             return;
-        components.add(Component.translatable(this.getDescriptionId() + ".scented_block")
+        components.accept(Component.translatable(this.getDescriptionId() + ".scented_block")
             .withStyle(Style.EMPTY.withColor(0xffffea2e).withBold(true)));
-        components.add(
+        components.accept(
             Component.translatable(block.asItem().getDescriptionId()).withStyle(
                 Style.EMPTY.withItalic(true).withColor(0xff6fe86b)
             )

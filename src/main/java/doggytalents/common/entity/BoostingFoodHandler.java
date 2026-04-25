@@ -31,7 +31,7 @@ public class BoostingFoodHandler implements IDogFoodHandler  {
             
             var item = stack.getItem();
 
-            var props = stack.getFoodProperties(dog);
+            var props = stack.get(net.minecraft.core.component.DataComponents.FOOD);
             
             if (props == null) return InteractionResult.FAIL;
 
@@ -40,11 +40,7 @@ public class BoostingFoodHandler implements IDogFoodHandler  {
             dog.addHunger(heal);
             dog.consumeItemFromStack(entityIn, stack);
 
-            for(var pair : props.effects()) {
-                if (dog.getRandom().nextFloat() < pair.probability()) {
-                   dog.addEffect(pair.effect());
-                }
-             }
+            // TODO: apply food effects via DataComponents.CONSUMABLE in 26.x
 
             if (dog.level() instanceof ServerLevel) {
                 ParticlePackets.DogEatingParticlePacket.sendDogEatingParticlePacketToNearby(

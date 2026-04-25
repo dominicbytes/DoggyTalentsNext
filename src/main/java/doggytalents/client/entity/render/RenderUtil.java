@@ -31,7 +31,7 @@ public class RenderUtil {
     public static void renderLabelWithScale(boolean flag, EntityRenderer<?, ?> renderer, EntityRenderDispatcher entityRenderDispatcher, Component text, PoseStack stack, MultiBufferSource buffer, int packedLightIn, float scale, float yOffset, boolean renderBkg) {
         stack.pushPose();
         stack.translate(0.0D, yOffset, 0.0D);
-        stack.mulPose(entityRenderDispatcher.cameraOrientation());
+        stack.mulPose(entityRenderDispatcher.camera.rotation());
         stack.scale(-scale, -scale, scale);
         var matrix4f = stack.last().pose();
         float f1 = renderBkg ? Minecraft.getInstance().options.getBackgroundOpacity(0.25F) : 0;

@@ -7,6 +7,7 @@ import net.minecraft.core.Registry;
 import net.minecraft.core.UUIDUtil;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
+import net.minecraft.nbt.NbtOps;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.ComponentSerialization;
 import net.minecraft.resources.Identifier;
@@ -56,7 +57,7 @@ public class NBTUtil {
     }
 
     public static UUID getOldUniqueId(CompoundTag compound, String key) {
-        return new UUID(compound.getLong(key + "Most"), compound.getLong(key + "Least"));
+        return new UUID(compound.getLongOr(key + "Most", 0L), compound.getLongOr(key + "Least", 0L));
     }
 
     public static boolean hasOldUniqueId(CompoundTag compound, String key) {
@@ -77,7 +78,7 @@ public class NBTUtil {
     @Nullable
     public static Identifier getResourceLocation(CompoundTag compound, String key) {
         if (compound.contains(key)) {
-            return Identifier.tryParse(compound.getString(key));
+            return Identifier.tryParse(compound.getStringOr(key, ""));
         }
 
         return null;
@@ -109,9 +110,9 @@ public class NBTUtil {
 
     @Nullable
     public static Component getTextComponent(CompoundTag compound, String key) {
-        
-        if (compound.contains(key)) { 
-            return parseComponentJsonStr(compound.getString(key));
+
+        if (compound.contains(key)) {
+            return parseComponentJsonStr(compound.getStringOr(key, ""));
         }
 
         return null;
@@ -153,7 +154,7 @@ public class NBTUtil {
         Identifier rl = NBTUtil.getResourceLocation(compound, key);
         if (rl != null) {
             if (registry.containsKey(rl)) {
-                return registry.get(rl);
+                return registry.get(rl).map(net.minecraft.core.Holder.Reference::value).orElse(null);
             } else {
                 DoggyTalentsNext.LOGGER.warn("Unable to load registry value in registry {} with resource location {}", registry.key(), rl);
             }
@@ -223,16 +224,20 @@ public class NBTUtil {
 
     public static void writeItemStack(HolderLookup.Provider prov, CompoundTag compound, String key, ItemStack stackIn) {
         if (!stackIn.isEmpty()) {
-            compound.put(key, stackIn.save(prov, new CompoundTag()));
+            ItemStack.CODEC.encodeStart(prov.createSerializationContext(NbtOps.INSTANCE), stackIn)
+                .ifSuccess(tag -> compound.put(key, tag));
         }
     }
 
     @Nonnull
     public static ItemStack readItemStack(HolderLookup.Provider prov, CompoundTag compound, String key) {
         if (compound.contains(key)) {
-            return ItemStack.parse(prov, compound.getCompound(key)).orElse(ItemStack.EMPTY);
+            var tag = compound.get(key);
+            if (tag != null) {
+                return ItemStack.CODEC.parse(prov.createSerializationContext(NbtOps.INSTANCE), tag)
+                    .getOrThrow(msg -> new RuntimeException(msg));
+            }
         }
-
         return ItemStack.EMPTY;
     }
 }

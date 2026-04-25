@@ -19,6 +19,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.stats.StatFormatter;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
+import net.minecraft.client.input.KeyEvent;
 
 public class SODTunningScreen extends Screen {
 
@@ -205,25 +206,25 @@ public class SODTunningScreen extends Screen {
     public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float pticks) {
         graphics.fill(0, 0, this.width, this.height, 0x40000000);
         super.extractRenderState(graphics, mouseX, mouseY, pticks);
-        this.sampleGraph.render(graphics, pticks);
+        this.sampleGraph.extractRenderState(graphics, pticks);
     }
 
     @Override
-    public boolean keyPressed(int keyCode, int scanCode, int modifier) {
+    public boolean keyPressed(KeyEvent event) {
         var sneakKey = this.minecraft.options.keyShift;
-        if (keyCode == sneakKey.getKey().getValue()) {
+        if (event.key() == sneakKey.getKey().getValue()) {
             this.simpleMode = true;
         }
-        return super.keyPressed(keyCode, scanCode, modifier);
+        return super.keyPressed(event);
     }
 
     @Override
-    public boolean keyReleased(int keyCode, int scanCode, int modifier) {
+    public boolean keyReleased(KeyEvent event) {
         var sneakKey = this.minecraft.options.keyShift;
-        if (keyCode == sneakKey.getKey().getValue()) {
+        if (event.key() == sneakKey.getKey().getValue()) {
             this.simpleMode = false;
         }
-        return super.keyReleased(keyCode, scanCode, modifier);
+        return super.keyReleased(event);
     }
 
     private static class TunningEntry {

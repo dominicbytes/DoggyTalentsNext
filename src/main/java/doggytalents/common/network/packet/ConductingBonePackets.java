@@ -155,7 +155,7 @@ public class ConductingBonePackets {
                     if (item != DoggyItems.CONDUCTING_BONE.get()) return;
 
                     //And is not on cooldown
-                    if (sender.getCooldowns().isOnCooldown(DoggyItems.CONDUCTING_BONE.get())) return;
+                    if (sender.getCooldowns().isOnCooldown(new net.minecraft.world.item.ItemStack(DoggyItems.CONDUCTING_BONE.get()))) return;
 
                     var uuid = data.dogUUID;
                     if (uuid == null) return; 

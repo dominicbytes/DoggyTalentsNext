@@ -96,12 +96,14 @@ public class MobRetrieverTalent extends TalentInstance {
             return false;
         if (target instanceof Enemy)
             return false;
-        if (target.getType().is(DoggyTags.MOB_RETRIEVER_MUST_IGNORE))
+        if (target.getType().builtInRegistryHolder().is(DoggyTags.MOB_RETRIEVER_MUST_IGNORE))
             return false;
-        if (target instanceof TamableAnimal otherDog 
-            && otherDog.getOwnerUUID() != null
-            && ObjectUtils.notEqual(otherDog.getOwnerUUID(), dog.getOwnerUUID()))
-            return false;
+        if (target instanceof TamableAnimal otherDog) {
+            var otherRef = otherDog.getOwnerReference();
+            var otherOwnerUUID = otherRef != null ? otherRef.getUUID() : null;
+            if (otherOwnerUUID != null && ObjectUtils.notEqual(otherOwnerUUID, dog.getOwnerUUID()))
+                return false;
+        }
         if (!canLevelRideTarget(dog, target))
             return false;
         return true;
@@ -127,12 +129,14 @@ public class MobRetrieverTalent extends TalentInstance {
             return false;
         if (target instanceof Enemy)
             return false;
-        if (target.getType().is(DoggyTags.MOB_RETRIEVER_MUST_IGNORE))
+        if (target.getType().builtInRegistryHolder().is(DoggyTags.MOB_RETRIEVER_MUST_IGNORE))
             return false;
-        if (target instanceof TamableAnimal otherDog 
-            && dog.getOwnerUUID() != null
-            && ObjectUtils.notEqual(otherDog.getOwnerUUID(), dog.getOwnerUUID()))
-            return false;
+        if (target instanceof TamableAnimal otherDog && dog.getOwnerUUID() != null) {
+            var otherRef = otherDog.getOwnerReference();
+            var otherOwnerUUID = otherRef != null ? otherRef.getUUID() : null;
+            if (ObjectUtils.notEqual(otherOwnerUUID, dog.getOwnerUUID()))
+                return false;
+        }
         if (!canLevelRideTarget(dog, target))
             return false;
         return true;

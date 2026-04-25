@@ -1,7 +1,6 @@
 package doggytalents.client.entity.render.layer.accessory;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.VertexConsumer;
 
 import doggytalents.api.inferface.IColoredObject;
 import doggytalents.api.registry.Accessory;
@@ -12,26 +11,24 @@ import doggytalents.client.entity.model.DogFrontLegsSeperate;
 import doggytalents.client.entity.model.DogModelRegistry;
 import doggytalents.client.entity.model.SyncedAccessoryModel;
 import doggytalents.client.entity.model.dog.DogModel;
+import doggytalents.client.entity.render.DogRenderState;
 import doggytalents.common.config.ConfigHandler;
-import doggytalents.common.entity.Dog;
 import net.minecraft.client.model.EntityModel;
-import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.rendertype.RenderType;
+import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
-import net.minecraft.client.renderer.entity.LivingEntityRenderer;
 import net.minecraft.client.renderer.entity.RenderLayerParent;
 import net.minecraft.client.renderer.entity.layers.RenderLayer;
+import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.ARGB;
-import net.minecraft.world.entity.LivingEntity;
 
-public class DefaultAccessoryRenderer extends RenderLayer<Dog, DogModel> {
+public class DefaultAccessoryRenderer extends RenderLayer<DogRenderState, DogModel> {
 
     private DogModel defaultModel;
     private DogFrontLegsSeperate hindLegDiffTextModel;
 
-    public DefaultAccessoryRenderer(RenderLayerParent parentRenderer, EntityRendererProvider.Context ctx) {
+    public DefaultAccessoryRenderer(RenderLayerParent<DogRenderState, DogModel> parentRenderer, EntityRendererProvider.Context ctx) {
         super(parentRenderer);
 
         this.defaultModel = DogModelRegistry.getDogModelHolder("default").getValue();
@@ -39,9 +36,9 @@ public class DefaultAccessoryRenderer extends RenderLayer<Dog, DogModel> {
     }
 
     @Override
-    public void render(PoseStack poseStack, MultiBufferSource buffer, int packedLight, Dog dog, float limbSwing, float limbSwingAmount, float partialTicks, float ageInTicks, float relativeHeadYRot, float headPitch) {
-        // Only show armour if dog is tamed or visible
-        if (!dog.isTame() || dog.isInvisible()) {
+    public void submit(PoseStack poseStack, SubmitNodeCollector submitNodeCollector, int packedLight, DogRenderState renderState, float yRot, float xRot) {
+        var dog = renderState.dog;
+        if (dog == null || !dog.isTame() || renderState.isInvisible) {
             return;
         }
 
@@ -56,16 +53,17 @@ public class DefaultAccessoryRenderer extends RenderLayer<Dog, DogModel> {
             var accessory = accessoryInst.getAccessory();
             if (!accessory.shouldRender())
                 continue;
-            if (!isOverlay(accessory)) continue;               
+            if (!isOverlay(accessory)) continue;
             if (accessory.hasHindLegDiffTex()) {
-                this.renderHindLegDifferentAccessory(poseStack, buffer, packedLight, dog, limbSwing, limbSwingAmount, partialTicks, ageInTicks, relativeHeadYRot, headPitch, accessoryInst);
+                this.renderHindLegDifferentAccessory(poseStack, submitNodeCollector, packedLight, renderState, accessoryInst);
             } else {
-                this.renderNormalAccessory(poseStack, buffer, packedLight, dog, limbSwing, limbSwingAmount, partialTicks, ageInTicks, relativeHeadYRot, headPitch, accessoryInst);
+                this.renderNormalAccessory(poseStack, submitNodeCollector, packedLight, renderState, accessoryInst);
             }
         }
     }
 
-    private void renderNormalAccessory(PoseStack poseStack, MultiBufferSource buffer, int packedLight, Dog dog, float limbSwing, float limbSwingAmount, float partialTicks, float ageInTicks, float relativeHeadYRot, float headPitch, AccessoryInstance accessoryInst) {
+    private void renderNormalAccessory(PoseStack poseStack, SubmitNodeCollector collector, int packedLight, DogRenderState renderState, AccessoryInstance accessoryInst) {
+        var dog = renderState.dog;
         var parentModel = this.getParentModel();
 
         DogModel dogModel;
@@ -84,20 +82,21 @@ public class DefaultAccessoryRenderer extends RenderLayer<Dog, DogModel> {
             dogModel.tail.visible = false;
         if (accessoryInst instanceof IColoredObject coloredObject) {
             float[] color = coloredObject.getColor();
-            if (isTranslucent) 
-                renderTranslucentModel(dogModel, texture_rl, poseStack, buffer, packedLight, dog, color[0], color[1], color[2], 1);
-            else 
-                RenderLayer.renderColoredCutoutModel(dogModel, texture_rl, poseStack, buffer, packedLight, dog, ARGB.colorFromFloat(1, color[0], color[1], color[2]));
+            if (isTranslucent)
+                renderTranslucentModel(dogModel, texture_rl, poseStack, collector, packedLight, renderState, color[0], color[1], color[2], 1);
+            else
+                RenderLayer.renderColoredCutoutModel(dogModel, texture_rl, poseStack, collector, packedLight, renderState, OverlayTexture.NO_OVERLAY, ARGB.colorFromFloat(1, color[0], color[1], color[2]));
         } else {
             if (isTranslucent)
-                renderTranslucentModel(dogModel, texture_rl, poseStack, buffer, packedLight, dog, 1.0F, 1.0F, 1.0F, 1);
+                renderTranslucentModel(dogModel, texture_rl, poseStack, collector, packedLight, renderState, 1.0F, 1.0F, 1.0F, 1);
             else
-                RenderLayer.renderColoredCutoutModel(dogModel, texture_rl, poseStack, buffer, packedLight, dog, 0xffffffff);
+                RenderLayer.renderColoredCutoutModel(dogModel, texture_rl, poseStack, collector, packedLight, renderState, OverlayTexture.NO_OVERLAY, 0xffffffff);
         }
         dogModel.tail.visible = tailVisible0;
     }
 
-    private void renderHindLegDifferentAccessory(PoseStack poseStack, MultiBufferSource buffer, int packedLight, Dog dog, float limbSwing, float limbSwingAmount, float partialTicks, float ageInTicks, float relativeHeadYRot, float headPitch, AccessoryInstance accessoryInst) {
+    private void renderHindLegDifferentAccessory(PoseStack poseStack, SubmitNodeCollector collector, int packedLight, DogRenderState renderState, AccessoryInstance accessoryInst) {
+        var dog = renderState.dog;
         var parentModel = this.getParentModel();
 
         DogModel dogModel;
@@ -119,20 +118,20 @@ public class DefaultAccessoryRenderer extends RenderLayer<Dog, DogModel> {
 
         //Render the parent model overlay without the front legs.
         boolean rightFrontLegVisible0 = dogModel.legFrontRight.visible;
-        boolean leftFrontLegVisible0 = dogModel.legFrontLeft.visible; 
+        boolean leftFrontLegVisible0 = dogModel.legFrontLeft.visible;
         dogModel.legFrontLeft.visible = false;
         dogModel.legFrontRight.visible = false;
         if (accessoryInst instanceof IColoredObject coloredObject) {
             float[] color = coloredObject.getColor();
-            if (isTranslucent) 
-                renderTranslucentModel(dogModel, texture_rl, poseStack, buffer, packedLight, dog, color[0], color[1], color[2], 1);
-            else 
-                RenderLayer.renderColoredCutoutModel(dogModel, texture_rl, poseStack, buffer, packedLight, dog, ARGB.colorFromFloat(1, color[0], color[1], color[2]));
+            if (isTranslucent)
+                renderTranslucentModel(dogModel, texture_rl, poseStack, collector, packedLight, renderState, color[0], color[1], color[2], 1);
+            else
+                RenderLayer.renderColoredCutoutModel(dogModel, texture_rl, poseStack, collector, packedLight, renderState, OverlayTexture.NO_OVERLAY, ARGB.colorFromFloat(1, color[0], color[1], color[2]));
         } else {
             if (isTranslucent)
-                renderTranslucentModel(dogModel, texture_rl, poseStack, buffer, packedLight, dog, 1.0F, 1.0F, 1.0F, 1);
+                renderTranslucentModel(dogModel, texture_rl, poseStack, collector, packedLight, renderState, 1.0F, 1.0F, 1.0F, 1);
             else
-                RenderLayer.renderColoredCutoutModel(dogModel, texture_rl, poseStack, buffer, packedLight, dog, 0xffffffff);
+                RenderLayer.renderColoredCutoutModel(dogModel, texture_rl, poseStack, collector, packedLight, renderState, OverlayTexture.NO_OVERLAY, 0xffffffff);
         }
         dogModel.tail.visible = tailVisible0;
         dogModel.legFrontRight.visible = rightFrontLegVisible0;
@@ -143,15 +142,15 @@ public class DefaultAccessoryRenderer extends RenderLayer<Dog, DogModel> {
         hindLegDiffTextModel.sync(dogModel);
         if (accessoryInst instanceof IColoredObject coloredObject) {
             float[] color = coloredObject.getColor();
-            if (isTranslucent) 
-                renderTranslucentModel(hindLegDiffTextModel, texture_rl, poseStack, buffer, packedLight, dog, color[0], color[1], color[2], 1);
-            else 
-                RenderLayer.renderColoredCutoutModel(hindLegDiffTextModel, texture_rl, poseStack, buffer, packedLight, dog, ARGB.colorFromFloat(1, color[0], color[1], color[2]));
+            if (isTranslucent)
+                renderTranslucentModel(hindLegDiffTextModel, texture_rl, poseStack, collector, packedLight, renderState, color[0], color[1], color[2], 1);
+            else
+                RenderLayer.renderColoredCutoutModel(hindLegDiffTextModel, texture_rl, poseStack, collector, packedLight, renderState, OverlayTexture.NO_OVERLAY, ARGB.colorFromFloat(1, color[0], color[1], color[2]));
         } else {
             if (isTranslucent)
-                renderTranslucentModel(hindLegDiffTextModel, texture_rl, poseStack, buffer, packedLight, dog, 1.0F, 1.0F, 1.0F, 1);
+                renderTranslucentModel(hindLegDiffTextModel, texture_rl, poseStack, collector, packedLight, renderState, 1.0F, 1.0F, 1.0F, 1);
             else
-                RenderLayer.renderColoredCutoutModel(hindLegDiffTextModel, texture_rl, poseStack, buffer, packedLight, dog, 0xffffffff);
+                RenderLayer.renderColoredCutoutModel(hindLegDiffTextModel, texture_rl, poseStack, collector, packedLight, renderState, OverlayTexture.NO_OVERLAY, 0xffffffff);
         }
     }
 
@@ -169,8 +168,11 @@ public class DefaultAccessoryRenderer extends RenderLayer<Dog, DogModel> {
         return accessory.renderTranslucent();
     }
 
-    public static void renderTranslucentModel(SyncedAccessoryModel p_117377_, Identifier p_117378_, PoseStack p_117379_, MultiBufferSource p_117380_, int p_117381_, Dog p_117382_, float p_117383_, float p_117384_, float p_117385_, float opascity) {
-        VertexConsumer vertexconsumer = p_117380_.getBuffer(RenderTypes.entityTranslucent(p_117378_));
-        p_117377_.renderAccessoryToBuffer(p_117379_, vertexconsumer, p_117381_, net.minecraft.client.renderer.texture.OverlayTexture.NO_OVERLAY, ARGB.colorFromFloat(opascity, p_117383_, p_117384_, p_117385_));
+    public static void renderTranslucentModel(EntityModel<DogRenderState> model, Identifier texture,
+            PoseStack poseStack, SubmitNodeCollector collector, int light,
+            DogRenderState renderState, float r, float g, float b, float opacity) {
+        collector.submitModel(model, renderState, poseStack,
+            RenderTypes.entityTranslucent(texture), light, OverlayTexture.NO_OVERLAY,
+            ARGB.colorFromFloat(opacity, r, g, b), null);
     }
 }

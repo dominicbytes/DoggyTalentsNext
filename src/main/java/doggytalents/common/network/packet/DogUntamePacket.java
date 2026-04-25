@@ -26,7 +26,7 @@ public class DogUntamePacket extends DogPacket<DogUntameData> {
         var sender = ctx.get().getSender();
         var stack = sender.getMainHandItem();
         if (stack.getItem() != DoggyItems.AMNESIA_BONE.get()) return;
-        if (sender.getCooldowns().isOnCooldown(DoggyItems.AMNESIA_BONE.get())) return;
+        if (sender.getCooldowns().isOnCooldown(new net.minecraft.world.item.ItemStack(DoggyItems.AMNESIA_BONE.get()))) return;
         var ownerUUID = dog.getOwnerUUID();
         if (ownerUUID == null) return;
         if (!ownerUUID.equals(sender.getUUID())) return;

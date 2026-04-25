@@ -36,24 +36,7 @@ public class DTItemTagsProvider extends ItemTagsProvider {
         createTag(DoggyTags.BREEDING_ITEMS, DoggyItems.BREEDING_BONE);
         createTag(DoggyTags.PACK_PUPPY_BLACKLIST, DoggyItems.THROW_BONE, DoggyItems.THROW_BONE_WET, DoggyItems.THROW_STICK, DoggyItems.THROW_STICK_WET);
         createTag(DoggyTags.TREATS, DoggyItems.TRAINING_TREAT, DoggyItems.SUPER_TREAT, DoggyItems.MASTER_TREAT, DoggyItems.KAMI_TREAT);
-        tag(ItemTags.DYEABLE).add(
-            DoggyItems.WOOL_COLLAR.get(),
-            DoggyItems.WOOL_COLLAR_THICC.get(),
-            DoggyItems.CAPE_COLOURED.get(),
-            DoggyItems.BOWTIE.get(),
-            DoggyItems.WIG.get(),
-            DoggyItems.FRISBEE.get(),
-            DoggyItems.BAKER_HAT.get(),
-            DoggyItems.CHEF_HAT.get(),
-            DoggyItems.LAB_COAT.get(),
-            DoggyItems.FRISBEE_WET.get(),
-            DoggyItems.FLYING_CAPE.get(),
-            DoggyItems.CERE_GARB.get(),
-            DoggyItems.DOG_PLUSHIE_TOY.get(),
-            DoggyItems.ANGEL_WINGS.get(),
-            DoggyItems.MIDI_KEYBOARD.get(),
-            DoggyBlocks.DOG_BATH.get().asItem()
-        );
+        // ItemTags.DYEABLE removed in 26.x
     }
 
     @SafeVarargs

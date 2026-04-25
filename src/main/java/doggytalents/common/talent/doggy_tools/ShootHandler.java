@@ -341,7 +341,7 @@ public interface ShootHandler {
             }
             if (item_list.isEmpty()) 
                 return;
-            crossbow_stack.set(DataComponents.CHARGED_PROJECTILES, ChargedProjectiles.of(item_list));
+            crossbow_stack.set(DataComponents.CHARGED_PROJECTILES, ChargedProjectiles.ofNonEmpty(item_list));
             
             if (inv != null) {
                 arrow_stack = arrow_stack.copy();
@@ -350,7 +350,7 @@ public interface ShootHandler {
             }
 
 
-            dog.playSound(SoundEvents.CROSSBOW_LOADING_END.value().value(), 1.0F,
+            dog.playSound(SoundEvents.CROSSBOW_LOADING_END.value(), 1.0F,
                 1.0F / (dog.getRandom().nextFloat() * 0.5F + 1.0F) + 0.2F);
         }
 

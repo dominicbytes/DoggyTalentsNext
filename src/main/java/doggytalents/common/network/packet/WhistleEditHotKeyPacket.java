@@ -39,7 +39,7 @@ public class WhistleEditHotKeyPacket implements IPacket<WhisltleEditHotKeyData> 
                 tag.putIntArray("hotkey_modes", new int[]{-1, -1, -1, -1});
                 ItemUtil.putTag(stack, tag);
             }
-            var keyarr = tag.getIntArray("hotkey_modes");
+            var keyarr = tag.getIntArray("hotkey_modes").orElse(null);
             if (keyarr == null) return;
             if (keyarr.length != 4) {
                 tag.putIntArray("hotkey_modes", new int[]{-1, -1, -1, -1});

@@ -405,7 +405,7 @@ public class SnifferDogTalent extends TalentInstance {
         private void notifyOwner(Dog dog, LivingEntity owner, double distanceAwaySqr) {
             var c1 = Component.translatable(getStringStatus(dog, distanceAwaySqr),
                 dog.getName().getString());
-            owner.sendSystemMessage(c1);
+            if (owner instanceof net.minecraft.world.entity.player.Player _p_sys) _p_sys.sendSystemMessage(c1);
             if (distanceAwaySqr <= 8 * 8) {
                 var sound = dog.dogMood.getSnifferDogForteSound();
                 dog.playSound(sound, 1f, 1f);

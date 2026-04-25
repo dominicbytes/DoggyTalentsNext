@@ -71,7 +71,6 @@ public class PianoRenderer extends EntityRenderer<Piano, PianoRenderer.PianoRend
         return Resources.PIANO_GRAND_BLACK;
     }
 
-    @Override
     public Identifier getTextureLocation(PianoRenderState state) {
         return state.texture != null ? state.texture : Resources.PIANO_GRAND_BLACK;
     }

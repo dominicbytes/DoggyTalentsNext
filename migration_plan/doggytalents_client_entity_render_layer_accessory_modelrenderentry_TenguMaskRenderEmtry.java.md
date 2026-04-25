@@ -1,20 +1,44 @@
-# Migration Plan for `  /home/aptd/DoggyTalentsNext/src/main/java/doggytalents/client/entity/render/layer/accessory/modelrenderentry/TenguMaskRenderEmtry.java`
+# Migration Plan for `/home/aptd/DoggyTalentsNext/src/main/java/doggytalents/client/entity/render/layer/accessory/modelrenderentry/TenguMaskRenderEmtry.java`
 
 Total Errors: 4
 
 ## Error: method does not override or implement a method from a supertype
 - **Lines:** 48
-- **Suggested Fix:** The supertype method signature has changed. Check the new parameters or return type in the 26.1.2 source.
+- **Suggested Fix:** The `renderAccessory` method in `TenguMaskRenderEmtry` does not correctly override the method in its superclass `AccessoryModelManager.Entry`. This is due to a type mismatch in the `RenderLayer` parameter.
+
+    **Concrete Change:**
+    Update the `renderAccessory` method signature to match the superclass, using `RenderLayer<DogRenderState, DogModel>`.
+
+    **Example:**
+    ```java
+    // Original:
+    // @Override
+    // public void renderAccessory(RenderLayer<Dog, DogModel> layer, PoseStack poseStack, MultiBufferSource buffer,
+    //         int packedLight, Dog dog, float limbSwing, float limbSwingAmount, float partialTicks, float ageInTicks,
+    //         float relativeHeadYRot, float headPitch, AccessoryInstance inst) {
+    // Proposed:
+    @Override
+    public void renderAccessory(RenderLayer<DogRenderState, DogModel> layer, // Changed type
+            PoseStack poseStack, MultiBufferSource buffer, int packedLight, Dog dog, float limbSwing, float limbSwingAmount, float partialTicks, float ageInTicks,
+            float relativeHeadYRot, float headPitch, AccessoryInstance inst) {
+    ```
 
 ## Error: type argument Dog is not within bounds of type-variable S
 - **Lines:** 49
-- **Suggested Fix:** Analyze the specific error message and compare with 26.1.2 sources.
+- **Suggested Fix:** This error is a direct consequence of the type mismatch in the `RenderLayer` parameter of the `renderAccessory` method. The `RenderLayer` in `AccessoryModelManager.Entry` expects `DogRenderState` as its first type argument.
+
+    **Concrete Change:**
+    This error should be resolved by applying the fix for the `renderAccessory` method signature.
 
 ## Error: name clash: renderAccessory(RenderLayer<Dog,DogModel>,PoseStack,MultiBufferSource,int,Dog,float,float,float,float,float,float,AccessoryInstance) in TenguMaskRenderEmtry and renderAccessory(RenderLayer<DogRenderState,DogModel>,PoseStack,MultiBufferSource,int,Dog,float,float,float,float,float,float,AccessoryInstance) in Entry have the same erasure, yet neither overrides the other
 - **Lines:** 49
-- **Suggested Fix:** Analyze the specific error message and compare with 26.1.2 sources.
+- **Suggested Fix:** This error indicates that the compiler sees two methods with the same "erasure" (i.e., the same signature after type parameters are removed), but they are not considered overrides because their generic type parameters differ. This is a direct consequence of the type mismatch in the `RenderLayer` parameter.
+
+    **Concrete Change:**
+    This error should be resolved by applying the fix for the `renderAccessory` method signature.
 
 ## Error: incompatible types: RenderLayer<Dog,DogModel> cannot be converted to RenderLayer<DogRenderState,DogModel>
 - **Lines:** 56
-- **Suggested Fix:** Type mismatch. Check if generics changed, or if a class needs to implement a new interface (e.g., SyncedDataHolder).
+- **Suggested Fix:** This error is a cascading effect of the `renderAccessory` method signature change. Once the `renderAccessory` method is correctly updated to use `RenderLayer<DogRenderState, DogModel>`, this error should resolve itself.
 
+    **Concrete Change:** This error should be resolved by applying the fix for the `renderAccessory` method signature.

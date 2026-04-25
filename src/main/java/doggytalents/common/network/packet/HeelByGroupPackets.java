@@ -146,7 +146,7 @@ public class HeelByGroupPackets {
                 //var side = ctx.get().getDirection().getReceptionSide();
                 if (!ctx.get().isServerRecipent()) return;
                 var sender = ctx.get().getSender();
-                if (sender.getCooldowns().isOnCooldown(DoggyItems.WHISTLE.get())) return;
+                if (sender.getCooldowns().isOnCooldown(new net.minecraft.world.item.ItemStack(DoggyItems.WHISTLE.get()))) return;
 
                 var dogs = sender.level().getEntitiesOfClass(
                     Dog.class, 

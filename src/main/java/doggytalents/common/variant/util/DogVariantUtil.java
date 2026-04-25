@@ -38,11 +38,12 @@ public class DogVariantUtil {
         if (id == null)
             return getDefault();
         
-        var variant = DoggyRegistries.DOG_VARIANT.get().get(id);
+        var variant = DoggyRegistries.DOG_VARIANT.get().get(id)
+            .map(net.minecraft.core.Holder.Reference::value).orElse(null);
         if (variant == null)
             return getDefault();
 
-        boolean handle_missing = 
+        boolean handle_missing =
             variant == getMissing() && !id.equals(getMissing().id());
         if (handle_missing) {
             missingSetter.accept(id);

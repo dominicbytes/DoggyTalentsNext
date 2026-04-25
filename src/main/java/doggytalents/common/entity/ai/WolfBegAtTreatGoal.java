@@ -33,7 +33,7 @@ public class WolfBegAtTreatGoal extends Goal {
 
    @Override
    public boolean canUse() {
-      this.player = this.level.getNearestPlayer(this.begTargeting, this.wolf);
+      this.player = this.level instanceof net.minecraft.server.level.ServerLevel begSLevel ? begSLevel.getNearestPlayer(this.begTargeting, this.wolf) : null;
       return this.player == null ? false : this.playerHoldingInteresting(this.player);
    }
 

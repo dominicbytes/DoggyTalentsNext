@@ -87,7 +87,7 @@ public class DogDistantTeleportToOwnerCrossDimensionPromise extends AbstractProm
         int r = dog.getRandom().nextInt(safePosList.size());
         var safePos = safePosList.get(r);
         dog.authorizeChangeDimension();
-        var dogafterTp = dog.changeDimension(getDogTransition(ownerLevel, dog, safePos));
+        var dogafterTp = dog.teleport(getDogTransition(ownerLevel, dog, safePos));
 
         if (dogafterTp instanceof Dog) {
             this.teleportedDog = (Dog) dogafterTp;
@@ -100,11 +100,11 @@ public class DogDistantTeleportToOwnerCrossDimensionPromise extends AbstractProm
     public void onFulfilled() {
         if (this.teleportedDog == null || !this.teleportedDog.isAlive())
             return;
-        if (this.owner != null)
-            this.owner.sendSystemMessage(
+        if (this.owner instanceof net.minecraft.world.entity.player.Player ownerPlayer)
+            ownerPlayer.sendSystemMessage(
                 Component.translatable(
-                    "item.doggytalents.conducting_bone.fulfilled.tp_self", 
-                    this.teleportedDog.getName().getString()  
+                    "item.doggytalents.conducting_bone.fulfilled.tp_self",
+                    this.teleportedDog.getName().getString()
                 )
             );
         this.ownerLevel.sendParticles(
@@ -119,8 +119,8 @@ public class DogDistantTeleportToOwnerCrossDimensionPromise extends AbstractProm
     //Ressurect
     @Override
     public void onRejected() {
-        if (this.owner != null)
-            this.owner.sendSystemMessage(
+        if (this.owner instanceof net.minecraft.world.entity.player.Player ownerPlayer)
+            ownerPlayer.sendSystemMessage(
                 Component.translatable(
                     "item.doggytalents.conducting_bone.rejected",
                     Component.literal(this.rejectedMsg).withStyle(

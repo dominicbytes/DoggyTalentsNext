@@ -55,7 +55,7 @@ public class DTAdvancementProvider extends AdvancementProvider {
                             .itemUsedOnBlock(
                                 LocationPredicate.Builder.location(),
                                 ItemPredicate.Builder.item()
-                                    .of(DoggyItems.DOGGY_CHARM.get())
+                                    .of(registries.lookupOrThrow(net.minecraft.core.registries.Registries.ITEM), DoggyItems.DOGGY_CHARM.get())
                             )
                     )
                     .save(consumer, Util.getResourcePath("dtn_core/summon_dog"));
@@ -75,10 +75,10 @@ public class DTAdvancementProvider extends AdvancementProvider {
                         PlayerInteractTrigger.TriggerInstance
                             .itemUsedOnEntity(
                                 ItemPredicate.Builder.item()
-                                    .of(DoggyItems.TRAINING_TREAT.get()),
+                                    .of(registries.lookupOrThrow(net.minecraft.core.registries.Registries.ITEM), DoggyItems.TRAINING_TREAT.get()),
                                 Optional.of(EntityPredicate.wrap(
                                     EntityPredicate.Builder.entity()
-                                        .of(EntityType.WOLF)
+                                        .of(registries.lookupOrThrow(net.minecraft.core.registries.Registries.ENTITY_TYPE), EntityType.WOLF)
                                         .build()))
                             )
                     )

@@ -2,10 +2,12 @@ package doggytalents.common.data;
 
 import net.minecraft.advancements.DisplayInfo;
 import net.minecraft.advancements.AdvancementType;
+import net.minecraft.core.ClientAsset;
 import net.minecraft.network.chat.Component;
 
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.ItemStackTemplate;
 import net.minecraft.world.level.ItemLike;
 
 import java.util.Optional;
@@ -21,7 +23,7 @@ public class DisplayInfoBuilder {
 
     private Component title;
     private Component description;
-    private ItemStack icon;
+    private ItemStackTemplate icon;
     private Identifier background;
     private AdvancementType frame;
     private boolean showToast = true;
@@ -59,7 +61,7 @@ public class DisplayInfoBuilder {
     }
 
     public DisplayInfoBuilder icon(ItemStack stackIn) {
-        this.icon = stackIn;
+        this.icon = stackIn.isEmpty() ? null : ItemStackTemplate.fromNonEmptyStack(stackIn);
         return this;
     }
 
@@ -97,7 +99,8 @@ public class DisplayInfoBuilder {
     }
 
     public DisplayInfo build() {
-        return new DisplayInfo(icon, title, description, Optional.ofNullable(background), frame, showToast, announceToChat, hidden);
+        var bg = background != null ? Optional.of(new ClientAsset.ResourceTexture(background)) : Optional.<ClientAsset.ResourceTexture>empty();
+        return new DisplayInfo(icon, title, description, bg, frame, showToast, announceToChat, hidden);
     }
 
     public static DisplayInfoBuilder create() {

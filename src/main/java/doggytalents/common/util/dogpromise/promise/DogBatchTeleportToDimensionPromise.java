@@ -101,7 +101,7 @@ public class DogBatchTeleportToDimensionPromise extends AbstractPromise {
         var center = ChunkPos.containing(ownerPos);
         for (int i = -1; i <= 1; ++i) {
             for (int j = -1; j <= 1; ++j) {
-                if (!target.getChunkSource().hasChunk(center.x + i, center.z + j)) 
+                if (!target.getChunkSource().hasChunk(center.x() + i, center.z() + j)) 
                     return false;
             }
         }
@@ -112,7 +112,7 @@ public class DogBatchTeleportToDimensionPromise extends AbstractPromise {
         if (!dogValidator.test(dog0)) return;
 
         dog0.authorizeChangeDimension();
-        dog0.changeDimension(getDogTransition(targetLevel, dog0, pos));
+        dog0.teleport(getDogTransition(targetLevel, dog0, pos));
     }
 
     @Override

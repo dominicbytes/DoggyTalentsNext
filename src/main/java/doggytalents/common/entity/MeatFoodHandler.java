@@ -41,7 +41,7 @@ public class MeatFoodHandler implements IDogFoodHandler {
             if (!dog.level().isClientSide()) {
                 var item = stack.getItem();
 
-                var props = stack.getFoodProperties(dog);
+                var props = stack.get(net.minecraft.core.component.DataComponents.FOOD);
 
                 if (props == null) return InteractionResult.FAIL;
                 

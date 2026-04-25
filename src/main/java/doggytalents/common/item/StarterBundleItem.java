@@ -40,7 +40,7 @@ public class StarterBundleItem extends Item {
             return InteractionResult.SUCCESS;
         
         var inv = player.getInventory();
-        var items = inv.items;
+        var items = inv.getNonEquipmentItems();
         boolean hasEnoughSpace = false; 
         int freeSlot = 0;
         for (var item : items) {
@@ -72,13 +72,13 @@ public class StarterBundleItem extends Item {
     public void appendHoverText(ItemStack stack, Item.TooltipContext context, net.minecraft.world.item.component.TooltipDisplay tooltipDisplay, java.util.function.Consumer<net.minecraft.network.chat.Component> components,
             TooltipFlag flags) {
         var desc_id = this.getDescriptionId() + ".description";
-        components.add(Component.translatable(desc_id).withStyle(
+        components.accept(Component.translatable(desc_id).withStyle(
             Style.EMPTY.withItalic(true)
         ));
         for (var item : STARTER_ITEMS) {
             var c1 = Component.translatable("item.doggytalents.starter_bundle.contains", 
                 1, Component.translatable(item.get().getDescriptionId()));
-            components.add(c1);
+            components.accept(c1);
         }
     }
 

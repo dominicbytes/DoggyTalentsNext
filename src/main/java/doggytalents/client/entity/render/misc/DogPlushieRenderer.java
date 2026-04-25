@@ -49,7 +49,6 @@ public class DogPlushieRenderer extends EntityRenderer<DogPlushie, DogPlushieRen
         state.collarThicc = entity.getCollarThicc();
     }
 
-    @Override
     public Identifier getTextureLocation(DogPlushieRenderState state) {
         return state.texture != null ? state.texture : Resources.COLLAR_DEFAULT;
     }

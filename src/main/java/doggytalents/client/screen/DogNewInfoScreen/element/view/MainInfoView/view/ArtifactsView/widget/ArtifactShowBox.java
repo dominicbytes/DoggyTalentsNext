@@ -2,25 +2,20 @@ package doggytalents.client.screen.DogNewInfoScreen.element.view.MainInfoView.vi
 
 import javax.annotation.Nonnull;
 
-import com.mojang.blaze3d.platform.DestFactor;
-import com.mojang.blaze3d.platform.SourceFactor;
-import com.mojang.blaze3d.systems.RenderSystem;
-
 import doggytalents.common.entity.Dog;
 import doggytalents.common.lib.Resources;
 import doggytalents.common.network.PacketHandler;
-import doggytalents.common.network.packet.data.ChangeAccessoriesData;
 import doggytalents.common.network.packet.data.ChangeArtifactData;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
-import net.minecraft.client.renderer.GameRenderer;
+import net.minecraft.client.input.MouseButtonEvent;
+import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
 import doggytalents.common.network.PacketDistributor;
 
 public class ArtifactShowBox extends AbstractWidget {
@@ -46,39 +41,31 @@ public class ArtifactShowBox extends AbstractWidget {
     }
 
     @Override
-    public void renderWidget(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float pTicks) {
+    protected void extractWidgetRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float pTicks) {
         this.isHovered = mouseX >= this.getX() && mouseY >= this.getY() && mouseX < this.getX() + this.width && mouseY < this.getY() + this.height;
         this.active = !this.itemStack.isEmpty();
         graphics.fill(this.getX(), this.getY(), this.getX()+this.width, this.getY()+this.height, BKGCOL);
         if (!this.active) {
             var order_str = "" + (this.order + 1);
             int order_width = font.width(order_str);
-            graphics.text(font, order_str, 
+            graphics.text(font, order_str,
                 this.getX() + this.width/2 - order_width/2,
                 this.getY() + this.height/2 - font.lineHeight/2, TXTCOL);
             return;
         }
         if (this.isHovered) {
-            int bkg_col = BKGCOL_REM;
-            graphics.fill( this.getX(), this.getY(), this.getX()+this.width, this.getY()+this.height, bkg_col);
+            graphics.fill(this.getX(), this.getY(), this.getX()+this.width, this.getY()+this.height, BKGCOL_REM);
         } else {
-            graphics.fill( this.getX(), this.getY(), this.getX()+this.width, this.getY()+this.height, BKGCOL);
+            graphics.fill(this.getX(), this.getY(), this.getX()+this.width, this.getY()+this.height, BKGCOL);
         }
-        
-        graphics.renderItem(itemStack, Mth.floor((this.getX() + this.width/2 - 8)), Mth.floor((this.getY() + this.height/2 - 8)));
 
-        RenderSystem.setShader(GameRenderer::getPositionTexShader);
-        RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
-        RenderSystem.enableBlend();
-        RenderSystem.defaultBlendFunc();
-        RenderSystem.blendFunc(SourceFactor.SRC_ALPHA, DestFactor.ONE_MINUS_SRC_ALPHA);
-        int iX = ICON_REM_X;
-        graphics.blit(Resources.STYLE_ADD_REMOVE, this.getX()+this.width - 2, getY()+this.height -2, iX, 0, 9, 9);
+        graphics.item(itemStack, Mth.floor((this.getX() + this.width/2 - 8)), Mth.floor((this.getY() + this.height/2 - 8)));
+        graphics.blit(RenderPipelines.GUI_TEXTURED, Resources.STYLE_ADD_REMOVE, this.getX()+this.width - 2, getY()+this.height - 2, (float)ICON_REM_X, 0f, 9, 9, 256, 256);
     }
 
     @Override
-    public void onClick(double x, double y) {
-        PacketHandler.send(PacketDistributor.SERVER.noArg(), 
+    public void onClick(MouseButtonEvent event, boolean flag) {
+        PacketHandler.send(PacketDistributor.SERVER.noArg(),
             new ChangeArtifactData(this.dog.getId(), false, order));
     }
 
@@ -86,12 +73,8 @@ public class ArtifactShowBox extends AbstractWidget {
         this.itemStack = stack;
     }
 
-    // @Override
-    // public void renderWidget(GuiGraphicsExtractor p_268228_, int p_268034_, int p_268009_, float p_268085_) {
-    // }
-
     @Override
     protected void updateWidgetNarration(NarrationElementOutput p_259858_) {
     }
-    
+
 }

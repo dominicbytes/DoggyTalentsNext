@@ -130,7 +130,7 @@ public class DogLowHealthGoal {
             }  else {
                 if (this.whine && this.tickTillInitWhine <= 0) {
                     this.whine = false;
-                    this.owner.sendSystemMessage(Component.translatable("dog.msg.low_health." + this.dog.getRandom().nextInt(4), this.dog.getName()));
+                    if (this.owner instanceof net.minecraft.world.entity.player.Player _p_sys) _p_sys.sendSystemMessage(Component.translatable("dog.msg.low_health." + this.dog.getRandom().nextInt(4), this.dog.getName()));
                     var sound = this.dog.dogMood.getWhineAttentionSound();
                     this.dog.dogSoundManager.playInterruptible(sound, this.dog.getSoundVolume(), this.dog.getVoicePitch());
                     this.tickTillInitWhine = 40;
@@ -190,9 +190,9 @@ public class DogLowHealthGoal {
             } else {
                 if (!this.dog.getMode().canWander())
                     return false;
-                if (!this.dog.hasRestriction() || this.dog.getRestrictCenter() == null)
+                if (!this.dog.hasHome() || this.dog.getHomePosition() == null)
                     return false;
-                this.restrictPos = this.dog.getRestrictCenter();
+                this.restrictPos = this.dog.getHomePosition();
                 this.type = Type.RESTRICT;
             }
             
@@ -221,9 +221,9 @@ public class DogLowHealthGoal {
             } else {
                 if (!this.dog.getMode().canWander())
                     return false;
-                if (!this.dog.hasRestriction() || this.dog.getRestrictCenter() == null)
+                if (!this.dog.hasHome() || this.dog.getHomePosition() == null)
                     return false;
-                if (!this.restrictPos.equals(dog.getRestrictCenter()))
+                if (!this.restrictPos.equals(dog.getHomePosition()))
                     return false;
             }
 

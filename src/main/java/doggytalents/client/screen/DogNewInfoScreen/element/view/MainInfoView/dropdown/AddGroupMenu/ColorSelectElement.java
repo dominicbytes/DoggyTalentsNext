@@ -87,12 +87,12 @@ public class ColorSelectElement extends AbstractElement {
         }
 
         @Override
-        public void onPress() {
+        public void onPress(net.minecraft.client.input.InputWithModifiers input) {
             this.onPress.onPress(this);
         }
 
         @Override
-        public void renderWidget(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float pTicks) {
+        protected void extractContents(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float pTicks) {
             if (!this.active) return;
 
             if (selected) {

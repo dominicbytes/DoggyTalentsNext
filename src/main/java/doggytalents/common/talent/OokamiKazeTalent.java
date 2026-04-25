@@ -198,9 +198,9 @@ public class OokamiKazeTalent extends TalentInstance {
             }
             --tickTillHowl;
             if (tickTillHowl == 0) {
-                dog.dogSoundManager.playInterruptible(SoundEvents.WOLF_HOWL, 1, dog.getVoicePitch());
+                dog.dogSoundManager.playInterruptible(dog.dogMood.getAmbientSound(), 1, dog.getVoicePitch());
             } else if (tickTillHowl == 30) {
-                this.dog.playSound(SoundEvents.WOLF_GROWL, 0.3F, dog.getVoicePitch());
+                this.dog.playSound(dog.dogMood.getSeriousGrowl(), 0.3F, dog.getVoicePitch());
             }
 
             --tickTillBoom;
@@ -345,7 +345,7 @@ public class OokamiKazeTalent extends TalentInstance {
             if (far_percent > 1)
                 return -1;
             var close_percent = 1 - far_percent;
-            var seen_percent = Explosion.getSeenPercent(dog_pos, e);
+            var seen_percent = net.minecraft.world.level.ServerExplosion.getSeenPercent(dog_pos, e);
             var impact_value = seen_percent * close_percent;
             return impact_value;
         }

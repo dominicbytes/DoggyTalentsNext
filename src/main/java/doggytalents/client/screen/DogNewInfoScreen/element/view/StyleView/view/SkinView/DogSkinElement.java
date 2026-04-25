@@ -329,20 +329,10 @@ public class DogSkinElement extends AbstractElement {
     }
     
     private void renderMysteriousKanji(GuiGraphicsExtractor graphics, int x, int y) {
-        //RenderSystem.setShader(GameRenderer::getPositionTexShader);
-        RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
-        //RenderSystem.setShaderTexture(0, getKanjiDogLevel(this.dog));
-        RenderSystem.enableBlend();
-        RenderSystem.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
         int imgeSize = 100;
-        graphics.blit(Resources.KANJI_MYSTERY_BKG, x - imgeSize/2, 
-            y - imgeSize/2 - 27, 0, 0, 0, imgeSize, imgeSize, imgeSize, imgeSize);
-        var stack = graphics.pose();
-        stack.pushPose();
-        stack.translate(0, 0, 400);
-        graphics.blit(Resources.KANJI_MYSTERY, x - imgeSize/2, 
-            y - imgeSize/2 - 27, 0, 0, 0, imgeSize, imgeSize, imgeSize, imgeSize);
-        stack.popPose();
-        RenderSystem.disableBlend();
+        graphics.blit(net.minecraft.client.renderer.RenderPipelines.GUI_TEXTURED, Resources.KANJI_MYSTERY_BKG,
+            x - imgeSize/2, y - imgeSize/2 - 27, 0f, 0f, imgeSize, imgeSize, imgeSize, imgeSize);
+        graphics.blit(net.minecraft.client.renderer.RenderPipelines.GUI_TEXTURED, Resources.KANJI_MYSTERY,
+            x - imgeSize/2, y - imgeSize/2 - 27, 0f, 0f, imgeSize, imgeSize, imgeSize, imgeSize);
     }
 }

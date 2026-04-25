@@ -226,7 +226,10 @@ public class EventHandler {
     }
 
     public static void trainWolf(Wolf wolf, Player owner, Level level) {
-        Dog dog = DoggyEntityTypes.DOG.get().create(level);
+        if (!(level instanceof ServerLevel sLevelForCreate)) {
+            throw new IllegalStateException("trainWolf called on client side");
+        }
+        Dog dog = DoggyEntityTypes.DOG.get().create(sLevelForCreate, net.minecraft.world.entity.EntitySpawnReason.BREEDING);
         if (dog == null) {
             throw new IllegalStateException("Creator function for the dog returned \"null\"");
         }
@@ -235,7 +238,7 @@ public class EventHandler {
         dog.maxHealth();
         dog.setOrderedToSit(false);
         dog.setAge(wolf.getAge());
-        dog.moveTo(wolf.getX(), wolf.getY(), wolf.getZ(), wolf.getYRot(), wolf.getXRot());
+        dog.setPos(wolf.getX(), wolf.getY(), wolf.getZ());
         dog.setYHeadRot(wolf.yBodyRot);
         dog.setYBodyRot(wolf.yBodyRot);
         dog.setYRot(wolf.yBodyRot);
@@ -273,7 +276,9 @@ public class EventHandler {
     }
 
     private static void migrateWolfVariant(Wolf wolf, Dog dog) {
-        var dog_variant = DogVariantUtil.fromVanila(wolf.getVariant().unwrapKey().orElse(WolfVariants.PALE));
+        var wolfVariantHolder = wolf.get(net.minecraft.core.component.DataComponents.WOLF_VARIANT);
+        var wolfVarKey = wolfVariantHolder != null ? wolfVariantHolder.unwrapKey().orElse(WolfVariants.PALE) : WolfVariants.PALE;
+        var dog_variant = DogVariantUtil.fromVanila(wolfVarKey);
         boolean random_var_on_pale = 
             dog_variant == DogVariantUtil.getDefault()
             && ConfigHandler.SERVER.RANDOM_VAR_ON_PALE.get();
@@ -289,7 +294,7 @@ public class EventHandler {
     }
 
     private static void migrateWolfArmor(Wolf wolf, Dog dog) {
-        if (!wolf.hasArmor())
+        if (!wolf.isWearingBodyArmor())
             return;
         var armor_stack = wolf.getBodyArmorItem().copyWithCount(1);
         dog.setWolfArmor(armor_stack);
@@ -337,7 +342,7 @@ public class EventHandler {
 
     private boolean isEnableStarterBundle() {
         final var retMut = new MutableBoolean(false);
-        if (FMLEnvironment.dist == Dist.CLIENT) {
+        if (FMLEnvironment.getDist() == Dist.CLIENT) {
             if (ConfigHandler.ClientConfig
                 .getConfig(ConfigHandler.CLIENT.ENABLE_STARTER_BUNDLE_BY_DEFAULT))
                 retMut.setTrue();

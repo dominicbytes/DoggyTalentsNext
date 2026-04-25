@@ -11,7 +11,9 @@ import doggytalents.client.screen.AmnesiaBoneScreen.AmneisaBoneScreen;
 import doggytalents.client.screen.AmnesiaBoneScreen.screen.DogForceMigrateOwnerScreen;
 import doggytalents.common.entity.Dog;
 import doggytalents.common.lib.Constants;
+import doggytalents.common.util.DogUtil;
 import doggytalents.common.util.ItemUtil;
+import doggytalents.common.util.NBTUtil;
 import net.minecraft.ChatFormatting;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
@@ -61,7 +63,7 @@ public class AmnesiaBoneItem extends Item implements IDogItem  {
             return;
         } 
         boolean isOpAndCreative = 
-            player.hasPermissions(Constants.OPERATOR_PERMISSION)
+            DogUtil.hasPermissions(player, Constants.OPERATOR_PERMISSION)
             && player.getAbilities().instabuild;
         if (isOpAndCreative && player.isShiftKeyDown()) {
             DogForceMigrateOwnerScreen.open(dog);
@@ -85,10 +87,10 @@ public class AmnesiaBoneItem extends Item implements IDogItem  {
         var stack = player.getItemInHand(hand);
         if (stack.getItem() != this) return;
         var tag = ItemUtil.getTag(stack);
-        if (tag.hasUUID("request_uuid")
-            && tag.getUUID("request_uuid").equals(playerUUID)) 
+        if (NBTUtil.hasUniqueId(tag, "request_uuid")
+            && NBTUtil.getUniqueId(tag, "request_uuid").equals(playerUUID))
                 return;
-        tag.putUUID("request_uuid", player.getUUID());
+        NBTUtil.putUniqueId(tag, "request_uuid", player.getUUID());
         tag.putString("request_str", player.getName().getString());
         ItemUtil.putTag(stack, tag);
     }
@@ -97,19 +99,19 @@ public class AmnesiaBoneItem extends Item implements IDogItem  {
     public void appendHoverText(ItemStack stack, Item.TooltipContext context, net.minecraft.world.item.component.TooltipDisplay tooltipDisplay, java.util.function.Consumer<net.minecraft.network.chat.Component> components,
             TooltipFlag flag) {
         var desc_id = this.getDescriptionId() + ".description";
-        components.add(Component.translatable(desc_id).withStyle(
+        components.accept(Component.translatable(desc_id).withStyle(
             Style.EMPTY.withItalic(true)
         ));
         var tag = ItemUtil.getTag(stack);
         if (tag == null) return;
         if (tag.contains("amnesia_bone_used_time")) {
-            components.add(
+            components.accept(
                 Component.translatable("item.doggytalents.amnesia_bone.use_status", 
                 getUseCap() - tag.getIntOr("amnesia_bone_used_time", 0), getUseCap())
                 .withStyle(ChatFormatting.RED));
         }
         if (tag.contains("request_str")) {
-            components.add(
+            components.accept(
                 Component.translatable("item.doggytalents.amnesia_bone.status", tag.getStringOr("request_str", ""))
                 .withStyle(
                     ChatFormatting.GRAY

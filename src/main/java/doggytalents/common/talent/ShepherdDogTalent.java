@@ -239,7 +239,7 @@ public class ShepherdDogTalent extends TalentInstance {
             }
 
             if (this.dog.getRandom().nextFloat() < 0.15F) {
-                this.dog.playSound(SoundEvents.WOLF_AMBIENT, this.dog.getSoundVolume() + 1.0F, (this.dog.getRandom().nextFloat() - this.dog.getRandom().nextFloat()) * 0.1F + 0.9F);
+                this.dog.playSound(this.dog.dogMood.getAmbientSound(), this.dog.getSoundVolume() + 1.0F, (this.dog.getRandom().nextFloat() - this.dog.getRandom().nextFloat()) * 0.1F + 0.9F);
             }
         }
 
@@ -458,7 +458,7 @@ public class ShepherdDogTalent extends TalentInstance {
     //                 }
     //                 // Play woof sound
     //                 if (this.dog.getRandom().nextFloat() < 0.15F) {
-    //                     this.dog.playSound(SoundEvents.WOLF_AMBIENT, this.dog.getSoundVolume() + 1.0F, (this.dog.getRandom().nextFloat() - this.dog.getRandom().nextFloat()) * 0.1F + 0.9F);
+    //                     this.dog.playSound(this.dog.dogMood.getAmbientSound(), this.dog.getSoundVolume() + 1.0F, (this.dog.getRandom().nextFloat() - this.dog.getRandom().nextFloat()) * 0.1F + 0.9F);
     //                 }
 
     //                 // Remove dead or faraway entities

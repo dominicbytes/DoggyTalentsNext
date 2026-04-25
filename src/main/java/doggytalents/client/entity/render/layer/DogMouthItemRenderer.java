@@ -3,21 +3,19 @@ package doggytalents.client.entity.render.layer;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
 
-import doggytalents.DoggyTalents;
-import doggytalents.api.inferface.IThrowableItem;
 import doggytalents.client.ClientSetup;
 import doggytalents.client.entity.model.SyncedRenderFunctionWithHeadModel;
 import doggytalents.client.entity.model.dog.DogModel;
 import doggytalents.client.entity.render.DogRenderState;
 import doggytalents.common.config.ConfigHandler;
 import doggytalents.common.entity.Dog;
-import net.minecraft.client.renderer.ItemInHandRenderer;
-import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.RenderLayerParent;
 import net.minecraft.client.renderer.entity.layers.RenderLayer;
-import net.minecraft.world.InteractionHand;
+import net.minecraft.client.renderer.item.ItemModelResolver;
+import net.minecraft.client.renderer.item.ItemStackRenderState;
+import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.BowItem;
 import net.minecraft.world.item.CrossbowItem;
@@ -28,12 +26,13 @@ import net.minecraft.world.item.Items;
 
 public class DogMouthItemRenderer extends RenderLayer<DogRenderState, DogModel> {
 
-    private ItemInHandRenderer itemInHandRenderer;
+    private final ItemModelResolver itemModelResolver;
     private SyncedRenderFunctionWithHeadModel itemSyncer;
+    private final ItemStackRenderState itemRenderState = new ItemStackRenderState();
 
     public DogMouthItemRenderer(RenderLayerParent<DogRenderState, DogModel> dogRendererIn, EntityRendererProvider.Context ctx) {
         super(dogRendererIn);
-        this.itemInHandRenderer = ctx.getItemInHandRenderer();
+        this.itemModelResolver = ctx.getItemModelResolver();
         itemSyncer = new SyncedRenderFunctionWithHeadModel(ctx.bakeLayer(ClientSetup.DOG_SYNCED_FUNCTION_WITH_HEAD));
     }
 
@@ -54,43 +53,37 @@ public class DogMouthItemRenderer extends RenderLayer<DogRenderState, DogModel> 
         var stackOptional = dog.getMouthItemForRender();
         if (!stackOptional.isPresent())
             return;
-        var stack = stackOptional.get();
+        var itemStack = stackOptional.get();
 
         var model = this.getParentModel();
-
         model.copyPropertiesTo(itemSyncer);
         itemSyncer.sync(model);
 
-        // TODO: ItemInHandRenderer needs MultiBufferSource which is no longer available here.
-        // For now, we stub this out - proper implementation requires SubmitNodeCollector item support.
-        // itemSyncer.startRenderFromRoot(matrixStack, matrixStack1 -> {
-        //     renderItem(matrixStack1, submitNodeCollector, lightCoords, dog, stack);
-        // });
-    }
+        itemSyncer.startRenderFromRoot(matrixStack, matrixStack1 -> {
+            matrixStack1.pushPose();
+            matrixStack1.translate(-0.025F, 0.125F, -0.32F);
+            var item = itemStack.getItem();
 
-    public void renderItem(PoseStack stack, MultiBufferSource bufferSource, int packedLight, Dog dog, ItemStack itemStack) {
-        stack.pushPose();
-        stack.translate(-0.025F, 0.125F, -0.32F);
-        var item = itemStack.getItem();
+            if (itemStack.has(DataComponents.WEAPON) || itemStack.has(DataComponents.TOOL)
+                || itemStack.is(Items.TRIDENT)) {
+                matrixStack1.translate(0.25, 0, 0);
+            }
+            if (item instanceof BowItem || item instanceof CrossbowItem) {
+                matrixStack1.scale(1, -1, -1);
+                matrixStack1.translate(0, 0, -0.1);
+            }
+            if (item instanceof BlockItem) {
+                matrixStack1.scale(0.5f, -0.5f, -0.5f);
+                matrixStack1.translate(0.2f, -0.31f, 0.07f);
+                matrixStack1.mulPose(Axis.YP.rotationDegrees(60.0F));
+            } else {
+                matrixStack1.mulPose(Axis.YP.rotationDegrees(45.0F));
+                matrixStack1.mulPose(Axis.XP.rotationDegrees(90.0F));
+            }
 
-        if (itemStack.has(DataComponents.WEAPON) || itemStack.has(DataComponents.TOOL)
-            || itemStack.is(Items.TRIDENT)) {
-            stack.translate(0.25, 0, 0);
-        }
-        if (item instanceof BowItem || item instanceof CrossbowItem) {
-            stack.scale(1, -1, -1);
-            stack.translate(0, 0, -0.1);
-        }
-        if (item instanceof BlockItem) {
-            stack.scale(0.5f, -0.5f, -0.5f);
-            stack.translate(0.2f, -0.31f, 0.07f);
-            stack.mulPose(Axis.YP.rotationDegrees(60.0F));
-        } else {
-            stack.mulPose(Axis.YP.rotationDegrees(45.0F));
-            stack.mulPose(Axis.XP.rotationDegrees(90.0F));
-        }
-
-        this.itemInHandRenderer.renderItem(dog, itemStack, ItemDisplayContext.GROUND, false, stack, bufferSource, packedLight);
-        stack.popPose();
+            itemModelResolver.updateForNonLiving(itemRenderState, itemStack, ItemDisplayContext.GROUND, dog);
+            itemRenderState.submit(matrixStack1, submitNodeCollector, lightCoords, OverlayTexture.NO_OVERLAY, -1);
+            matrixStack1.popPose();
+        });
     }
 }

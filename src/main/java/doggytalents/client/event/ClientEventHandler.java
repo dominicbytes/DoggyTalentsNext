@@ -135,7 +135,7 @@ public class ClientEventHandler {
 
     @SubscribeEvent
     public void onInputEvent(final MovementInputUpdateEvent event) {
-        if (!event.getInput().jumping)
+        if (!event.getInput().keyPresses.jump())
             return;
         var entity = event.getEntity();
         var vehicle = entity.getVehicle();
@@ -186,11 +186,11 @@ public class ClientEventHandler {
         }
         if (hotkey_use < 0) return;
 
-        if (player.getCooldowns().isOnCooldown(whistle)) return;
+        if (player.getCooldowns().isOnCooldown(new net.minecraft.world.item.ItemStack(whistle))) return;
         
         var tag = ItemUtil.getTag(whistle_stack);
         if (tag == null) return;
-        var hotkeyarr = tag.getIntArray("hotkey_modes");
+        var hotkeyarr = tag.getIntArray("hotkey_modes").orElse(null);
         if (hotkeyarr == null) return;
         if (hotkeyarr.length != 4) return;
         

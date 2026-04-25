@@ -42,7 +42,6 @@ public class SamoyedPlushieRenderer extends EntityRenderer<SamoyedPlushie, Samoy
         state.yRot = Mth.wrapDegrees(entity.getYRot());
     }
 
-    @Override
     public Identifier getTextureLocation(SamoyedPlushieRenderState state) {
         return Resources.SAMOYED_PLUSHIE_TOY;
     }

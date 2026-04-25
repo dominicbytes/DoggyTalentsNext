@@ -14,6 +14,7 @@ import net.minecraft.core.Holder;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.Tag;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.InteractionResult;
@@ -82,14 +83,13 @@ public class ChemiCanineTalent extends TalentInstance {
         if (!tg0.contains("effects"))
             return;
         var effectTags = tg0.getListOrEmpty("effects");
+        var ops = dogIn.registryAccess().createSerializationContext(NbtOps.INSTANCE);
         for (int i = 0; i < effectTags.size(); ++i) {
             try {
                 var effectTag = effectTags.getCompoundOrEmpty(i);
-                var effectInst = MobEffectInstance.load(effectTag);
-                if (effectInst != null)
-                    this.storedEffects.add(effectInst);   
+                MobEffectInstance.CODEC.parse(ops, effectTag)
+                    .ifSuccess(effectInst -> this.storedEffects.add(effectInst));
             } catch (Exception e) {
-                
             }
         }
     }
@@ -100,8 +100,10 @@ public class ChemiCanineTalent extends TalentInstance {
         var tg0 = new CompoundTag();
         tg0.putInt("tickTillEffectDecay", this.tickTillEffectDecay);
         var effectTags = new ListTag();
+        var ops = dogIn.registryAccess().createSerializationContext(NbtOps.INSTANCE);
         for (var effect : this.storedEffects) {
-            effectTags.add(effect.save());
+            MobEffectInstance.CODEC.encodeStart(ops, effect)
+                .ifSuccess(tag -> effectTags.add(tag));
         }
         tg0.put("effects", effectTags);
         compound.put("DTN_ChemiCanine", tg0);

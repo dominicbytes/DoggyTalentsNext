@@ -11,12 +11,15 @@ import doggytalents.client.entity.model.DogArmorModel;
 import doggytalents.client.entity.model.SyncedRenderFunctionWithHeadModel;
 import doggytalents.client.entity.model.dog.DogModel;
 import doggytalents.client.entity.render.DoggyArmorMapping;
+import doggytalents.client.entity.render.DogRenderState;
 import doggytalents.client.entity.render.layer.DogArmorHelmetAltModel;
 import doggytalents.common.config.ConfigHandler;
-import doggytalents.common.entity.Dog;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.Model;
 import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.rendertype.RenderType;
+import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.RenderLayerParent;
 import net.minecraft.client.renderer.entity.layers.RenderLayer;
@@ -26,9 +29,8 @@ import net.minecraft.resources.Identifier;
 import net.minecraft.util.ARGB;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.equipment.Equippable;
 
-public class DoggyArmorRenderer extends RenderLayer<Dog, DogModel> {
+public class DoggyArmorRenderer extends RenderLayer<DogRenderState, DogModel> {
 
     private DogArmorModel model;
     private DogArmorModel newModel;
@@ -38,7 +40,7 @@ public class DoggyArmorRenderer extends RenderLayer<Dog, DogModel> {
 
     private DogArmorHelmetAltModel helmetAltModel;
 
-    public DoggyArmorRenderer(RenderLayerParent parentRenderer, EntityRendererProvider.Context ctx) {
+    public DoggyArmorRenderer(RenderLayerParent<DogRenderState, DogModel> parentRenderer, EntityRendererProvider.Context ctx) {
         super(parentRenderer);
         this.newModel = new DogArmorModel(ctx.bakeLayer(ClientSetup.DOG_ARMOR));
         this.legacyModel = new DogArmorModel(ctx.bakeLayer(ClientSetup.DOG_ARMOR_LEGACY));
@@ -50,8 +52,9 @@ public class DoggyArmorRenderer extends RenderLayer<Dog, DogModel> {
     }
 
     @Override
-    public void render(PoseStack poseStack, MultiBufferSource buffer, int packedLight, Dog dog, float limbSwing, float limbSwingAmount, float partialTicks, float ageInTicks, float relativeHeadYRot, float headPitch) {
-        if (!dog.isTame() || dog.isInvisible()) {
+    public void submit(PoseStack poseStack, SubmitNodeCollector submitNodeCollector, int packedLight, DogRenderState renderState, float yRot, float xRot) {
+        var dog = renderState.dog;
+        if (dog == null || !dog.isTame() || renderState.isInvisible) {
             return;
         }
 
@@ -78,15 +81,17 @@ public class DoggyArmorRenderer extends RenderLayer<Dog, DogModel> {
         this.model.sync(parentModel);
         initAltModel = false;
 
+        // Get MultiBufferSource from Minecraft for VertexConsumer-based rendering
+        var buffer = Minecraft.getInstance().renderBuffers().bufferSource();
+
         checkAndRenderSlot(dog, EquipmentSlot.HEAD, poseStack, buffer, packedLight);
         checkAndRenderSlot(dog, EquipmentSlot.CHEST, poseStack, buffer, packedLight);
         checkAndRenderSlot(dog, EquipmentSlot.LEGS, poseStack, buffer, packedLight);
         checkAndRenderSlot(dog, EquipmentSlot.FEET, poseStack, buffer, packedLight);
     }
 
-    private void checkAndRenderSlot(Dog dog, EquipmentSlot slot, PoseStack stack, MultiBufferSource buffer, int light) {
+    private void checkAndRenderSlot(doggytalents.common.entity.Dog dog, EquipmentSlot slot, PoseStack stack, MultiBufferSource buffer, int light) {
         var itemStack = dog.getItemBySlot(slot);
-        var item = itemStack.getItem();
 
         // ArmorItem no longer exists in 26.1.2; use DataComponents.EQUIPPABLE instead
         var equippable = itemStack.getOrDefault(DataComponents.EQUIPPABLE, null);
@@ -109,7 +114,6 @@ public class DoggyArmorRenderer extends RenderLayer<Dog, DogModel> {
             return;
         }
 
-
         var altModel = getAlternativeArmorModel(dog, slot, stack, itemStack);
         if (altModel.isPresent()) {
             if (!initAltModel) {
@@ -122,16 +126,13 @@ public class DoggyArmorRenderer extends RenderLayer<Dog, DogModel> {
             return;
         }
 
-        renderArmorCutout(this.model, DoggyArmorMapping.getMappedResource(itemStack.getItem(), dog, itemStack), stack, buffer, light, dog, 1.0F, 1.0F, 1.0F);
-
-        // Trim rendering removed: ArmorTrim.outerTexture(material) no longer exists in 26.1.2
-        // TODO: re-implement trim rendering using EquipmentLayerRenderer when available
+        renderArmorCutout(this.model, DoggyArmorMapping.getMappedResource(itemStack.getItem(), dog, itemStack), stack, buffer, light);
 
         if (itemStack.hasFoil())
             renderGlint(stack, buffer, light, this.model);
     }
 
-    private Optional<Model> getAlternativeArmorModel(Dog dog, EquipmentSlot slot, PoseStack stack, ItemStack itemStack) {
+    private Optional<Model> getAlternativeArmorModel(doggytalents.common.entity.Dog dog, EquipmentSlot slot, PoseStack stack, ItemStack itemStack) {
         if (slot == EquipmentSlot.HEAD && ConfigHandler.CLIENT.USE_THIRD_PARTY_PLAYER_HELMET_MODEL.get()) {
             var dummy = this.helmetAltModel.getDummy();
             if (dummy != null) {
@@ -145,14 +146,12 @@ public class DoggyArmorRenderer extends RenderLayer<Dog, DogModel> {
         return Optional.empty();
     }
 
-    private void startRenderAlternativeModelFromRoot(Model model, Dog dog, PoseStack stack, MultiBufferSource buffer, int light, ItemStack itemStack) {
+    private void startRenderAlternativeModelFromRoot(Model model, doggytalents.common.entity.Dog dog, PoseStack stack, MultiBufferSource buffer, int light, ItemStack itemStack) {
         this.alternativeModel.startRenderFromRoot(stack, stack1 -> {
             stack1.pushPose();
             stack1.scale(0.6f, 0.6f, 0.6f);
             stack1.translate(0, 0.15f, 0.07);
-            renderAlternativeModel(model, dog, stack1, buffer, light, itemStack);
-
-            // Trim rendering removed: ArmorTrim.outerTexture(material) no longer exists in 26.1.2
+            renderAlternativeModel(model, stack1, buffer, light, itemStack);
 
             if (itemStack.hasFoil())
                 renderGlint(stack, buffer, light, model);
@@ -161,19 +160,19 @@ public class DoggyArmorRenderer extends RenderLayer<Dog, DogModel> {
         });
     }
 
-    private void renderAlternativeModel(Model model, Dog dog, PoseStack stack, MultiBufferSource buffer, int light, ItemStack itemStack) {
-        var texLoc = DoggyArmorMapping.getMappedResource(itemStack.getItem(), dog, itemStack);
-        VertexConsumer ivertexbuilder = buffer.getBuffer(RenderType.armorCutoutNoCull(texLoc));
+    private void renderAlternativeModel(Model model, PoseStack stack, MultiBufferSource buffer, int light, ItemStack itemStack) {
+        var texLoc = DoggyArmorMapping.getMappedResource(itemStack.getItem(), null, itemStack);
+        VertexConsumer ivertexbuilder = buffer.getBuffer(RenderTypes.armorCutoutNoCull(texLoc));
         model.renderToBuffer(stack, ivertexbuilder, light, OverlayTexture.NO_OVERLAY, 0xffffffff);
     }
 
-    private void renderArmorCutout(DogArmorModel model, Identifier textureLocationIn, PoseStack matrixStackIn, MultiBufferSource bufferIn, int packedLightIn, Dog entityIn, float red, float green, float blue) {
-        VertexConsumer ivertexbuilder = bufferIn.getBuffer(RenderType.armorCutoutNoCull(textureLocationIn));
-        model.renderToBuffer(matrixStackIn, ivertexbuilder, packedLightIn, OverlayTexture.NO_OVERLAY, ARGB.colorFromFloat(1, red, green, blue));
+    private void renderArmorCutout(DogArmorModel model, Identifier textureLocationIn, PoseStack matrixStackIn, MultiBufferSource bufferIn, int packedLightIn) {
+        VertexConsumer ivertexbuilder = bufferIn.getBuffer(RenderTypes.armorCutoutNoCull(textureLocationIn));
+        model.renderToBuffer(matrixStackIn, ivertexbuilder, packedLightIn, OverlayTexture.NO_OVERLAY, ARGB.colorFromFloat(1, 1.0F, 1.0F, 1.0F));
     }
 
     private void renderGlint(PoseStack stack, MultiBufferSource buffer, int light, Model model) {
-        model.renderToBuffer(stack, buffer.getBuffer(RenderType.armorEntityGlint()), light, OverlayTexture.NO_OVERLAY, 0xffffffff);
+        model.renderToBuffer(stack, buffer.getBuffer(RenderTypes.armorEntityGlint()), light, OverlayTexture.NO_OVERLAY, 0xffffffff);
     }
 
 }

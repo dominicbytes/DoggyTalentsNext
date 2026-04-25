@@ -1,12 +1,10 @@
 package doggytalents.client.screen;
 
-import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.PoseStack;
 import doggytalents.common.inventory.container.FoodBowlContainer;
 import doggytalents.common.lib.Resources;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
-import net.minecraft.client.renderer.GameRenderer;
+import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
 import net.minecraft.world.entity.player.Inventory;
@@ -14,30 +12,21 @@ import net.minecraft.world.entity.player.Inventory;
 public class FoodBowlScreen extends AbstractContainerScreen<FoodBowlContainer> {
 
     public FoodBowlScreen(FoodBowlContainer foodBowl, Inventory playerInventory, Component displayName) {
-        super(foodBowl, playerInventory, displayName);
-        this.imageHeight = 127;
+        super(foodBowl, playerInventory, displayName, 176, 127);
     }
 
     @Override
-    public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTicks) {
-        //this.renderBackground(graphics, mouseX, mouseY, partialTicks);
-        super.extractRenderState(graphics, mouseX, mouseY, partialTicks);
-        this.renderTooltip(graphics, mouseX, mouseY);
+    public void extractContents(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTicks) {
+        int x = (this.width - this.imageWidth) / 2;
+        int y = (this.height - this.imageHeight) / 2;
+        graphics.blit(RenderPipelines.GUI_TEXTURED, Resources.GUI_FOOD_BOWL, x, y, 0f, 0f, this.imageWidth, this.imageHeight, 256, 256);
+        super.extractContents(graphics, mouseX, mouseY, partialTicks);
         renderDogProTip(graphics);
     }
 
     @Override
     protected void extractLabels(GuiGraphicsExtractor graphics, int mouseX, int mouseY) {
         graphics.text(font, this.title.getString(), 10, 8, 4210752, false);
-    }
-
-    @Override
-    protected void extractBackground(GuiGraphicsExtractor graphics, float partialTicks, int mouseX, int mouseY) {
-        RenderSystem.setShader(GameRenderer::getPositionTexShader);
-        RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
-        int x = (this.width - this.imageWidth) / 2;
-        int y = (this.height - this.imageHeight) / 2;
-        graphics.blit(Resources.GUI_FOOD_BOWL, x, y, 0, 0, this.imageWidth, this.imageHeight);
     }
 
     private void renderDogProTip(GuiGraphicsExtractor graphics) {

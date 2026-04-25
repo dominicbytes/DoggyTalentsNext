@@ -43,7 +43,6 @@ public class DogThrownTridentRenderer extends EntityRenderer<DogThrownTrident, D
         state.foil = entity.isFoil();
     }
 
-    @Override
     public Identifier getTextureLocation(DogThrownTridentRenderState state) {
         return ThrownTridentRenderer.TRIDENT_LOCATION;
     }

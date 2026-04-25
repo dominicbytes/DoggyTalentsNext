@@ -72,7 +72,7 @@ public class DoggyCharmItem extends Item implements IDogItem {
             }
 
 
-            Entity entity = DoggyEntityTypes.DOG.get().spawn((ServerLevel) world, itemstack, context.getPlayer(), blockpos1, EntitySpawnReason.SPAWN_EGG, !Objects.equals(blockpos, blockpos1) && enumfacing == Direction.UP, false);
+            Entity entity = DoggyEntityTypes.DOG.get().spawn((ServerLevel) world, itemstack, context.getPlayer(), blockpos1, EntitySpawnReason.SPAWN_ITEM_USE, !Objects.equals(blockpos, blockpos1) && enumfacing == Direction.UP, false);
             if (entity instanceof Dog) {
                Dog dog = (Dog)entity;
                if (player != null) {
@@ -115,7 +115,7 @@ public class DoggyCharmItem extends Item implements IDogItem {
                 if (!(worldIn.getBlockState(blockpos).getBlock() instanceof LiquidBlock)) {
                     return InteractionResult.PASS; // stack: itemstack);
                 } else if (worldIn.mayInteract(playerIn, blockpos) && playerIn.mayUseItemAt(blockpos, ((BlockHitResult)raytraceresult).getDirection(), itemstack)) {
-                    Entity entity = DoggyEntityTypes.DOG.get().spawn((ServerLevel) worldIn, itemstack, playerIn, blockpos, EntitySpawnReason.SPAWN_EGG, false, false);
+                    Entity entity = DoggyEntityTypes.DOG.get().spawn((ServerLevel) worldIn, itemstack, playerIn, blockpos, EntitySpawnReason.SPAWN_ITEM_USE, false, false);
                     if (entity instanceof Dog) {
                         Dog dog = (Dog)entity;
                            dog.setTame(true, true);
@@ -188,6 +188,6 @@ public class DoggyCharmItem extends Item implements IDogItem {
     public void appendHoverText(ItemStack stack, Item.TooltipContext context, net.minecraft.world.item.component.TooltipDisplay tooltipDisplay, java.util.function.Consumer<net.minecraft.network.chat.Component> components,
             TooltipFlag flags) {
         var desc_id = this.getDescriptionId() + ".description";
-        components.add(Component.translatable(desc_id));
+        components.accept(Component.translatable(desc_id));
     }
 }

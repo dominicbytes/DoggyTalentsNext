@@ -142,7 +142,7 @@ public class DogGunpowderProjectile extends ThrowableProjectile {
                 dog, new ItemStack(Items.GUNPOWDER));
         }
         dog.playSound(
-            SoundEvents.GENERIC_EAT.value().value(),
+            SoundEvents.GENERIC_EAT.value(),
             dog.getSoundVolume(),
             (dog.getRandom().nextFloat() - dog.getRandom().nextFloat()) * 0.2F + 1.0F
         );

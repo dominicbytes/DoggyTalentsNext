@@ -19,14 +19,14 @@ public class DTNForcedChunkManager {
         new Long2ObjectOpenHashMap<>();
 
     public static final void accquireChunk(ServerLevel level, AbstractPromise chunkTask, ChunkPos pos) {
-        var tickets = accquiredChunkMap.computeIfAbsent(pos.toLong(), k -> new HashSet<>());
+        var tickets = accquiredChunkMap.computeIfAbsent(pos.pack(), k -> new HashSet<>());
         if (tickets.isEmpty())
             level.getChunkSource().addTicketWithRadius(CHUNK_TASK, pos, 2);
         tickets.add(chunkTask);
     }
 
     public static final void dropChunk(ServerLevel level, AbstractPromise chunkTask, ChunkPos pos) {
-        var tickets = accquiredChunkMap.get(pos.toLong());
+        var tickets = accquiredChunkMap.get(pos.pack());
         if (tickets == null || tickets.isEmpty())
             return;
         tickets.remove(chunkTask);

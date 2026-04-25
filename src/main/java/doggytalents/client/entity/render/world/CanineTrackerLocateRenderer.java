@@ -16,6 +16,7 @@ import doggytalents.common.lib.Resources;
 import doggytalents.common.network.PacketHandler;
 import doggytalents.common.network.packet.data.CanineTrackerData.RequestPosUpdateData;
 import doggytalents.common.util.ItemUtil;
+import doggytalents.common.util.NBTUtil;
 import doggytalents.common.util.Util;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
@@ -65,7 +66,7 @@ public class CanineTrackerLocateRenderer {
         } else {
             dog_pos = new Vec3(locatingPos.getX(), locatingPos.getY() + 1, locatingPos.getZ());
         }
-        var camera_pos = camera.getPosition().add(0, -0.2, 0);
+        var camera_pos = camera.position().add(0, -0.2, 0);
         var off_dog_camera = dog_pos.subtract(camera_pos);
         var d_dog_camera = off_dog_camera.length();
         var off_txt = off_dog_camera;
@@ -119,7 +120,7 @@ public class CanineTrackerLocateRenderer {
         var bufferSource = Minecraft.getInstance().renderBuffers().bufferSource();
 
         //TODO For some reason, this line is required for the below lines to work...
-        bufferSource.getBuffer(RenderType.text(Resources.SMALL_WIDGETS));
+        bufferSource.getBuffer(net.minecraft.client.renderer.rendertype.RenderTypes.text(Resources.SMALL_WIDGETS));
 
         float tX = (float)(-font.width(line1) / 2);
         float tY = 0;
@@ -161,7 +162,7 @@ public class CanineTrackerLocateRenderer {
                 stopLocating(); return;
             }
             var tag = tagOptional.get();
-            if (!tag.getUUID("uuid").equals(locatingUUID)) {
+            if (!NBTUtil.getUniqueId(tag, "uuid").equals(locatingUUID)) {
                 setLocating(tag);
             }
             updateCache(player);
@@ -203,7 +204,7 @@ public class CanineTrackerLocateRenderer {
         if (radar == null) return Optional.empty();
         if (!ItemUtil.hasTag(radar)) return Optional.empty();
         var tag = ItemUtil.getTag(radar);
-        if (tag == null || !tag.hasUUID("uuid")) return Optional.empty();
+        if (tag == null || !NBTUtil.hasUniqueId(tag, "uuid")) return Optional.empty();
         return Optional.of(tag);
     }
 
@@ -225,7 +226,7 @@ public class CanineTrackerLocateRenderer {
     }
 
     public static void setLocating(CompoundTag tag) {
-        var uuid = tag.getUUID("uuid");
+        var uuid = NBTUtil.getUniqueId(tag, "uuid");
         var name = tag.getStringOr("name", "");
         var posX = tag.getIntOr("posX", 0);
         var posY = tag.getIntOr("posY", 0);

@@ -181,10 +181,7 @@ public class DogCannotInteractWithScreen extends Screen {
     }
 
     private void drawDefeatedKanji(GuiGraphicsExtractor graphics, int x, int y, int size)  {
-        RenderSystem.enableBlend();
-        RenderSystem.blendFunc(SourceFactor.SRC_ALPHA, DestFactor.ONE_MINUS_SRC_ALPHA);
         graphics.blit(RenderPipelines.GUI_TEXTURED, getDefeatedKanji(this.dog), x, y, 0.0F, 0.0F, size, size, size, size);
-        RenderSystem.disableBlend();
     }
 
     public static Identifier getDefeatedKanji(Dog dog) {

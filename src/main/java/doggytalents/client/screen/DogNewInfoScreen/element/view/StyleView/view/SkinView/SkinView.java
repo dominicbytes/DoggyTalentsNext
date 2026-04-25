@@ -224,7 +224,7 @@ public class SkinView extends AbstractElement {
 
     private Dog createDummyDog() {
         var level = Minecraft.getInstance().level;
-        var dog = DoggyEntityTypes.DOG.get().create(level);
+        var dog = DoggyEntityTypes.DOG.get().create(level, net.minecraft.world.entity.EntitySpawnReason.LOAD);
         return dog;
     }
     

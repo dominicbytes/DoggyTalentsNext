@@ -7,32 +7,34 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import doggytalents.DoggyAccessoryTypes;
 import doggytalents.DoggyTalents;
 import doggytalents.client.ClientSetup;
-import doggytalents.client.entity.model.DogRescueModel;
 import doggytalents.client.entity.model.FisherDogModel;
 import doggytalents.client.entity.model.dog.DogModel;
-import doggytalents.common.entity.Dog;
+import doggytalents.client.entity.render.DogRenderState;
 import doggytalents.common.lib.Resources;
 import doggytalents.common.talent.FisherDogTalent;
-import doggytalents.common.talent.RescueDogTalent;
-import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.RenderLayerParent;
 import net.minecraft.client.renderer.entity.layers.RenderLayer;
+import net.minecraft.client.renderer.texture.OverlayTexture;
 
-public class FisherDogRenderer extends RenderLayer<Dog, DogModel> {
+public class FisherDogRenderer extends RenderLayer<DogRenderState, DogModel> {
 
     private FisherDogModel model;
 
-    public FisherDogRenderer(RenderLayerParent parentRenderer, EntityRendererProvider.Context ctx) {
+    public FisherDogRenderer(RenderLayerParent<DogRenderState, DogModel> parentRenderer, EntityRendererProvider.Context ctx) {
         super(parentRenderer);
         this.model = new FisherDogModel(ctx.bakeLayer(ClientSetup.DOG_FISHER_HAT));
     }
 
     @Override
-    public void render(PoseStack poseStack, MultiBufferSource buffer, int packedLight, Dog dog, float limbSwing, float limbSwingAmount, float partialTicks, float ageInTicks, float relativeHeadYRot, float headPitch) {
-        if (dog.isInvisible()) {
+    public void submit(PoseStack poseStack, SubmitNodeCollector submitNodeCollector, int packedLight, DogRenderState renderState, float yRot, float xRot) {
+        if (renderState.isInvisible) {
             return;
         }
+
+        var dog = renderState.dog;
+        if (dog == null) return;
 
         var dogSkin = dog.getClientSkin();
         if (dogSkin.useCustomModel()) {
@@ -56,7 +58,7 @@ public class FisherDogRenderer extends RenderLayer<Dog, DogModel> {
             dogModel.copyPropertiesTo(this.model);
             this.model.sync(dogModel);
 
-            RenderLayer.renderColoredCutoutModel(this.model, Resources.FISHER_HAT, poseStack, buffer, packedLight, dog, 0xffffffff);
+            RenderLayer.renderColoredCutoutModel(this.model, Resources.FISHER_HAT, poseStack, submitNodeCollector, packedLight, renderState, OverlayTexture.NO_OVERLAY, 0xffffffff);
         }
 
     }

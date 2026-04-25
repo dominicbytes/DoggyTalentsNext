@@ -72,7 +72,7 @@ public abstract class AbstractPromise {
         var accquireds = this.accquiredChunks
             .computeIfAbsent(level.dimension(), k -> new AccquiredChunks(level))
             .chunks();
-        boolean added = accquireds.add(pos.toLong());
+        boolean added = accquireds.add(pos.pack());
         if (!added) {
             //LOGGER.error("chunk already accquired. " + pos );
             return;

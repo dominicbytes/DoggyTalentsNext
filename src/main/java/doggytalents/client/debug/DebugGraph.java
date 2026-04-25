@@ -72,11 +72,11 @@ public class DebugGraph {
         graphics.fill(x, y, x+width, y+height, cl);
         
         for (var entry : this.historyMap.entrySet()) {
-            renderEntry(x, y, width, height, entry.getValue());
+            renderEntry(graphics, x, y, width, height, entry.getValue());
         }
     }
 
-    private void renderEntry(int x, int y, int w, int h, RecordEntry entry) {
+    private void renderEntry(GuiGraphicsExtractor graphics, int x, int y, int w, int h, RecordEntry entry) {
         final float min_value = entry.minValue();
         final float max_value = entry.maxValue();
         final var history = entry.history();
@@ -84,12 +84,8 @@ public class DebugGraph {
         if (history.size() < 2)
             return;
         
-        //RenderSystem.enableBlend();
-        //RenderSystem.defaultBlendFunc();
-        RenderSystem.setShader(GameRenderer::getPositionColorShader);
-        
-        var tessellator = Tesselator.getInstance();
-        var buffer = tessellator.begin(Mode.DEBUG_LINES, DefaultVertexFormat.POSITION_COLOR);
+        var bufferSource = net.minecraft.client.Minecraft.getInstance().renderBuffers().bufferSource();
+        var vertexConsumer = bufferSource.getBuffer(net.minecraft.client.renderer.rendertype.RenderTypes.LINES);
 
         for (int i = 0; i < history.size() - 1; ++i) {
             float val = history.get(i);
@@ -111,12 +107,9 @@ public class DebugGraph {
             int g = ARGB.green(entry.color());
             int b = ARGB.blue(entry.color());
             int a = ARGB.alpha(entry.color());
-            buffer.addVertex(val_x, val_y, 0).setColor(r, g, b, a);
-            buffer.addVertex(val1_x, val1_y, 0).setColor(r, g, b, a);
+            vertexConsumer.addVertex(val_x, val_y, 0).setColor(r, g, b, a);
+            vertexConsumer.addVertex(val1_x, val1_y, 0).setColor(r, g, b, a);
         }
-
-        // TODO: BufferUploader removed in 26.1.2 - debug graph rendering disabled
-        buffer.buildOrThrow(); // discard built buffer
     }
 
     // public static void afterGuiRender(RenderGuiEvent.Post event) {

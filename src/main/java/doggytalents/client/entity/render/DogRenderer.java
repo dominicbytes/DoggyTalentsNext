@@ -133,7 +133,7 @@ public class DogRenderer extends MobRenderer<Dog, DogRenderState, DogModel> {
         if (state.dog != null) {
             return DogTextureManager.INSTANCE.getTexture(state.dog);
         }
-        return DogTextureManager.INSTANCE.getDefaultTexture();
+        return doggytalents.common.lib.Resources.ENTITY_WOLF;
     }
 
     @Override
@@ -241,7 +241,7 @@ public class DogRenderer extends MobRenderer<Dog, DogRenderState, DogModel> {
         }
 
         boolean renderHealthInNameActive =
-                this.entityRenderDispatcher.camera.getEntity().isShiftKeyDown()
+                this.entityRenderDispatcher.camera.entity().isShiftKeyDown()
                 && ConfigHandler.ClientConfig.getConfig(ConfigHandler.CLIENT.RENDER_HEALTH_IN_NAME);
         if (renderHealthInNameActive) {
             text = colorTextWithHealth(dog, text);

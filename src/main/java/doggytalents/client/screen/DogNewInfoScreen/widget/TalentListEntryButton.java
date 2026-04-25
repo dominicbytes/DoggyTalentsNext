@@ -49,14 +49,14 @@ public class TalentListEntryButton extends AbstractButton {
     }
 
     @Override
-    public void onPress() {
+    public void onPress(net.minecraft.client.input.InputWithModifiers input) {
         Store.get(screen).dispatch(ActiveTalentDescSlice.class, 
             new UIAction(UIActionTypes.Talents.OPEN_DESC, new ActiveTalentDescSlice(this.talent))
         );
     }
 
     @Override
-    public void renderWidget(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float pTicks) {
+    protected void extractContents(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float pTicks) {
         int cl = this.isHovered ? DEFAULT_HLCOLOR : DEFAULT_COLOR;
         int lvlcl = this.isHovered ? DEFAULT_LEVEL_HLCOLOR : DEFAULT_LEVEL_COLOR;
         

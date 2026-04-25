@@ -82,7 +82,7 @@ public class FieryReflector extends Accessory implements IAccessoryHasModel {
         private int tickTillRefresh = 0;
         private final Type type;
 
-        private final ArrayList<Pair<Item, Identifier>> recipeCache = new ArrayList<>(5);
+        private final ArrayList<Pair<Item, net.minecraft.resources.ResourceKey<net.minecraft.world.item.crafting.Recipe<?>>>> recipeCache = new ArrayList<>(5);
 
         //Anim Debug workaround, clientside
         public boolean debugForceLowFlameRender = false;
@@ -185,7 +185,7 @@ public class FieryReflector extends Accessory implements IAccessoryHasModel {
                 var recipe = getCookedRecipe(dog, item);
                 if (recipe == null)
                     continue;
-                this.cooking.put(e, recipe.getCookingTime());
+                this.cooking.put(e, recipe.cookingTime());
             }
         }
 
@@ -267,7 +267,7 @@ public class FieryReflector extends Accessory implements IAccessoryHasModel {
             if (recipe == null)
                 return;
             var cookedItem = recipe
-                .getResultItem(dog.level().registryAccess()).copy();
+                .assemble(new net.minecraft.world.item.crafting.SingleRecipeInput(uncookedItem.copy()));
             var cookedItemEntity = new ItemEntity(dog.level(), 
                 e.getX(), e.getY(), e.getZ(), cookedItem);
             cookedItemEntity.setDefaultPickUpDelay();
@@ -292,9 +292,11 @@ public class FieryReflector extends Accessory implements IAccessoryHasModel {
             var item = stack.getItem();
             var firstCheck = getCachedRecipeLoc(item);
             
-            var pairOptional = 
-                dog.level().getRecipeManager().getRecipeFor(RecipeType.SMELTING, 
-                    new SingleRecipeInput(stack), dog.level(), firstCheck);
+            if (!(dog.level() instanceof net.minecraft.server.level.ServerLevel fierySLevel))
+                return null;
+            var pairOptional =
+                fierySLevel.recipeAccess().getRecipeFor(RecipeType.SMELTING,
+                    new SingleRecipeInput(stack), fierySLevel, firstCheck);
             if (!pairOptional.isPresent())
                 return null;
             var pair = pairOptional.get();
@@ -322,13 +324,13 @@ public class FieryReflector extends Accessory implements IAccessoryHasModel {
             this.recipeCache.clear();
         }
 
-        private void cacheResult(Item item, Identifier res) {
+        private void cacheResult(Item item, net.minecraft.resources.ResourceKey<net.minecraft.world.item.crafting.Recipe<?>> res) {
             if (item == null || res == null)
                 return;
             this.recipeCache.add(Pair.of(item, res));
         }
 
-        private @Nullable Identifier getCachedRecipeLoc(Item item) {
+        private @Nullable net.minecraft.resources.ResourceKey<net.minecraft.world.item.crafting.Recipe<?>> getCachedRecipeLoc(Item item) {
             for (var pair : this.recipeCache) {
                 if (pair.getLeft() == item)
                     return pair.getRight();

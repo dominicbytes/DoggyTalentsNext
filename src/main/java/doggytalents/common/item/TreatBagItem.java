@@ -69,7 +69,7 @@ public class TreatBagItem extends Item implements IDogFoodHandler {
             if (playerIn instanceof ServerPlayer) {
                 ServerPlayer serverPlayer = (ServerPlayer) playerIn;
 
-                Screens.openTreatBagScreen(serverPlayer, stack, playerIn.getInventory().selected);
+                Screens.openTreatBagScreen(serverPlayer, stack, playerIn.getInventory().getSelectedSlot());
             }
 
             return InteractionResult.SUCCESS; // consumed stack: stack);
@@ -153,7 +153,7 @@ public class TreatBagItem extends Item implements IDogFoodHandler {
         tooltip.accept(Component.translatable("item.doggytalents.treat_bag.contents"));
         for (var entry : contentsMap.entrySet()) {
             var c1 = Component.translatable("item.doggytalents.starter_bundle.contains",
-                entry.getValue(), entry.getKey().getDescription()).withStyle(
+                entry.getValue(), Component.translatable(entry.getKey().getDescriptionId())).withStyle(
                     Style.EMPTY.withColor(0xffa3a3a3)
                 );
             tooltip.accept(c1);
@@ -174,7 +174,7 @@ public class TreatBagItem extends Item implements IDogFoodHandler {
         var itemList = stack.getOrDefault(DataComponents.CONTAINER, ItemContainerContents.EMPTY);
         if (itemList == ItemContainerContents.EMPTY)
             return List.of();
-        return itemList.stream().collect(Collectors.toList());
+        return itemList.allItemsCopyStream().collect(Collectors.toList());
     }
 
     public static void flushInveotory(ItemStack stack, NonNullList<ItemStack> inv) {

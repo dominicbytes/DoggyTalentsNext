@@ -42,7 +42,7 @@ public class SakeItem extends DogEddibleItem {
             return false;
         if (!(entityIn instanceof Player player))
             return false;
-        if (player.getCooldowns().isOnCooldown(this))
+        if (player.getCooldowns().isOnCooldown(new net.minecraft.world.item.ItemStack(this)))
             return false;
         if (dog.getOwner() != player)
             return false;
@@ -89,12 +89,6 @@ public class SakeItem extends DogEddibleItem {
     @Override
     public InteractionResult use(Level p_42993_, Player p_42994_, InteractionHand p_42995_) {
         return ItemUtils.startUsingInstantly(p_42993_, p_42994_, p_42995_);
-    }
-
-    @Override
-    @Nullable
-    public FoodProperties getFoodProperties(ItemStack stack, @Nullable LivingEntity entity) {
-        return null;
     }
 
     @Override
@@ -156,7 +150,7 @@ public class SakeItem extends DogEddibleItem {
     public void appendHoverText(ItemStack stack, Item.TooltipContext context, net.minecraft.world.item.component.TooltipDisplay tooltipDisplay, java.util.function.Consumer<net.minecraft.network.chat.Component> components,
             TooltipFlag flags) {
         var desc_id = this.getDescriptionId() + ".description";
-        components.add(Component.translatable(desc_id).withStyle(
+        components.accept(Component.translatable(desc_id).withStyle(
             Style.EMPTY.withItalic(true)
         ));
     }

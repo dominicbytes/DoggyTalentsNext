@@ -36,16 +36,10 @@ public class GlowingEyeDogModel extends DogModel {
     public void setupAnim(Dog dog, float limbSwing, float limbSwingAmount, float ageInTicks, float relativeHeadYRot,
             float headPitch) {
         super.setupAnim(dog, limbSwing, limbSwingAmount, ageInTicks, relativeHeadYRot, headPitch);
-        this.glowingEyes.copyFrom(this.head);
-        this.realGlowingEyes.copyFrom(this.realHead);
-    }
-
-    @Override
-    public void renderToBuffer(PoseStack stack, VertexConsumer vertex_consumer, int light, int overlay,
-            int color_overlay) {
+        this.glowingEyes.loadPose(this.head.storePose());
+        this.realGlowingEyes.loadPose(this.realHead.storePose());
         this.glowingEyes.visible = false;
         this.realGlowingEyes.visible = false;
-        super.renderToBuffer(stack, vertex_consumer, light, overlay, color_overlay);
     }
 
     @Override

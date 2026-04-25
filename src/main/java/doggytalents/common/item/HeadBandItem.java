@@ -26,7 +26,7 @@ public class HeadBandItem extends AccessoryItem{
         if (this == DoggyItems.HEAD_BAND_BLANK.get())
             return;
         var desc_id = this.getDescriptionId() + ".description";
-        components.add(Component.translatable(desc_id));
+        components.accept(Component.translatable(desc_id));
     }
 
 }
