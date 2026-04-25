@@ -45,15 +45,11 @@ public class RiceMillBlock extends BaseEntityBlock implements WorldlyContainerHo
     private static final EnumProperty<Direction> FACING = HorizontalDirectionalBlock.FACING;
     protected static final VoxelShape SHAPE = Block.box(4.0D, 0.0D, 4.0D, 12.0D, 16.0D, 12.0D);
 
-    public RiceMillBlock() {
-        super(Block.Properties.of().mapColor(MapColor.WOOD).strength(1.0F, 5.0F).sound(SoundType.WOOD));
+    public RiceMillBlock(BlockBehaviour.Properties props) {
+        super(props.mapColor(MapColor.WOOD).strength(1.0F, 5.0F).sound(SoundType.WOOD));
         registerDefaultState(this.stateDefinition.any().setValue(FACING, Direction.NORTH));
-    
     }
 
-    public RiceMillBlock(BlockBehaviour.Properties props) {
-        this();
-    }
 
     @Override
     public VoxelShape getShape(BlockState state, BlockGetter worldIn, BlockPos pos, CollisionContext selectionContext) {

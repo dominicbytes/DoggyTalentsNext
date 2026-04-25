@@ -52,12 +52,8 @@ public class FoodBowlBlock extends BaseEntityBlock {
     public static final BooleanProperty WATERLOGGED = BlockStateProperties.WATERLOGGED;
     protected static final VoxelShape SHAPE = Block.box(1.0D, 0.0D, 1.0D, 15.0D, 8.0D, 15.0D);
 
-    public FoodBowlBlock() {
-        super(Block.Properties.of().mapColor(MapColor.METAL).strength(1.0F, 5.0F).sound(SoundType.METAL));
-    }
-
     public FoodBowlBlock(BlockBehaviour.Properties props) {
-        this();
+        super(props.mapColor(MapColor.METAL).strength(1.0F, 5.0F).sound(SoundType.METAL));
     }
 
     @Override

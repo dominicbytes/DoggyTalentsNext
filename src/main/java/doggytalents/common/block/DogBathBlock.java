@@ -49,12 +49,8 @@ public class DogBathBlock extends BaseEntityBlock {
     protected static final VoxelShape SHAPE = Block.box(0.0D, 0.0D, 0.0D, 16.0D, 8.0D, 16.0D);
     protected static final VoxelShape SHAPE_COLLISION = Block.box(0.0D, 0.0D, 0.0D, 16.0D, 4.0D, 16.0D);
 
-    public DogBathBlock() {
-        super(Block.Properties.of().mapColor(MapColor.METAL).strength(1F, 5.0F).sound(SoundType.METAL));
-    }
-
     public DogBathBlock(BlockBehaviour.Properties props) {
-        this();
+        super(props.mapColor(MapColor.METAL).strength(1F, 5.0F).sound(SoundType.METAL));
     }
 
     @Override

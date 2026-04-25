@@ -58,7 +58,8 @@ public class DoggyTalentsNext {
         var modEventBus = ModLoadingContext.get().getActiveContainer().getEventBus();
 
         // Mod lifecycle
-        modEventBus.addListener(this::gatherData);
+        modEventBus.addListener(GatherDataEvent.Client.class, this::gatherDataClient);
+        modEventBus.addListener(GatherDataEvent.Server.class, this::gatherDataServer);
         modEventBus.addListener(this::commonSetup);
 
         // Registries
@@ -153,33 +154,35 @@ public class DoggyTalentsNext {
         ClientSetup.onClientSetup(event);
     }
 
-    private void gatherData(final GatherDataEvent event) {
+    private void gatherDataClient(final GatherDataEvent.Client event) {
+        var packOutput = event.getGenerator().getPackOutput();
+
+        DTNPackMetadataProvider.start(event);
+        event.addProvider(new DTBlockstateProvider(packOutput));
+        event.addProvider(new DTItemModelProvider(packOutput));
+
+        DTNDatapackProvider.start(event);
+        DTNDataRegistryProvider.start(event);
+        DTNNeoForgeDataEntry.onGatherData(event);
+    }
+
+    private void gatherDataServer(final GatherDataEvent.Server event) {
         var packOutput = event.getGenerator().getPackOutput();
         var lookup = event.getLookupProvider();
 
         DTNPackMetadataProvider.start(event);
+        event.addProvider(new DTAdvancementProvider(packOutput, lookup));
 
-        if (event instanceof GatherDataEvent.Client) {
-            event.addProvider(new DTBlockstateProvider(packOutput));
-            event.addProvider(new DTItemModelProvider(packOutput));
-        }
-
-        if (event instanceof GatherDataEvent.Server) {
-            event.addProvider(new DTAdvancementProvider(packOutput, lookup));
-
-            DTBlockTagsProvider blockTagProvider = new DTBlockTagsProvider(packOutput, lookup);
-            event.addProvider(blockTagProvider);
-            event.addProvider(new DTItemTagsProvider(packOutput, lookup));
-            event.addProvider(new DTRecipeProvider.Runner(packOutput, lookup));
-            event.addProvider(new DTLootTableProvider(packOutput, lookup));
-            event.addProvider(new DTLootModifierProvider(packOutput, lookup));
-            event.addProvider(new DTEntityTagsProvider(packOutput, lookup));
-        }
+        DTBlockTagsProvider blockTagProvider = new DTBlockTagsProvider(packOutput, lookup);
+        event.addProvider(blockTagProvider);
+        event.addProvider(new DTItemTagsProvider(packOutput, lookup));
+        event.addProvider(new DTRecipeProvider.Runner(packOutput, lookup));
+        event.addProvider(new DTLootTableProvider(packOutput, lookup));
+        event.addProvider(new DTLootModifierProvider(packOutput, lookup));
+        event.addProvider(new DTEntityTagsProvider(packOutput, lookup));
 
         DTNDatapackProvider.start(event);
         DTNDataRegistryProvider.start(event);
-
-        //NeoForge
         DTNNeoForgeDataEntry.onGatherData(event);
     }
 }

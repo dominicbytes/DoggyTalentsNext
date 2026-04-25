@@ -348,6 +348,14 @@ public class ClientEventHandler {
         return true;
     } 
 
+    @SubscribeEvent
+    public void onRenderGuiLayer(net.neoforged.neoforge.client.event.RenderGuiLayerEvent.Pre event) {
+        if (!event.getName().equals(net.neoforged.neoforge.client.gui.VanillaGuiLayers.VEHICLE_HEALTH)) return;
+        if (doggytalents.client.DTNWolfMountCustomGuiOverlay.onRenderVehicleHealth(event.getGuiGraphics(), null)) {
+            event.setCanceled(true);
+        }
+    }
+
     public static boolean shouldRenderAnimDebugNametag(Dog dog) {
         var mc = Minecraft.getInstance();
         var player = mc.player;

@@ -96,8 +96,7 @@ public class DTNClientDogSleepOnManager {
     }
     
 
-    public boolean onLivingModelSetupRotation(LivingEntity living, PoseStack stack, 
-        float anim_timeline, float yrot, float pticks, float scale) {
+    public boolean onLivingModelSetupRotation(LivingEntity living, PoseStack stack) {
         var player_optional = checkIsSleepingOnDog(living);
         if (!player_optional.isPresent())
             return false;

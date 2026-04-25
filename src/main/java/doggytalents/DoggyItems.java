@@ -51,7 +51,7 @@ import java.util.function.Supplier;
 
 public class DoggyItems {
 
-    public static final DeferredRegister<Item> ITEMS = DeferredRegister.create(BuiltInRegistries.ITEM, Constants.MOD_ID);
+    public static final DeferredRegister.Items ITEMS = DeferredRegister.createItems(Constants.MOD_ID);
 
     //DTN Main ==========================
     public static final Supplier<Item> STARTER_BUNDLE = registerWith("starter_bundle", StarterBundleItem::new, 1);
@@ -325,7 +325,7 @@ public class DoggyItems {
     // }
 
     private static <T extends Item> Supplier<T> register(final String name, final Function<Item.Properties, T> sup) {
-        return ITEMS.register(name, () -> sup.apply(createInitialProp()));
+        return ITEMS.registerItem(name, sup);
     }
 
     // TODO: Item color system was removed in 26.1. Item tinting now uses data-driven ItemTintSource.
