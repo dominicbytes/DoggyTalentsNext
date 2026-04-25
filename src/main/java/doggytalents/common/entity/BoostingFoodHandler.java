@@ -40,7 +40,12 @@ public class BoostingFoodHandler implements IDogFoodHandler  {
             dog.addHunger(heal);
             dog.consumeItemFromStack(entityIn, stack);
 
-            // TODO: apply food effects via DataComponents.CONSUMABLE in 26.x
+            var consumable = stack.get(net.minecraft.core.component.DataComponents.CONSUMABLE);
+            if (consumable != null) {
+                for (var effect : consumable.onConsumeEffects()) {
+                    effect.apply(dog.level(), stack, (net.minecraft.world.entity.LivingEntity) dog);
+                }
+            }
 
             if (dog.level() instanceof ServerLevel) {
                 ParticlePackets.DogEatingParticlePacket.sendDogEatingParticlePacketToNearby(

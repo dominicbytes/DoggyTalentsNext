@@ -265,7 +265,15 @@ public class DTNClientPettingManager {
 
     @SubscribeEvent
     public void onPlayerRender(RenderPlayerEvent.Pre event) {
-        // TODO: RenderPlayerEvent.Pre no longer has getEntity() in 26.1.2 - arm pose disabled
+        var mc = net.minecraft.client.Minecraft.getInstance();
+        if (mc.level == null) return;
+        var renderState = (net.minecraft.client.renderer.entity.state.AvatarRenderState) event.getRenderState();
+        var entity = mc.level.getEntity(renderState.id);
+        if (!(entity instanceof Player player)) return;
+        if (!isPettingPlayer(player)) return;
+
+        renderState.leftArmPose = PettingArmPose.VALUE;
+        renderState.rightArmPose = PettingArmPose.VALUE;
     }
 
     private boolean isPettingPlayer(Player player) {
