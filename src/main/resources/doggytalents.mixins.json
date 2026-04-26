@@ -10,6 +10,7 @@
       "ServerLevel_EntityCallbackMixin"
     ],
     "client": [
+      "LocalPlayerXRotMixin",
       "LivingEntityRendererMixin",
       "PlayerModelMixin",
       "CameraMixin",
