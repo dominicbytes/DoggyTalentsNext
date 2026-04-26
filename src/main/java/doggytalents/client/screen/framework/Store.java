@@ -11,8 +11,11 @@ import javax.annotation.Nullable;
 import com.google.common.collect.Maps;
 
 import net.minecraft.client.gui.screens.Screen;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public class Store {
+    private static final Logger LOGGER = LogManager.getLogger("DTN/Store");
     
     private static Store INSTANCE;
 
@@ -73,24 +76,36 @@ public class Store {
     }
 
     private void processUIAction(UIAction action) {
+        LOGGER.info("[DTN store] processUIAction type={} targetSlice={} payload={}",
+            action.type, action.targetSlice, action.payload);
         var targetSlice = action.targetSlice;
         if (targetSlice == null) {
             for (var entry : this.applicationStates.entrySet()) {
                 var storeValue = entry.getValue();
-                if (storeValue == null) return;
+                if (storeValue == null) {
+                    LOGGER.warn("[DTN store] null storeValue for slice {}", entry.getKey());
+                    return;
+                }
                 var oldState = storeValue.state;
                 storeValue.state = storeValue.worker.reducer(storeValue.state, action);
                 if (oldState != storeValue.state) {
+                    LOGGER.info("[DTN store] slice {} state changed: {} -> {}",
+                        entry.getKey().getSimpleName(), oldState, storeValue.state);
                     this.changedSlices.add(entry.getKey());
                 }
             }
             return;
         }
         var storeValue = this.applicationStates.get(targetSlice);
-        if (storeValue == null) return;
+        if (storeValue == null) {
+            LOGGER.warn("[DTN store] no storeValue for targetSlice {}", targetSlice);
+            return;
+        }
         var oldState = storeValue.state;
         storeValue.state = storeValue.worker.reducer(storeValue.state, action);
         if (oldState != storeValue.state) {
+            LOGGER.info("[DTN store] slice {} state changed: {} -> {}",
+                targetSlice.getSimpleName(), oldState, storeValue.state);
             this.changedSlices.add(targetSlice);
         }
     }

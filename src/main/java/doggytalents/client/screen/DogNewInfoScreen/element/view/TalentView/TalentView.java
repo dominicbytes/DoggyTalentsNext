@@ -8,9 +8,12 @@ import doggytalents.client.screen.framework.element.ElementPosition.PosType;
 import doggytalents.common.entity.Dog;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.Screen;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public class TalentView extends AbstractElement {
 
+    private static final Logger LOGGER = LogManager.getLogger("DTN/TalentView");
     Dog dog;
 
     public TalentView(AbstractElement parent, Screen screen, Dog dog) {
@@ -20,6 +23,8 @@ public class TalentView extends AbstractElement {
 
     @Override
     public AbstractElement init() {
+        LOGGER.info("[DTN tab] TalentView.init() called, sizeX={} sizeY={}",
+            this.getSizeX(), this.getSizeY());
 
         int sizeX = this.getSizeX();
         int sizeY = this.getSizeY();
