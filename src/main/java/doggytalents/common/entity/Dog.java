@@ -4411,6 +4411,11 @@ public class Dog extends AbstractDog {
 
         if (this.isDefeated()) return;
 
+        DoggyTalentsNext.LOGGER.info("[DTN tickRidden] dog={} rider={} dog.xRot={} rider.xRot={} isClientSide={}",
+            this.getId(), rider.getName().getString(),
+            String.format("%.1f", this.getXRot()), String.format("%.1f", rider.getXRot()),
+            this.level().isClientSide());
+
         // Face the dog in the direction of the controlling passenger
         this.setYRot(rider.getYRot());
         this.yRotO = this.getYRot();

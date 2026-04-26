@@ -9,6 +9,8 @@ import doggytalents.common.entity.Dog;
 import doggytalents.common.util.Util;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import doggytalents.api.inferface.DTNInteractionResultHolder;
@@ -22,6 +24,7 @@ import net.minecraft.world.level.Level;
 import java.util.UUID;
 
 public class WolfMountTalent extends TalentInstance {
+    private static final Logger LOGGER = LogManager.getLogger("DTN/WolfMount");
 
     private static final Identifier WOLF_MOUNT_JUMP = Util.getResource("wolf_mount_jump");
     private int lastClickTick;
@@ -82,6 +85,9 @@ public class WolfMountTalent extends TalentInstance {
 
         if (!dog.level().isClientSide()) {
             dog.setOrderedToSit(false);
+            LOGGER.info("[DTN mount] setXRot called: player={} dog.xRot={} dog.yRot={} caller={}",
+                player.getName().getString(), dog.getXRot(), dog.getYRot(),
+                new Exception("stack").getStackTrace()[1]);
             player.setYRot(dog.getYRot());
             player.setXRot(dog.getXRot());
             player.startRiding(dog);

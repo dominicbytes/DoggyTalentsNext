@@ -30,10 +30,14 @@ public class CameraMixin {
             if (!Float.isNaN(dtn__lastXRot) && Math.abs(currentXRot - dtn__lastXRot) > 0.01f) {
                 var mc2 = net.minecraft.client.Minecraft.getInstance();
                 String sn = mc2.screen != null ? mc2.screen.getClass().getSimpleName() : "none";
-                LOGGER.info("[DTN camera] xRot changed: {} -> {} screen={}",
+                var vehicle = entity.getVehicle();
+                var passengers = entity.getPassengers();
+                LOGGER.info("[DTN camera] xRot changed: {} -> {} screen={} vehicle={} passengers={}",
                     String.format("%.2f", dtn__lastXRot),
                     String.format("%.2f", currentXRot),
-                    sn);
+                    sn,
+                    vehicle != null ? vehicle.getType().toShortString() + "/xRot=" + String.format("%.1f", vehicle.getXRot()) : "none",
+                    passengers.stream().map(p -> p.getType().toShortString()).toList());
             }
             dtn__lastXRot = currentXRot;
         }
