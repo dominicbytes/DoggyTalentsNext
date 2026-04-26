@@ -18,6 +18,7 @@ import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.PacketFlow;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.server.level.ServerPlayer;
+import net.neoforged.neoforge.client.network.event.RegisterClientPayloadHandlersEvent;
 import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 import net.neoforged.neoforge.network.handling.IPayloadHandler;
@@ -124,16 +125,15 @@ public class DTNNetworkHandler {
 
     public static void onRegisterPayloadEvent(RegisterPayloadHandlersEvent event) {
         var registerer = event.registrar(Constants.PROTOCOL_VERSION);
-        
-        StreamCodec
-            <FriendlyByteBuf, DTNNetworkPayload<?>> 
-            rw_stream_codec = 
+        StreamCodec<FriendlyByteBuf, DTNNetworkPayload<?>> codec =
             StreamCodec.of(DTNNetworkHandler::toBuf, DTNNetworkHandler::fromBuf);
-        
-        IPayloadHandler<DTNNetworkPayload<?>> payload_handler = 
-            DTNNetworkHandler::handlePayload;
+        // Server handler registered here; client handler registered via RegisterClientPayloadHandlersEvent.
+        registerer.playToServer(CHANNEL_ID, codec, DTNNetworkHandler::handlePayload);
+        registerer.playToClient(CHANNEL_ID, codec);
+    }
 
-        registerer.playBidirectional(CHANNEL_ID, rw_stream_codec, payload_handler);
+    public static void onRegisterClientPayloadEvent(RegisterClientPayloadHandlersEvent event) {
+        event.register(CHANNEL_ID, DTNNetworkHandler::handlePayload);
     }
 
     private static final DTNNetworkPayload<Object> ERROR_DATA = new DTNNetworkPayload<Object>(null, null);
