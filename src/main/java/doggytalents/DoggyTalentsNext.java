@@ -101,7 +101,6 @@ public class DoggyTalentsNext {
         forgeEventBus.register(new EventHandler());
 
         if (FMLEnvironment.getDist() == Dist.CLIENT) {
-            modEventBus.addListener(DTNNetworkHandler::onRegisterClientPayloadEvent);
             modEventBus.addListener(DoggyKeybinds::registerDTKeyMapping);
             modEventBus.addListener(this::clientSetup);
             // modEventBus.addListener(DoggyBlocks::registerBlockColours); // TODO: migrate to ItemTintSource
