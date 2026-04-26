@@ -18,7 +18,7 @@ public class Constants {
     // Storage
     public static final String STORAGE_DOG_RESPAWN = "dead_dogs";
     public static final String STORAGE_DOG_LOCATION = "dog_locations_dtn";
-    public static final String STORAGE_DOG_LOCATION_OLD = "dog_locations";
+    public static final String STORAGE_DOG_LOCATION_OLD = "minecraft:dog_locations";
 
     public static final int OPERATOR_PERMISSION = 4;
 
