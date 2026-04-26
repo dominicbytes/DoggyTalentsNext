@@ -25,12 +25,11 @@ public class DogFoodProjectileRenderer extends EntityRenderer<DogFoodProjectile,
     }
 
     private final ItemModelResolver itemModelResolver;
-    private final ItemStack placeholder;
+    private ItemStack placeholder;
 
     public DogFoodProjectileRenderer(Context ctx) {
         super(ctx);
         this.itemModelResolver = ctx.getItemModelResolver();
-        this.placeholder = new ItemStack(Items.SNOWBALL);
     }
 
     @Override
@@ -43,6 +42,7 @@ public class DogFoodProjectileRenderer extends EntityRenderer<DogFoodProjectile,
         super.extractRenderState(entity, state, partialTick);
         var foodStack = entity.getDogFoodStack();
         if (foodStack.isEmpty()) {
+            if (placeholder == null) placeholder = new ItemStack(Items.SNOWBALL);
             foodStack = placeholder;
         }
         this.itemModelResolver.updateForNonLiving(state.item, foodStack, ItemDisplayContext.GROUND, entity);

@@ -25,12 +25,11 @@ public class DogGunpowderProjectileRenderer extends EntityRenderer<DogGunpowderP
     }
 
     private final ItemModelResolver itemModelResolver;
-    private final ItemStack renderStack;
+    private ItemStack renderStack;
 
     public DogGunpowderProjectileRenderer(Context ctx) {
         super(ctx);
         this.itemModelResolver = ctx.getItemModelResolver();
-        this.renderStack = new ItemStack(Items.GUNPOWDER);
     }
 
     @Override
@@ -41,6 +40,7 @@ public class DogGunpowderProjectileRenderer extends EntityRenderer<DogGunpowderP
     @Override
     public void extractRenderState(DogGunpowderProjectile entity, DogGunpowderRenderState state, float partialTick) {
         super.extractRenderState(entity, state, partialTick);
+        if (renderStack == null) renderStack = new ItemStack(Items.GUNPOWDER);
         this.itemModelResolver.updateForNonLiving(state.item, renderStack, ItemDisplayContext.GROUND, entity);
     }
 
