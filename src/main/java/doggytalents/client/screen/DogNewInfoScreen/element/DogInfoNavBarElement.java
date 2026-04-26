@@ -72,6 +72,16 @@ public class DogInfoNavBarElement extends AbstractElement {
 
 
     @Override
+    public boolean isMouseOver(double x, double y) {
+        // The declared bounds only cover the right half of the centered buttons.
+        // Delegate to children so that all buttons are hittable regardless of X.
+        for (var child : children()) {
+            if (child.isMouseOver(x, y)) return true;
+        }
+        return false;
+    }
+
+    @Override
     public void renderElement(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTicks) {
     }
 
