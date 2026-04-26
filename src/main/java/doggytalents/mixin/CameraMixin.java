@@ -28,10 +28,12 @@ public class CameraMixin {
         if (entity != null) {
             float currentXRot = entity.getXRot();
             if (!Float.isNaN(dtn__lastXRot) && Math.abs(currentXRot - dtn__lastXRot) > 0.01f) {
-                LOGGER.info("[DTN camera] xRot changed: {} -> {} (screen open={})",
+                var mc2 = net.minecraft.client.Minecraft.getInstance();
+                String sn = mc2.screen != null ? mc2.screen.getClass().getSimpleName() : "none";
+                LOGGER.info("[DTN camera] xRot changed: {} -> {} screen={}",
                     String.format("%.2f", dtn__lastXRot),
                     String.format("%.2f", currentXRot),
-                    net.minecraft.client.Minecraft.getInstance().screen != null);
+                    sn);
             }
             dtn__lastXRot = currentXRot;
         }
@@ -42,8 +44,9 @@ public class CameraMixin {
             dtn__logTick = 0;
             if (entity != null) {
                 float eyeHeight = entity instanceof LivingEntity le ? le.getEyeHeight() : entity.getEyeHeight();
-                boolean screenOpen = net.minecraft.client.Minecraft.getInstance().screen != null;
-                LOGGER.info("[DTN camera] xRot={} yRot={} | entity.xRot={} entity.getY()={} entity.yo={} eyeHeight={} | pos={} | screenOpen={}",
+                var mc = net.minecraft.client.Minecraft.getInstance();
+                String screenName = mc.screen != null ? mc.screen.getClass().getName() : "none";
+                LOGGER.info("[DTN camera] xRot={} yRot={} | entity.xRot={} entity.getY()={} entity.yo={} eyeHeight={} | pos={} | screen={}",
                     String.format("%.2f", self.xRot()),
                     String.format("%.2f", self.yaw()),
                     String.format("%.2f", entity.getXRot()),
@@ -51,7 +54,7 @@ public class CameraMixin {
                     String.format("%.2f", entity.yo),
                     String.format("%.2f", eyeHeight),
                     self.position(),
-                    screenOpen
+                    screenName
                 );
             } else {
                 LOGGER.info("[DTN camera] entity is null");
