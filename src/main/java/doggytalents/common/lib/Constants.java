@@ -16,8 +16,8 @@ public class Constants {
     public static final String PROTOCOL_VERSION = Integer.toString(3);
 
     // Storage
-    public static final String STORAGE_DOG_RESPAWN = MOD_ID + "DeadDogs";
-    public static final String STORAGE_DOG_LOCATION = MOD_ID + "DogLocations";
+    public static final String STORAGE_DOG_RESPAWN = "dead_dogs";
+    public static final String STORAGE_DOG_LOCATION = "dog_locations_dtn";
     public static final String STORAGE_DOG_LOCATION_OLD = "dog_locations";
 
     public static final int OPERATOR_PERMISSION = 4;
