@@ -168,8 +168,6 @@ import net.minecraft.world.level.portal.TeleportTransition;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.CollisionContext;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
 import net.neoforged.neoforge.common.NeoForgeMod;
 import net.neoforged.neoforge.fluids.FluidType;
 import doggytalents.common.network.PacketDistributor;
@@ -463,13 +461,11 @@ public class Dog extends AbstractDog {
         return this.wetSource.soaked();
     }
 
-    @OnlyIn(Dist.CLIENT)
     public float getShadingWhileWet(float partialTicks) {
         return Math.min(0.5F + Mth.lerp(partialTicks, this.prevTimeWolfIsShaking, this.timeWolfIsShaking) / 2.0F * 0.5F, 1.0F);
     }
 
     @Override
-    @OnlyIn(Dist.CLIENT)
     public float getShakeAngle(float partialTicks, float offset) {
         float f = (Mth.lerp(partialTicks, this.prevTimeWolfIsShaking, this.timeWolfIsShaking) + offset) / 1.8F;
         if (f < 0.0F) {
@@ -482,7 +478,6 @@ public class Dog extends AbstractDog {
     }
 
     @Override
-    @OnlyIn(Dist.CLIENT)
     public float getInterestedAngle(float partialTicks) {
         return Mth.lerp(partialTicks, this.headRotationCourseOld, this.headRotationCourse) * 0.15F * (float)Math.PI;
     }

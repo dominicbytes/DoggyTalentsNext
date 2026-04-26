@@ -17,10 +17,6 @@ import net.minecraft.client.animation.AnimationDefinition;
 import net.minecraft.client.animation.AnimationChannel.Targets;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.util.Mth;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
-
-@OnlyIn(Dist.CLIENT)
 public class DogKeyframeAnimations {
    public static void animate(DogModel model, Dog dog,
         AnimationDefinition animation, long elapsed_in_millis, float interpolation_scale, 

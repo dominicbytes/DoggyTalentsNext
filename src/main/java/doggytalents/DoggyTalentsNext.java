@@ -34,7 +34,6 @@ import doggytalents.common.network.DTNNetworkHandler;
 import doggytalents.common.network.PacketHandler;
 import doggytalents.common.talent.HappyEaterTalent;
 import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
 import net.neoforged.fml.ModLoadingContext;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
@@ -149,7 +148,6 @@ public class DoggyTalentsNext {
         DoggyCommands.register(event.getDispatcher());
     }
 
-    @OnlyIn(Dist.CLIENT)
     public void clientSetup(final FMLClientSetupEvent event) {
         ClientSetup.onClientSetup(event);
     }

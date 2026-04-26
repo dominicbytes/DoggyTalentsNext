@@ -55,8 +55,6 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
 import doggytalents.common.lib.Constants;
 
 import org.apache.commons.lang3.ObjectUtils;
@@ -358,7 +356,6 @@ public class DogBedBlock extends BaseEntityBlock {
     }
 
     // NOTE: Block.appendHoverText removed in 26.1 — tooltip now handled via custom BlockItem
-    @OnlyIn(Dist.CLIENT)
     public static void addBedTooltip(ItemStack stack, List<Component> tooltip, TooltipFlag flagIn) {
         Pair<ICasingMaterial, IBeddingMaterial> materials = DogBedUtil.getMaterials(stack);
 
