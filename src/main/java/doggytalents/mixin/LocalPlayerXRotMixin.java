@@ -40,10 +40,18 @@ public class LocalPlayerXRotMixin {
         if (!(((Object)this) instanceof LocalPlayer)) return;
         var self = (Entity)(Object)this;
         float stored = self.getXRot();
-        // Log whenever the stored value changes (catches the % 360 + clamp result)
-        LOGGER.info("[DTN xRot POST] stored={} (arg={})",
-            String.format("%.2f", stored),
-            String.format("%.2f", xRot));
+        // Only log the "extra" 90-degree sets (not from Entity.turn's own clamp)
+        if (Math.abs(xRot - 90.0f) < 0.1f) {
+            StackTraceElement[] trace = Thread.currentThread().getStackTrace();
+            StringBuilder sb = new StringBuilder();
+            for (int i = 2; i < Math.min(8, trace.length); i++) {
+                sb.append("\n  at ").append(trace[i]);
+            }
+            LOGGER.info("[DTN xRot POST=90] stored={} (arg={}){}",
+                String.format("%.2f", stored),
+                String.format("%.2f", xRot),
+                sb);
+        }
     }
 
 }
