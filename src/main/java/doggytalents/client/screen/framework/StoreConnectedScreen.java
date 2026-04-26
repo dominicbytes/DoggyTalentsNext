@@ -67,11 +67,9 @@ public class StoreConnectedScreen extends Screen implements IStoreSubscriber {
             reRenderRoot();
             this.isResizing = false;
         }
-        if (doRenderBackground())
-            this.extractBackground(graphics, mouseX, mouseY, pTicks);
-
-        // 1.21 only
-        renderDarkBackground_1_21_1_above(graphics);
+        // Background is already extracted by Screen.extractRenderStateWithTooltipAndSubtitles
+        // before extractRenderState is called; calling extractBackground here again would
+        // invoke blurBeforeThisStratum() twice, which crashes in 26.1.2.
 
         for (var renderable : this.renderables) {
             renderable.extractRenderState(graphics, mouseX, mouseY, pTicks);
