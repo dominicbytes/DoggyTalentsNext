@@ -7,16 +7,20 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.world.entity.Entity;
 
-@Mixin(LocalPlayer.class)
+@Mixin(Entity.class)
 public class LocalPlayerXRotMixin {
 
     private static final Logger LOGGER = LogManager.getLogger("DTN/XRot");
 
     @Inject(at = @At("HEAD"), method = "setXRot")
     private void dtn__setXRot(float xRot, CallbackInfo info) {
-        var self = (LocalPlayer)(Object)this;
+        // Only trace calls on the local player
+        if (!(((Object)this) instanceof LocalPlayer)) return;
+        var self = (Entity)(Object)this;
         float old = self.getXRot();
         if (Math.abs(xRot - old) > 0.01f) {
             StackTraceElement[] trace = Thread.currentThread().getStackTrace();

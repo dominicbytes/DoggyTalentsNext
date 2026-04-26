@@ -4,13 +4,13 @@
     "package": "doggytalents.mixin",
     "compatibilityLevel": "JAVA_17",
     "mixins": [
+      "LocalPlayerXRotMixin",
       "EntityMixin",
       "ProjectileMixin",
       "TamableAnimalMixin",
       "ServerLevel_EntityCallbackMixin"
     ],
     "client": [
-      "LocalPlayerXRotMixin",
       "LivingEntityRendererMixin",
       "PlayerModelMixin",
       "CameraMixin",
