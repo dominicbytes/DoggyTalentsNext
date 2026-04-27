@@ -246,16 +246,16 @@ public class DogSkinElement extends AbstractElement {
         int nextId = this.activeSkinId + 1;
 
         if (nextId < locList.size()) {
-            this.renderSkinAndDogModel(nextId, false, graphics, 
-                mouseX, mouseY, e_mX + 32 + 25 + 25, e_mY + 32, 50, true);
+            this.renderSkinAndDogModel(nextId, false, graphics,
+                mouseX, mouseY, e_mX + 32 + 25 + 25, e_mY + 32, 50, false);
         }
 
         if (prevId >= 0) {
-            this.renderSkinAndDogModel(prevId, false, graphics, 
-                mouseX, mouseY, e_mX - 32 - 25 - 25, e_mY + 32, 50, true);
+            this.renderSkinAndDogModel(prevId, false, graphics,
+                mouseX, mouseY, e_mX - 32 - 25 - 25, e_mY + 32, 50, false);
         }
 
-        this.renderSkinAndDogModel(activeSkinId, true, graphics, 
+        this.renderSkinAndDogModel(activeSkinId, true, graphics,
             mouseX, mouseY, e_mX, e_mY + 36, 64, false);
     }
 
