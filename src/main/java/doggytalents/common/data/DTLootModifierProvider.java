@@ -86,13 +86,15 @@ public class DTLootModifierProvider extends GlobalLootModifierProvider {
                         this.registries.lookupOrThrow(net.minecraft.core.registries.Registries.ENTITY_TYPE), DoggyEntityTypes.DOG.get())
                 )
                 .build();
-        var drop_soy_condition =
-            LootItemEntityPropertyCondition
-                .hasProperties(
-                    EntityTarget.THIS, 
-                    EntityPredicate.Builder.entity().of(this.registries.lookupOrThrow(net.minecraft.core.registries.Registries.ENTITY_TYPE), DoggyTags.DROP_SOY_WHEN_DOG_KILL)
-                )
-                .build();
+        // Tag-based conditions fail at parse time in 26.1.2 (tags not yet loaded).
+        // Use AnyOfCondition with the individual entity types from the tag instead.
+        var lookup = this.registries.lookupOrThrow(net.minecraft.core.registries.Registries.ENTITY_TYPE);
+        var drop_soy_condition = net.minecraft.world.level.storage.loot.predicates.AnyOfCondition.anyOf(
+            LootItemEntityPropertyCondition.hasProperties(EntityTarget.THIS, EntityPredicate.Builder.entity().of(lookup, net.minecraft.world.entity.EntityType.ZOMBIE)),
+            LootItemEntityPropertyCondition.hasProperties(EntityTarget.THIS, EntityPredicate.Builder.entity().of(lookup, net.minecraft.world.entity.EntityType.CREEPER)),
+            LootItemEntityPropertyCondition.hasProperties(EntityTarget.THIS, EntityPredicate.Builder.entity().of(lookup, net.minecraft.world.entity.EntityType.SKELETON)),
+            LootItemEntityPropertyCondition.hasProperties(EntityTarget.THIS, EntityPredicate.Builder.entity().of(lookup, net.minecraft.world.entity.EntityType.SPIDER))
+        ).build();
         var random_condition = 
             LootItemRandomChanceCondition.randomChance(SOY_FROM_ZOMBIE_DROP_CHANCE)
             .build();
