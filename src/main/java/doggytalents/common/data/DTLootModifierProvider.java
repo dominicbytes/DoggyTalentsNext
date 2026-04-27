@@ -111,8 +111,8 @@ public class DTLootModifierProvider extends GlobalLootModifierProvider {
 
         public static MapCodec<LootModifier> getCodec() { return CODEC; }
 
-        protected RiceFromGrass(LootItemCondition[] conditionsIn) {
-            super(conditionsIn);
+        protected RiceFromGrass(LootItemCondition[] conditionsIn, int priority) {
+            super(conditionsIn, priority);
         }
 
         @Override
@@ -136,8 +136,8 @@ public class DTLootModifierProvider extends GlobalLootModifierProvider {
 
         public static MapCodec<LootModifier> getCodec() { return CODEC; }
 
-        protected SoyFromZombies(LootItemCondition[] conditionsIn) {
-            super(conditionsIn);
+        protected SoyFromZombies(LootItemCondition[] conditionsIn, int priority) {
+            super(conditionsIn, priority);
         }
 
         @Override
