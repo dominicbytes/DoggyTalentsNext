@@ -74,7 +74,7 @@ public class DTLootModifierProvider extends GlobalLootModifierProvider {
             not_shear_condtion,
             random_condition
         };
-        return new RiceFromGrass(conditions);
+        return new RiceFromGrass(conditions, 0);
     }
 
     private SoyFromZombies createSoyFromZombiesModifier() {
@@ -101,7 +101,7 @@ public class DTLootModifierProvider extends GlobalLootModifierProvider {
             drop_soy_condition,
             random_condition
         };
-        return new SoyFromZombies(conditions);
+        return new SoyFromZombies(conditions, 0);
     }
 
     public static class RiceFromGrass extends LootModifier {
