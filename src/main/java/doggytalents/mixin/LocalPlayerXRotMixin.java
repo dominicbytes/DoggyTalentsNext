@@ -1,33 +1,41 @@
 package doggytalents.mixin;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.ModifyArg;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import net.minecraft.client.player.LocalPlayer;
-import net.minecraft.util.Mth;
-import net.minecraft.world.entity.Entity;
+import net.minecraft.client.MouseHandler;
 
-/**
- * Fix for MC 26.1.2: Entity.setXRot now does Math.clamp(xRot % 360, -90, 90).
- * The % 360 converts large turn deltas to arbitrary mid-range angles instead of
- * properly clamping to ±90. Pre-clamp the xRot before it reaches setXRot so that
- * downward overshoots stay at 90 and upward overshoots stay at -90, matching
- * the 1.21 behaviour where setXRot stored raw values and turn() clamped explicitly.
- */
-@Mixin(Entity.class)
+@Mixin(MouseHandler.class)
 public class LocalPlayerXRotMixin {
 
-    @ModifyArg(
-        method = "turn",
-        at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/Entity;setXRot(F)V", ordinal = 0)
-    )
-    private float dtn__clampTurnXRot(float xRot) {
-        if (!(((Object)this) instanceof LocalPlayer)) return xRot;
-        // Clamp before setXRot so the % 360 in 26.1.2 setXRot cannot wrap values outside [-90,90]
-        return Mth.clamp(xRot, -90.0f, 90.0f);
+    @Shadow private double accumulatedDX;
+    @Shadow private double accumulatedDY;
+
+    private static final Logger LOGGER = LogManager.getLogger("DTN/Mouse");
+    private int dtn__tick = 0;
+
+    @Inject(at = @At("HEAD"), method = "handleAccumulatedMovement")
+    private void dtn__logMouseDelta(CallbackInfo info) {
+        dtn__tick++;
+        if (dtn__tick < 20) return;
+        dtn__tick = 0;
+
+        var mc = net.minecraft.client.Minecraft.getInstance();
+        if (mc == null || mc.player == null) return;
+
+        LOGGER.info("[DTN mouse] accDX={} accDY={} | invertY={} smoothCamera={} sensitivity={} grabbed={}",
+            String.format("%.3f", accumulatedDX),
+            String.format("%.3f", accumulatedDY),
+            mc.options.invertMouseY().get(),
+            mc.options.smoothCamera,
+            String.format("%.2f", mc.options.sensitivity().get()),
+            ((MouseHandler)(Object)this).isMouseGrabbed()
+        );
     }
 
 }

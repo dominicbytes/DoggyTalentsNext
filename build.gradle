@@ -33,7 +33,7 @@ afterEvaluate {
 // --- NEW NEOFORGE BLOCK (Replaces old 'minecraft' and top-level 'runs') ---
 neoForge {
     // This handles the version and the 'neoforge' dependency automatically
-    version = "26.1.2.11-beta"
+    version = "26.1.2.29-beta"
 
     accessTransformers.from file('src/main/resources/META-INF/accesstransformer.cfg')
 
