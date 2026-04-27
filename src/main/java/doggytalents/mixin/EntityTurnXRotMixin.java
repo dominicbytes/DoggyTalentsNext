@@ -1,39 +1,33 @@
 package doggytalents.mixin;
 
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 
 /**
- * Fix for MC 26.1.2: Entity.setXRot now stores Math.clamp(xRot % 360, -90, 90).
+ * MC 26.1.2 changed Entity.setXRot to Math.clamp(xRot % 360, -90, 90).
+ * The % 360 is correct for yaw but breaks pitch: a large negative delta
+ * (mouse moving up) can land at e.g. -200 % 360 = 160 → clamped to 90 (down).
  *
- * Entity.turn() calls setXRot(currentXRot + xDelta) with an unbounded delta.
- * For large deltas, the % 360 can map the value to an angle outside [-90, 90]
- * (e.g., -200 % 360 = 160 → clamped to 90, making upward mouse motion look DOWN).
- * Pre-clamping to [-90, 90] before the first setXRot call in turn() ensures
- * % 360 receives a safe value and the pitch behaves correctly.
- *
- * Only applied for LocalPlayer so server-side and other entities are unaffected.
+ * For the local player, skip the % 360 and clamp directly to [-90, 90].
  */
 @Mixin(Entity.class)
-public class EntityTurnXRotMixin {
+public abstract class EntityTurnXRotMixin {
 
-    @Redirect(
-        method = "turn",
-        at = @At(value = "INVOKE",
-                 target = "Lnet/minecraft/world/entity/Entity;setXRot(F)V",
-                 ordinal = 0)
-    )
-    private void dtn__redirectTurnSetXRot(Entity self, float xRot) {
-        if (self instanceof LocalPlayer) {
-            self.setXRot(Mth.clamp(xRot, -90.0f, 90.0f));
-        } else {
-            self.setXRot(xRot);
-        }
+    @Shadow private float xRot;
+
+    @Inject(at = @At("HEAD"), method = "setXRot", cancellable = true)
+    private void dtn__fixLocalPlayerSetXRot(float xRot, CallbackInfo ci) {
+        if (!(((Object)this) instanceof LocalPlayer)) return;
+        if (!Float.isFinite(xRot)) return;
+        this.xRot = Mth.clamp(xRot, -90.0f, 90.0f);
+        ci.cancel();
     }
 
 }
