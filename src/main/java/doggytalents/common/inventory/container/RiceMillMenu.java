@@ -36,7 +36,7 @@ public class RiceMillMenu extends AbstractContainerMenu {
         this(containerId, inv, new SimpleContainer(RiceMillBlockEntity.TOTOAL_SLOTS), new SimpleContainerData(RiceMillBlockEntity.TOTOAL_DATA_SLOT));
         var player = inv.player;
         var level = player.level();
-        if (level.isClientSide) {
+        if (level.isClientSide()) {
             findClientMill(level, millPos);
         }
     }

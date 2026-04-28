@@ -90,11 +90,11 @@ public class DogMeleeAttackGoal extends Goal implements IHasTickNonRunning {
       } else if (!target.isAlive()) {
          this.dog.setTarget(null); // Disacrd dead target no matter what
          return false;
-      } else if (target.getY() >= dog.level().getMaxBuildHeight()) {
+      } else if (target.getY() >= dog.level().getMaxY()) {
          return false;
       } else if (this.dog.getDogRangedAttack().isApplicable(this.dog)) { 
          return false; 
-      } else if (restriction && !this.dog.isWithinRestriction(target.blockPosition())) {
+      } else if (restriction && !this.dog.isWithinHome(target.blockPosition())) {
          return false;
       }
 
@@ -166,9 +166,9 @@ public class DogMeleeAttackGoal extends Goal implements IHasTickNonRunning {
          return false;
       } else if (!livingentity.isAlive()) {
          return false;
-      } else if (livingentity.getY() >= dog.level().getMaxBuildHeight()) {
+      } else if (livingentity.getY() >= dog.level().getMaxY()) {
          return false;
-      } else if (restriction && !this.dog.isWithinRestriction(livingentity.blockPosition())) {
+      } else if (restriction && !this.dog.isWithinHome(livingentity.blockPosition())) {
          return false;
       } else {
          return !(livingentity instanceof Player)
@@ -362,7 +362,8 @@ public class DogMeleeAttackGoal extends Goal implements IHasTickNonRunning {
          this.resetAttackCooldown();
 
          this.dog.swing(InteractionHand.MAIN_HAND);
-         this.dog.doHurtTarget(target);
+         if (this.dog.level() instanceof net.minecraft.server.level.ServerLevel sLevel)
+             this.dog.doHurtTarget(sLevel, target);
          return true;
       }
       return false;

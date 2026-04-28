@@ -4,9 +4,10 @@ import doggytalents.client.entity.render.RenderUtil;
 import doggytalents.common.util.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.AbstractButton;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
+import net.minecraft.client.input.InputWithModifiers;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
 
@@ -41,12 +42,12 @@ public class FlatCheckbox extends AbstractButton {
     }
     
     @Override
-    public void onPress() {
+    public void onPress(InputWithModifiers input) {
         this.onPress.onChange(this);
     }
 
-    @Override //TODO 1.19.4 ?? 
-    public void renderWidget(GuiGraphics graphics, int mouseX, int mouseY, float pTicks) {
+    @Override
+    protected void extractContents(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float pTicks) {
 
         if (!this.active) {
             this.animTimeline = 0;

@@ -1,10 +1,9 @@
 package doggytalents.client.screen.framework.widget;
 
-import com.mojang.blaze3d.vertex.PoseStack;
-
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.input.InputWithModifiers;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.AbstractButton;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.network.chat.Component;
@@ -29,7 +28,7 @@ public class FlatButton extends AbstractButton {
     }
     
     @Override
-    public void onPress() {
+    public void onPress(InputWithModifiers input) {
         this.onPress.onPress(this);
     }
 
@@ -43,8 +42,8 @@ public class FlatButton extends AbstractButton {
         return this;
     }
 
-    @Override //TODO 1.19.4 ?? 
-    public void renderWidget(GuiGraphics graphics, int mouseX, int mouseY, float pTicks) {
+    @Override
+    protected void extractContents(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float pTicks) {
 
         if (!this.active && !visibleWhenNotActive) return;
 
@@ -60,7 +59,7 @@ public class FlatButton extends AbstractButton {
         int tY = mY - font.lineHeight/2;
         msg = modifyMessage(msg);
         //TODO if the name is too long, draw it cut off with a ..
-        graphics.drawString(font, msg, tX, tY, 0xffffffff);
+        graphics.text(font, msg, tX, tY, 0xffffffff);
     }
 
     protected int maskColor(int color, boolean hightlight) {

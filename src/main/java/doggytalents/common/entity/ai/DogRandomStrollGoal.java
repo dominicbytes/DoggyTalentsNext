@@ -67,7 +67,7 @@ public class DogRandomStrollGoal extends RandomStrollGoal {
     @Nullable
     @Override
     protected Vec3 getPosition() {
-        boolean underwater_random = this.dog.isInWaterOrBubble()
+        boolean underwater_random = this.dog.isInWater()
             && this.dog.canSwimUnderwater()
             && this.dog.isDogSwimming();
         if (underwater_random)  
@@ -77,7 +77,7 @@ public class DogRandomStrollGoal extends RandomStrollGoal {
     }
 
     private Vec3 getDogWaterAvoidRandomPos() {
-        if (this.dog.isInWaterOrBubble()) {
+        if (this.dog.isInWater()) {
             Vec3 vec3 = LandRandomPos.getPos(this.dog, 15, 7);
             return vec3 == null ? super.getPosition() : vec3;
         } else {

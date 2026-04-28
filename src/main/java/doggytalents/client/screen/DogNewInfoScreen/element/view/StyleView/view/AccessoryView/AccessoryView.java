@@ -7,7 +7,7 @@ import doggytalents.client.screen.framework.element.ElementPosition.ChildDirecti
 import doggytalents.client.screen.framework.element.ElementPosition.PosType;
 import doggytalents.common.entity.Dog;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.Screen;
 
 public class AccessoryView extends AbstractElement {
@@ -46,7 +46,7 @@ public class AccessoryView extends AbstractElement {
     }
 
     @Override
-    public void renderElement(GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {
+    public void renderElement(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTicks) {
         // TODO Auto-generated method stub
         
     }

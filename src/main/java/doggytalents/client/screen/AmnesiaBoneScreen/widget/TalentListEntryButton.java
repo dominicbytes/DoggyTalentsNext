@@ -1,7 +1,5 @@
 package doggytalents.client.screen.AmnesiaBoneScreen.widget;
 
-import com.mojang.blaze3d.vertex.PoseStack;
-
 import doggytalents.DoggyTalents;
 import doggytalents.api.registry.Talent;
 import doggytalents.client.screen.AmnesiaBoneScreen.store.UIActionTypes;
@@ -13,10 +11,11 @@ import doggytalents.common.entity.Dog;
 import doggytalents.common.util.DogUtil;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.AbstractButton;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.input.InputWithModifiers;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
 
@@ -49,14 +48,14 @@ public class TalentListEntryButton extends AbstractButton {
     }
 
     @Override
-    public void onPress() {
-        Store.get(screen).dispatch(ActiveTalentDescSlice.class, 
+    public void onPress(InputWithModifiers input) {
+        Store.get(screen).dispatch(ActiveTalentDescSlice.class,
             new UIAction(UIActionTypes.Talents.OPEN_DESC, new ActiveTalentDescSlice(this.talent))
         );
     }
 
     @Override
-    public void renderWidget(GuiGraphics graphics, int mouseX, int mouseY, float pTicks) {
+    protected void extractContents(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float pTicks) {
         int cl = this.isHovered ? DEFAULT_HLCOLOR : DEFAULT_COLOR;
         int lvlcl = this.isHovered ? DEFAULT_LEVEL_HLCOLOR : DEFAULT_LEVEL_COLOR;
         
@@ -91,7 +90,7 @@ public class TalentListEntryButton extends AbstractButton {
         int tX = mX - font.width(msg)/2;
         int tY = mY - font.lineHeight/2;
         //TODO if the name is too long, draw it cut off with a ..
-        graphics.drawString(font, msg, tX, tY, 0xffffffff);
+        graphics.text(font, msg, tX, tY, 0xffffffff);
     }
 
     @Override

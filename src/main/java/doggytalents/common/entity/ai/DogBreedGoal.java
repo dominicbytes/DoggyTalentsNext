@@ -71,6 +71,6 @@ public class DogBreedGoal extends Goal {
     }
 
     private boolean filterEntities(Dog dog) {
-        return breedPredicate.test(this.dog, dog) && this.dog.canMate(dog);
+        return this.world instanceof net.minecraft.server.level.ServerLevel breedSLevel && breedPredicate.test(breedSLevel, this.dog, dog) && this.dog.canMate(dog);
     }
 }

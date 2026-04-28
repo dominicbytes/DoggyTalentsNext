@@ -94,7 +94,7 @@ public class DogGoAwayFromFireGoal extends Goal {
             return;
         var nav = this.dog.getNavigation();
         nav.stop();
-        nav.moveTo(this.path, this.dog.getUrgentSpeedModifier());
+        nav.moveTo(this.path.getPath(), this.dog.getUrgentSpeedModifier());
         var b0 = this.path.getNode(0).asBlockPos();
         DogUtil.stopAndForceLook(dog, b0.getCenter());
         this.dog.getMoveControl().setWantedPosition(b0.getX() + 0.5f, b0.getY(), b0.getZ() + 0.5f, 

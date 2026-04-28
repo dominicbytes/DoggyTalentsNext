@@ -25,7 +25,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.goal.Goal;
-import net.minecraft.world.entity.animal.Wolf;
+import net.minecraft.world.entity.animal.wolf.Wolf;
 import net.minecraft.world.entity.player.Player;
 
 public class RescueDogTalent extends TalentInstance {
@@ -54,7 +54,7 @@ public class RescueDogTalent extends TalentInstance {
 
     @Override
     public void livingTick(AbstractDog abstractDog) {
-        if (abstractDog.level().isClientSide) {
+        if (abstractDog.level().isClientSide()) {
             return;
         }
 
@@ -273,7 +273,7 @@ public class RescueDogTalent extends TalentInstance {
     @Override
     public void readFromNBT(AbstractDog dogIn, CompoundTag compound) {
         super.readFromNBT(dogIn, compound);
-        this.renderBox = compound.getBoolean("renderBox");
+        this.renderBox = compound.getBooleanOr("renderBox", false);
     }
 
     @Override
