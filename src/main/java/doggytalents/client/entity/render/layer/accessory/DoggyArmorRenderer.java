@@ -61,7 +61,8 @@ public class DoggyArmorRenderer extends RenderLayer<DogRenderState, DogModel> {
         if (!ConfigHandler.CLIENT.RENDER_ARMOR.get() || dog.hideArmor())
             return;
 
-        var skin = dog.getClientSkin();
+        var skin = renderState.activeSkin;
+        if (skin == null) return;
         if (skin.useCustomModel()) {
             var model = skin.getCustomModel().getValue();
             if (!model.armorShouldRender(dog))

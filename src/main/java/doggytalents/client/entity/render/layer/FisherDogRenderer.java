@@ -36,7 +36,8 @@ public class FisherDogRenderer extends RenderLayer<DogRenderState, DogModel> {
         var dog = renderState.dog;
         if (dog == null) return;
 
-        var dogSkin = dog.getClientSkin();
+        var dogSkin = renderState.activeSkin;
+        if (dogSkin == null) return;
         if (dogSkin.useCustomModel()) {
             var model = dogSkin.getCustomModel().getValue();
             if (!model.armorShouldRender(dog))

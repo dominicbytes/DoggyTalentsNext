@@ -38,7 +38,8 @@ public class IncapacitatedRenderer extends RenderLayer<DogRenderState, DogModel>
 
         if (!dog.isDefeated()) return;
 
-        var skin = dog.getClientSkin();
+        var skin = renderState.activeSkin;
+        if (skin == null) return;
         if (skin.useCustomModel()) {
             var model = skin.getCustomModel().getValue();
             if (!model.incapShouldRender(dog)) {

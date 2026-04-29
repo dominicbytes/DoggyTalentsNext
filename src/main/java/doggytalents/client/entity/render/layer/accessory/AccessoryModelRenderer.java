@@ -25,8 +25,9 @@ public class AccessoryModelRenderer extends RenderLayer<DogRenderState, DogModel
             return;
         }
 
+        var activeSkin = renderState.activeSkin;
         for (var accessoryInst : dog.getAccessories()) {
-            var skin = dog.getClientSkin();
+            var skin = activeSkin;
             if (skin.useCustomModel()) {
                 var model = skin.getCustomModel().getValue();
                 if (!model.acessoryShouldRender(dog, accessoryInst)) {

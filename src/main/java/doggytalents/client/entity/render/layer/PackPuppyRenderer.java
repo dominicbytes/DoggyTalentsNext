@@ -38,7 +38,8 @@ public class PackPuppyRenderer extends RenderLayer<DogRenderState, DogModel> {
         if (!ConfigHandler.CLIENT.RENDER_CHEST.get())
             return;
 
-        var dogSkin = dog.getClientSkin();
+        var dogSkin = renderState.activeSkin;
+        if (dogSkin == null) return;
         if (dogSkin.useCustomModel()) {
             var model = dogSkin.getCustomModel().getValue();
             if (!model.armorShouldRender(dog))

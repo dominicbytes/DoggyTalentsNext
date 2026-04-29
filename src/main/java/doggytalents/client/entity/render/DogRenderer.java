@@ -94,8 +94,11 @@ public class DogRenderer extends MobRenderer<Dog, DogRenderState, DogModel> {
         );
         state.headPitchForAnim = Mth.lerp(partialTick, dog.xRotO, dog.getXRot());
 
-        // Switch to the correct model in the state
+        // Capture skin at extraction time — dog skin may be temporarily changed for
+        // skin preview rendering and restored before submit() is called.
         var skin = dog.getClientSkin();
+        state.activeSkin = skin;
+        state.skinTexture = DogTextureManager.INSTANCE.getTexture(dog);
         if (skin.useCustomModel()) {
             this.model = skin.getCustomModel().getValue();
         } else {
@@ -113,9 +116,9 @@ public class DogRenderer extends MobRenderer<Dog, DogRenderState, DogModel> {
 
     @Override
     public void submit(DogRenderState state, PoseStack poseStack, SubmitNodeCollector submitNodeCollector, CameraRenderState camera) {
-        // Restore model based on state
-        if (state.dog != null) {
-            var skin = state.dog.getClientSkin();
+        // Restore model based on skin captured at extraction time
+        var skin = state.activeSkin;
+        if (skin != null) {
             if (skin.useCustomModel()) {
                 this.model = skin.getCustomModel().getValue();
             } else {
@@ -130,8 +133,8 @@ public class DogRenderer extends MobRenderer<Dog, DogRenderState, DogModel> {
 
     @Override
     public Identifier getTextureLocation(DogRenderState state) {
-        if (state.dog != null) {
-            return DogTextureManager.INSTANCE.getTexture(state.dog);
+        if (state.skinTexture != null) {
+            return state.skinTexture;
         }
         return doggytalents.common.lib.Resources.ENTITY_WOLF;
     }
@@ -143,8 +146,8 @@ public class DogRenderer extends MobRenderer<Dog, DogRenderState, DogModel> {
         float size = dogIn.isBaby() ? 0.5f
             : dogIn.getDogSize().getScale();
         this.shadowRadius = size * 0.5F;
-        var skin = dogIn.getClientSkin();
-        if (skin.useCustomModel()) {
+        var skin = state.activeSkin;
+        if (skin != null && skin.useCustomModel()) {
             var model = skin.getCustomModel().getValue();
             if (model.hasDefaultScale()) {
                 var default_scale = model.getDefaultScale();

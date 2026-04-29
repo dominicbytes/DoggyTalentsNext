@@ -42,7 +42,7 @@ public class DogMouthItemRenderer extends RenderLayer<DogRenderState, DogModel> 
         if (dog == null) return;
 
         if (!ConfigHandler.CLIENT.MOUTH_ITEM_FORCE_RENDER.get()) {
-            var skin = dog.getClientSkin();
+            var skin = state.activeSkin;
             if (skin.useCustomModel()) {
                 var model = skin.getCustomModel().getValue();
                 if (!model.armorShouldRender(dog))

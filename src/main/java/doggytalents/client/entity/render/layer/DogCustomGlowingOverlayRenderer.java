@@ -25,7 +25,8 @@ public class DogCustomGlowingOverlayRenderer extends RenderLayer<DogRenderState,
         var dog = renderState.dog;
         if (dog == null) return;
 
-        var skin = dog.getClientSkin();
+        var skin = renderState.activeSkin;
+        if (skin == null) return;
         if (!skin.isCustom() || !skin.hasGlowingOverlay())
             return;
 

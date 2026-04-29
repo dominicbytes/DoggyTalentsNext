@@ -42,8 +42,9 @@ public class DefaultAccessoryRenderer extends RenderLayer<DogRenderState, DogMod
             return;
         }
 
+        var activeSkin = renderState.activeSkin;
         for (AccessoryInstance accessoryInst : dog.getClientSortedAccessories()) {
-            var skin = dog.getClientSkin();
+            var skin = activeSkin;
             if (skin.useCustomModel()) {
                 var model = skin.getCustomModel().getValue();
                 if (!model.acessoryShouldRender(dog, accessoryInst)) {
@@ -78,7 +79,7 @@ public class DefaultAccessoryRenderer extends RenderLayer<DogRenderState, DogMod
         boolean isTranslucent = isAcceossryRenderTranslucent(accessoryInst.getAccessory());
         if (texture_rl == null) return;
         boolean tailVisible0 = dogModel.tail.visible;
-        if (dog.getClientSkin().useCustomModel())
+        if (renderState.activeSkin != null && renderState.activeSkin.useCustomModel())
             dogModel.tail.visible = false;
         if (accessoryInst instanceof IColoredObject coloredObject) {
             float[] color = coloredObject.getColor();
@@ -113,7 +114,7 @@ public class DefaultAccessoryRenderer extends RenderLayer<DogRenderState, DogMod
         boolean isTranslucent = isAcceossryRenderTranslucent(accessoryInst.getAccessory());
         if (texture_rl == null) return;
         boolean tailVisible0 = dogModel.tail.visible;
-        if (dog.getClientSkin().useCustomModel())
+        if (renderState.activeSkin != null && renderState.activeSkin.useCustomModel())
             dogModel.tail.visible = false;
 
         //Render the parent model overlay without the front legs.
