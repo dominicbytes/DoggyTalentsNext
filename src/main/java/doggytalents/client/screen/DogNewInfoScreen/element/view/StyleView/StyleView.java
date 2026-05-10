@@ -25,8 +25,6 @@ public class StyleView extends AbstractElement {
         
     }
 
-    //TODO print no accessories when no accessories
-    //TODO shrink the div box.
     @Override
     public AbstractElement init() {
 

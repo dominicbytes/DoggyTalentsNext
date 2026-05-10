@@ -304,7 +304,7 @@ public class DoggyCommands {
             for (DogRespawnData data : respawnData) {
                 joiner.add(Objects.toString(data.getDogId()));
             }
-            throw AMBIGUOUS_NAME_EXCEPTION.create(dogName); //TODO!
+            throw AMBIGUOUS_NAME_EXCEPTION.create(dogName);
         }
 
         return respawn(respawnStorage, respawnData.get(0), source);

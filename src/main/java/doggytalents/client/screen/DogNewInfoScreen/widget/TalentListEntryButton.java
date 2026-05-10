@@ -40,7 +40,6 @@ public class TalentListEntryButton extends AbstractButton {
     public TalentListEntryButton(int x, int y, int width, int height, 
         Talent talent, Screen screen, Dog dog, boolean selected) {
         super(x, y, width, height, Component.translatable(talent.getTranslationKey()));
-        //TODO Auto-generated constructor stub
         this.font = Minecraft.getInstance().font;
         this.talent = talent;
         this.screen = screen;
@@ -93,16 +92,20 @@ public class TalentListEntryButton extends AbstractButton {
                 .withUnderlined(true)
             );
         }
+        msg = truncateToWidth(font, msg, this.width - 4);
         int tX = mX - font.width(msg)/2;
         int tY = mY - font.lineHeight/2;
-        //TODO if the name is too long, draw it cut off with a ..
         graphics.text(font, msg, tX, tY, 0xffffffff);
+    }
+
+    private static Component truncateToWidth(Font font, Component msg, int maxWidth) {
+        if (font.width(msg) <= maxWidth) return msg;
+        var s = font.plainSubstrByWidth(msg.getString(), Math.max(0, maxWidth - font.width("..")));
+        return Component.literal(s + "..").withStyle(msg.getStyle());
     }
 
     @Override
     protected void updateWidgetNarration(NarrationElementOutput p_259858_) {
-        // TODO Auto-generated method stub
-        
     }
-    
+
 }

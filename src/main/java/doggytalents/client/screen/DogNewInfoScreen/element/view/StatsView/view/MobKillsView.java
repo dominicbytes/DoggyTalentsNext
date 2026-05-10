@@ -110,12 +110,11 @@ public class MobKillsView extends AbstractElement {
             mobName.withStyle(
                 Style.EMPTY.withBold(true)
             );
-            //TODO Grammar plural ??
             var kills = entry.getValue();
             graphics.text(font, mobName, startX, pY, 0xffffffff);
             pY += font.lineHeight + LINE_SPACING;
-            var killSentence = dog.getName().getString() + " has killed " 
-                + kills + " " + mobName.getString();
+            var killWord = kills == 1 ? "kill" : "kills";
+            var killSentence = dog.getName().getString() + " has " + kills + " " + killWord + " of " + mobName.getString();
             graphics.text(font, killSentence, startX, pY, 0xffffffff);
             pY += font.lineHeight + LINE_SPACING;
             ++entryDrawm;

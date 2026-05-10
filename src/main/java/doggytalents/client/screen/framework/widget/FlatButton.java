@@ -19,10 +19,9 @@ public class FlatButton extends AbstractButton {
     protected boolean visibleWhenNotActive = false;
     protected int buttonColor = DEFAULT_COLOR;
 
-    public FlatButton(int x, int y, int width, int height, 
+    public FlatButton(int x, int y, int width, int height,
         Component msg, FlatButton.OnPress onPress) {
         super(x, y, width, height, msg);
-        //TODO Auto-generated constructor stub
         this.font = Minecraft.getInstance().font;
         this.onPress = onPress;
     }
@@ -54,11 +53,10 @@ public class FlatButton extends AbstractButton {
         //draw text
         int mX = this.getX() + this.width/2;
         int mY = this.getY() + this.height/2;
-        var msg = this.getMessage();
+        var msg = modifyMessage(this.getMessage());
+        msg = truncateToWidth(font, msg, this.width - 4);
         int tX = mX - font.width(msg)/2;
         int tY = mY - font.lineHeight/2;
-        msg = modifyMessage(msg);
-        //TODO if the name is too long, draw it cut off with a ..
         graphics.text(font, msg, tX, tY, 0xffffffff);
     }
 
@@ -77,10 +75,14 @@ public class FlatButton extends AbstractButton {
         void onPress(FlatButton p_93751_);
     }
 
+    private static Component truncateToWidth(Font font, Component msg, int maxWidth) {
+        if (font.width(msg) <= maxWidth) return msg;
+        var s = font.plainSubstrByWidth(msg.getString(), Math.max(0, maxWidth - font.width("..")));
+        return Component.literal(s + "..").withStyle(msg.getStyle());
+    }
+
     @Override
     protected void updateWidgetNarration(NarrationElementOutput p_259858_) {
-        // TODO Auto-generated method stub
-        
     }
 
 }
