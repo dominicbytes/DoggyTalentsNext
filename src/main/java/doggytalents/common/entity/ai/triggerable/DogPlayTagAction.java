@@ -164,8 +164,7 @@ public class DogPlayTagAction extends TriggerableAction {
 
     @Override
     public void onStop() {
-        // TODO Auto-generated method stub
-        
+
     }
 
     protected boolean canReachTarget(LivingEntity target, double distanceToTargetSqr) {

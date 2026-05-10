@@ -321,7 +321,7 @@ public class ShepherdDogTalent extends TalentInstance {
     //             }
     //         };
     //         this.holdingPred = (stack) -> {
-    //             return stack.getItem() == DoggyItems.WHISTLE.get(); // TODO
+    //             return stack.getItem() == DoggyItems.WHISTLE.get();
     //         };
 
     //         this.sorter = new EntityUtil.Sorter(dogIn);

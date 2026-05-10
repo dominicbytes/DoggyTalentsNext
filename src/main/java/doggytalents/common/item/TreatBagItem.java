@@ -182,7 +182,7 @@ public class TreatBagItem extends Item implements IDogFoodHandler {
 
     @Override
     public boolean shouldCauseReequipAnimation(ItemStack oldStack, ItemStack newStack, boolean slotChanged) {
-        //TODO : do we want to matches the tag as well ? As this one is currently do...
+        // consider also matching item tags here
         return !ItemStack.matches(oldStack, newStack);
     }
 

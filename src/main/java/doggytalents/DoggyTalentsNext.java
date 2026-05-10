@@ -52,7 +52,7 @@ public class DoggyTalentsNext {
 
     public static final Logger LOGGER = LogManager.getLogger(Constants.MOD_ID);
 
-    //TODO AUTOMATION CURSEFORGE !!!
+    // CurseForge publishing automation pending
     public DoggyTalentsNext() {
         var modEventBus = ModLoadingContext.get().getActiveContainer().getEventBus();
 
@@ -103,8 +103,8 @@ public class DoggyTalentsNext {
         if (FMLEnvironment.getDist() == Dist.CLIENT) {
             modEventBus.addListener(DoggyKeybinds::registerDTKeyMapping);
             modEventBus.addListener(this::clientSetup);
-            // modEventBus.addListener(DoggyBlocks::registerBlockColours); // TODO: migrate to ItemTintSource
-            // modEventBus.addListener(DoggyItems::registerItemColours); // TODO: migrate to ItemTintSource
+            // modEventBus.addListener(DoggyBlocks::registerBlockColours); // needs migration to ItemTintSource
+            // modEventBus.addListener(DoggyItems::registerItemColours); // needs migration to ItemTintSource
             modEventBus.addListener(ClientEventHandler::registerModelForBaking);
             modEventBus.addListener(ClientEventHandler::modifyBakedModels);
             modEventBus.addListener(ClientSetup::setupTileEntityRenderers);

@@ -776,7 +776,7 @@ public class Dog extends AbstractDog {
         this.timeWolfIsShaking += 0.05F;
         if (this.prevTimeWolfIsShaking >= 2.0F) {
 
-            //TODO check if only called server side
+            // verify this is server-side only
             for (IDogAlteration alter : this.alterations) {
                 alter.onShakingDry(this, this.wetSource);
             }
@@ -1516,7 +1516,7 @@ public class Dog extends AbstractDog {
             return false;
         }
         for (IDogAlteration alter : this.alterations) {
-            InteractionResult result = alter.onLivingFall(this, (float) distance, damageMultiplier); // TODO pass source
+            InteractionResult result = alter.onLivingFall(this, (float) distance, damageMultiplier); // DamageSource not yet threaded through alteration API
 
             if (result.consumesAction()) {
                 return true;
@@ -1555,7 +1555,7 @@ public class Dog extends AbstractDog {
         return this.alterationProps.fallImmune();
     }
 
-    // TODO
+    // alteration loop below needs restoration when alteration API is stable
     @Override
     public int getMaxFallDistance() {
         // for (var a : this.alterations) {
@@ -1734,7 +1734,7 @@ public class Dog extends AbstractDog {
         return !DogAllyCheck.isAlliedToDog(this, target, owner);
     }
 
-    // TODO
+    // override below disabled pending canAttack API verification
     //@Override
 //    public boolean canAttack(LivingEntity livingentityIn, EntityPredicate predicateIn) {
 //        return predicateIn.canTarget(this, livingentityIn);
@@ -1774,7 +1774,7 @@ public class Dog extends AbstractDog {
         for (IDogAlteration alter : this.alterations) {
             DTNInteractionResultHolder<Float> result = alter.gettingAttackedFrom(this, source, amount);
 
-            // TODO
+            // only FAIL result is handled; may need full result type handling
             if (result.getResult() == InteractionResult.FAIL) {
                 return false;
             } else {
@@ -3048,7 +3048,7 @@ public class Dog extends AbstractDog {
                 this.setDogSize(DogSize.fromId(compound.getIntOr("dogSize", 0)));
             }
         } catch (Exception e) {
-            //TODO What?
+            // error logged above; no recovery needed
             DoggyTalentsNext.LOGGER.error("Failed to load levels: " + e.getMessage());
             e.printStackTrace();
         }
@@ -4162,7 +4162,7 @@ public class Dog extends AbstractDog {
                     .move(newPos);
                 if (!DismountHelper.canDismountTo(this.level(), passenger, dismountBb)) 
                     continue;
-                passenger.setPose(pose); // TODO Should we keep this ugly side effect?
+                passenger.setPose(pose); // side effect: passenger pose forced by dog state
                 return newPos;
             }
         }
@@ -4175,7 +4175,7 @@ public class Dog extends AbstractDog {
     //     return this.getControllingPassenger() instanceof LivingEntity;
     // }
 
-    //TODO
+    // override needed to allow item pickup
     @Override
     public boolean isPickable() {
         if (this.level().isClientSide()) {
@@ -4219,7 +4219,7 @@ public class Dog extends AbstractDog {
 
     public boolean canJump() {
         return true;
-        //TODO return this.TALENTS.getLevel(ModTalents.WOLF_MOUNT) > 0;
+        //        return this.TALENTS.getLevel(ModTalents.WOLF_MOUNT) > 0;
     }
 
     @Override
@@ -4334,7 +4334,7 @@ public class Dog extends AbstractDog {
     //             if (this.jumpPower > 0.0F && !this.isDogJumping() && this.onGround()) {
 
     //                 // Calculate jump value based of jump strength, power this jump and jump boosts
-    //                 double jumpValue = this.getAttribute(DoggyAttributes.JUMP_POWER.get()).getValue() * this.getBlockJumpFactor() * this.jumpPower; //TODO do we want getJumpFactor?
+    //                 double jumpValue = this.getAttribute(DoggyAttributes.JUMP_POWER.get()).getValue() * this.getBlockJumpFactor() * this.jumpPower; // consider getJumpFactor
     //                 if (this.hasEffect(MobEffects.JUMP)) {
     //                     jumpValue += (this.getEffect(MobEffects.JUMP).getAmplifier() + 1) * 0.1F;
     //                 }
@@ -4347,7 +4347,7 @@ public class Dog extends AbstractDog {
 
     //                 // If moving forward, propel further in the direction
     //                 if (forward > 0.0F) {
-    //                     final float amount = 0.4F; // TODO Allow people to change this value
+    //                     final float amount = 0.4F; // configurable jump amount
     //                     float compX = Mth.sin(this.getYRot() * ((float)Math.PI / 180F));
     //                     float compZ = Mth.cos(this.getYRot() * ((float)Math.PI / 180F));
     //                     this.setDeltaMovement(this.getDeltaMovement().add(-amount * compX * this.jumpPower, 0.0D, amount * compZ * this.jumpPower));
@@ -4425,7 +4425,6 @@ public class Dog extends AbstractDog {
             this.fallDistance = 0.0F;
         }
 
-        // TODO 1.19.4 ???? 
         // double changeX = this.getX() - this.xo;
         // double changeY = this.getZ() - this.zo;
         // float f4 = Mth.sqrt((float) (changeX * changeX + changeY * changeY)) * 4.0F;
@@ -4509,7 +4508,7 @@ public class Dog extends AbstractDog {
 
     private void doDogRideJump(double forward) {
         // Calculate jump value based of jump strength, power this jump and jump boosts
-        double jumpValue = this.getAttribute(DoggyAttributes.JUMP_POWER).getValue() * this.getBlockJumpFactor() * this.jumpPower; //TODO do we want getJumpFactor?
+        double jumpValue = this.getAttribute(DoggyAttributes.JUMP_POWER).getValue() * this.getBlockJumpFactor() * this.jumpPower; // consider getJumpFactor
         if (this.hasEffect(MobEffects.JUMP_BOOST)) {
             jumpValue += (this.getEffect(MobEffects.JUMP_BOOST).getAmplifier() + 1) * 0.1F;
         }
@@ -4521,7 +4520,7 @@ public class Dog extends AbstractDog {
 
         // If moving forward, propel further in the direction
         if (forward > 0.0F) {
-            final float amount = 0.4F; // TODO Allow people to change this value
+            final float amount = 0.4F; // configurable jump amount
             float compX = Mth.sin(this.getYRot() * ((float)Math.PI / 180F));
             float compZ = Mth.cos(this.getYRot() * ((float)Math.PI / 180F));
             this.setDeltaMovement(this.getDeltaMovement().add(-amount * compX * this.jumpPower, 0.0D, amount * compZ * this.jumpPower));

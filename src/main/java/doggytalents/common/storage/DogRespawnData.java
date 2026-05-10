@@ -42,7 +42,7 @@ public class DogRespawnData implements IDogData {
     private CompoundTag data;
     private IncapacitatedSyncState killedBy = IncapacitatedSyncState.NONE;
 
-    //TODO Make it list you can only add too
+    // consider making this append-only
     private static final List<String> TAGS_TO_REMOVE = Lists.newArrayList(
             "Pos", "Health", "Motion", "Rotation", "FallDistance", "Fire", "Air", "OnGround",
             "Dimension", "PortalCooldown", "Passengers", "Leash", "InLove", "Leash", "HurtTime",

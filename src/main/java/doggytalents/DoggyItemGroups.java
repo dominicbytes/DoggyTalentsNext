@@ -30,7 +30,7 @@ import static doggytalents.DoggyBlocks.*;
 
 public class DoggyItemGroups {
 
-    //TODO using vanilla key, not forge's key ??? 
+    // uses vanilla registry key (NeoForge no longer has a separate key here)
     public static final DeferredRegister<CreativeModeTab> ITEM_GROUP = DeferredRegister.create(Registries.CREATIVE_MODE_TAB, Constants.MOD_ID);
     public static DeferredHolder<CreativeModeTab, CreativeModeTab> MAIN
         = register("main", () -> CreativeModeTab.builder()

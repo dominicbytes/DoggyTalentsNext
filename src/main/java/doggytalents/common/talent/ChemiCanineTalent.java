@@ -355,7 +355,7 @@ public class ChemiCanineTalent extends TalentInstance {
                     }
                 }
             } else {
-                //TODO maintain some space ??
+                // consider maintaining space between dog and target
                 //this.dog.getNavigation().stop();
                 if (this.talentInst.canAbsorbTarget(dog, target))
                     this.talentInst.absorb(dog, target);

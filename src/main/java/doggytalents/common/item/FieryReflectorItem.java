@@ -17,7 +17,6 @@ public class FieryReflectorItem extends AccessoryItem {
 
     public FieryReflectorItem(Supplier<? extends Accessory> type, Properties properties) {
         super(type, properties);
-        //TODO Auto-generated constructor stub
     }
 
     @Override

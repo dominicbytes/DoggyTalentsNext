@@ -34,7 +34,7 @@ public class DoggyArmorTalent extends TalentInstance {
 
     protected int tickUntilXPSearch;
 
-    protected final int SEARCH_RADIUS = 2; //TODO
+    protected final int SEARCH_RADIUS = 2;
 
     protected int spareValue;
 
@@ -173,7 +173,7 @@ public class DoggyArmorTalent extends TalentInstance {
                 dog.getBoundingBox().inflate(SEARCH_RADIUS)
             );
 
-            //TODO : In the future check if XP Collector Talent is present and ONLY get xp from there
+            // future: when XP Collector Talent is present, route XP through it instead
             for (var x : orbs) {
                 if (itemstack.getDamageValue() <= 0) break;
                 

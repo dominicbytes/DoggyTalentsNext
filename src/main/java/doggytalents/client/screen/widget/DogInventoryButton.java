@@ -95,7 +95,6 @@ public class DogInventoryButton extends AbstractButton {
     public void renderWidget2(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTicks) {
        int i = this.getTextureY();
        graphics.blit(RenderPipelines.GUI_TEXTURED, Resources.SMALL_WIDGETS, this.getX(), this.getY(), 0.0F, (float)(36 + i * 10), this.width, this.height, 256, 256);
-       //TODO : 1.19.4 ???
        //this.renderBg(stack, mc, mouseX, mouseY);
        if (this.openSingle) {
             int tX = this.getX() + 11;

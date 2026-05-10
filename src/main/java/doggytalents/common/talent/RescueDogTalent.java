@@ -84,7 +84,7 @@ public class RescueDogTalent extends TalentInstance {
         dog.triggerAction(new RescueAction(dog, this, target));
     }
 
-    //TODO Decrease the healCost due to healing is more difficult now.
+    // healCost may need tuning
     public int healCost(AbstractDog dog, LivingEntity target) {
         int cost;
         if (this.level() >= 5) {
@@ -96,7 +96,7 @@ public class RescueDogTalent extends TalentInstance {
         return cost;
     }
 
-    //TODO need tuned ? 
+    // may need tuning
     public float healAmount(AbstractDog dog, LivingEntity target) {
         //Bonus level 3+
         float bonus = 0;
@@ -358,7 +358,7 @@ public class RescueDogTalent extends TalentInstance {
                     }
                 }
             } else {
-                //TODO maintain some space ??
+                // consider maintaining space
                 //this.dog.getNavigation().stop();
                 if (this.talentInst.canHealTarget(dog, target))
                     this.talentInst.heal(dog, target);
@@ -437,7 +437,6 @@ public class RescueDogTalent extends TalentInstance {
     //             if (--this.ticksUntilPathRecalc <= 0) {
     //                 this.ticksUntilPathRecalc = 10;
     //                 if (!this.dog.isLeashed() && !this.dog.isPassenger()) {
-    //                     //TODO ?
     //                     // if (this.dog.distanceToSqr(this.target) >= 144.0D) {
     //                     //     DogUtil.guessAndTryToTeleportToOwner(dog, 4);
     //                     // } else {
@@ -447,7 +446,7 @@ public class RescueDogTalent extends TalentInstance {
     //                 }
     //             }
     //         } else {
-    //             //TODO maintain some space ??
+    //             // consider maintaining space
     //             //this.dog.getNavigation().stop();
     //             if (this.talentInst.canHealTarget(dog, target))
     //                 this.talentInst.heal(dog, target);

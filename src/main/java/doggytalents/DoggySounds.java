@@ -29,7 +29,6 @@ public class DoggySounds {
     }
 
     private static Supplier<SoundEvent> register(final String name) {
-        //TODO 1.19.3 ??
         return register(name, () -> SoundEvent.createVariableRangeEvent(Util.getResource(name)));
     }
 

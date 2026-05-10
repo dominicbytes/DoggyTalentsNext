@@ -228,7 +228,7 @@ public class PackPuppyTalent extends TalentInstance {
                 && (Boolean) sl.getGameRules().get(GameRules.KEEP_INVENTORY))
             return;
 
-        //TODO either drop inventory or save to respawn data, currently does both
+        // currently does both: drop and save to respawn data
         // No need to drop anything if dog didn't have pack puppy
         for (int i = 0; i < this.packPuppyHandler.getSlots(); ++i) {
             Containers.dropItemStack(dogIn.level(), dogIn.getX(), dogIn.getY(), dogIn.getZ(), this.packPuppyHandler.getStackInSlot(i));

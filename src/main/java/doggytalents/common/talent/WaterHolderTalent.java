@@ -175,7 +175,7 @@ public class WaterHolderTalent extends TalentInstance {
                         dog.getX(), dog.getY(), dog.getZ(), 
                         this.level*8, 
                         dog.getBbWidth(), 0.8f, dog.getBbWidth(), 
-                        0.5 //TODO Tune
+                        0.5 // tune this value
                     );
                 }
             }
@@ -222,7 +222,7 @@ public class WaterHolderTalent extends TalentInstance {
             e.getX(), e.getY(), e.getZ(), 
             15, 
             e.getBbWidth(), 0.8f, e.getBbWidth(), 
-            0.1 //TODO Tune
+            0.1 // tune this value
         );
         var e_b0 = e.blockPosition();
         var e_b0m = e_b0.mutable();
@@ -456,7 +456,7 @@ public class WaterHolderTalent extends TalentInstance {
         
     }
 
-    // //TODO There is seems like a pattern emerging from this
+    // // there seems to be a pattern emerging from this
     // //And the RescueDogTalent, maybe consider coupling it
     // //together... Or composition is enough already.
     // public static class MoveToExtinguishGoal extends Goal {
@@ -516,7 +516,6 @@ public class WaterHolderTalent extends TalentInstance {
     //             if (--this.ticksUntilPathRecalc <= 0) {
     //                 this.ticksUntilPathRecalc = 10;
     //                 if (!this.dog.isLeashed() && !this.dog.isPassenger()) {
-    //                     //TODO ?
     //                     // if (this.dog.distanceToSqr(this.target) >= 144.0D) {
     //                     //     DogUtil.guessAndTryToTeleportToOwner(dog, 4);
     //                     // } else {

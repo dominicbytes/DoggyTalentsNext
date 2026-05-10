@@ -18,7 +18,6 @@ public abstract class BaseDogPlushie extends Entity {
 
     public BaseDogPlushie(EntityType<?> type, Level level) {
         super(type, level);
-        //TODO Auto-generated constructor stub
     }
 
     @Override

@@ -281,7 +281,7 @@ public class HellHoundTalent extends TalentInstance {
                     dog.getX(), dog.getY(), dog.getZ(), 
                     30, 
                     dog.getBbWidth(), 0.8f, dog.getBbWidth(), 
-                    0.1 //TODO Tune
+                    0.1 // tune this value
                 );
         }
     }

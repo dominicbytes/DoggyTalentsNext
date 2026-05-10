@@ -53,7 +53,7 @@ public class DogArmorContainer extends AbstractContainerMenu {
 
         var dogArmors = dog.dogArmors();
         
-        //TODO 3 -> 4
+        // 3 armor slots; expand to 4 when ready
         for (int i = 0; i < 2; ++i) {  
             final EquipmentSlot equipmentslot = SLOT_IDS[i];
             var dogSlot = DogArmorItemHandlerImpl.DogArmorSlots.byEquipment(equipmentslot);
@@ -125,7 +125,7 @@ public class DogArmorContainer extends AbstractContainerMenu {
             ItemStack itemstack1 = slot.getItem();
             itemstack = itemstack1.copy();
 
-            if (index < 4) { // TODO will change when dog have 4 armor
+            if (index < 4) { // update when 4th armor slot is added
                 if (!moveItemStackTo(itemstack1, 4, this.slots.size(), true)) {
                     return ItemStack.EMPTY;
                 }

@@ -73,7 +73,6 @@ public class RiceMillMenu extends AbstractContainerMenu {
             this.addSlot(new Slot(millContainer, RiceMillBlockEntity.BOWL_SLOT, 58, 35) {
                 @Override
                 public boolean mayPlace(ItemStack stack) {
-                    // TODO Auto-generated method stub
                     return stack.is(Items.BOWL);
                 }
             });

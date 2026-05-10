@@ -112,7 +112,6 @@ public class DoggyBeamEntity extends ThrowableProjectile {
 
     @Override
     protected void defineSynchedData(SynchedEntityData.Builder b) {
-        // TODO Auto-generated method stub
 
     }
 }

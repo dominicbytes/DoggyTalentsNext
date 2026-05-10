@@ -328,7 +328,7 @@ public class DoggyItems {
         return ITEMS.registerItem(name, sup);
     }
 
-    // TODO: Item color system was removed in 26.1. Item tinting now uses data-driven ItemTintSource.
+    // Item color system was removed in 26.1; item tinting now uses data-driven ItemTintSource.
     // Dyeable accessories need to be migrated to the new system.
     // public static void registerItemColours(final RegisterColorHandlersEvent.ItemTintSources event) {
     // }
