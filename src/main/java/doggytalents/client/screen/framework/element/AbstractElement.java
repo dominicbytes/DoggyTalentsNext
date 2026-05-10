@@ -16,7 +16,7 @@ import net.minecraft.client.gui.narration.NarratableEntry;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.client.gui.screens.Screen;
 
-//TODO: maybe implements LayoutElement too
+// could implement LayoutElement
 public abstract class AbstractElement implements Renderable, ContainerEventHandler, NarratableEntry {
 
     @Nullable

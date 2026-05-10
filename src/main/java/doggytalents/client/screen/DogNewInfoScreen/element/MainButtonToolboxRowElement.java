@@ -34,8 +34,8 @@ public class MainButtonToolboxRowElement extends AbstractElement {
     public AbstractElement init() {
 
         int totalWidth = 0;
-        // TODO If state == MAIN then do this
-        
+        // currently renders for all states
+
         var modeButton = new ModeSwitch(0, this.getRealY(), 85, this.getSizeY(),
             this.dog, this.font, getScreen()
         );

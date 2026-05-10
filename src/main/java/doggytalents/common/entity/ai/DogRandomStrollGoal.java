@@ -42,7 +42,7 @@ public class DogRandomStrollGoal extends RandomStrollGoal {
         return super.canContinueToUse();
     }
     
-    //  TODO : Make this more user friendly, maybe make this into a talent or mode
+    //  Make this more user friendly, maybe make this into a talent or mode
     //
     //  But i can see people is going to need this cause i once got my TorchDog into lava
     //Because this reason here.., and it is also kinda annoying to see dogs going in 

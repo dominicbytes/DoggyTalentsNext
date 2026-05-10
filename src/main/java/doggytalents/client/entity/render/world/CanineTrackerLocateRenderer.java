@@ -119,7 +119,7 @@ public class CanineTrackerLocateRenderer {
 
         var bufferSource = Minecraft.getInstance().renderBuffers().bufferSource();
 
-        //TODO For some reason, this line is required for the below lines to work...
+        // This line is required for the below lines to work (pipeline flush)
         bufferSource.getBuffer(net.minecraft.client.renderer.rendertype.RenderTypes.text(Resources.SMALL_WIDGETS));
 
         float tX = (float)(-font.width(line1) / 2);
@@ -185,7 +185,7 @@ public class CanineTrackerLocateRenderer {
         }
         if (locatingUUID == null || player.tickCount % 8 != 0) return;
         var dogs = player.level().getEntitiesOfClass(Dog.class, 
-            //TODO wider ?
+            // consider wider search radius
             player.getBoundingBox().inflate(24, 8, 24),
             dog -> dog.getUUID().equals(locatingUUID));
         if (!dogs.isEmpty()) {

@@ -178,7 +178,6 @@ public class DogMigrateOwnerScreen extends Screen {
         ) {
             //@Override
             public void renderWidgetMain(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float pTicks) {
-                // TODO Auto-generated method stub
                 //super.renderWidget(graphics, mouseX, mouseY, pTicks);
                 var player = Minecraft.getInstance().player;
                 this.active = 

@@ -156,7 +156,7 @@ public class DogGoAwayFromFireGoal extends Goal {
             var dog_bb = dog.getBoundingBox();
 
              /*
-                * TODO Absoluteness of dog bbW.
+                * Absoluteness of dog bbW.
                 * Currently this implementation relies on the fact that currently a dog's bbHeight never
                 * surpass one block like DogSwimNodeEval
             */

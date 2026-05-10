@@ -48,9 +48,8 @@ public class BedFinderRenderer {
         // RenderSystem.enableBlend();
         // RenderSystem.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
 
-        // // TODO: This line has no effect RenderSystem.lineWidth(2.0F);
+        // // This line has no effect RenderSystem.lineWidth(2.0F);
 
-        // //TODO 1.19.4 ??? 
         // //RenderSystem.disableTexture();
         // Vec3 vec3d = Minecraft.getInstance().gameRenderer.getMainCamera().getPosition();
         // double d0 = vec3d.x();

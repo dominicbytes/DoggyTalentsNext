@@ -9,7 +9,6 @@ public class DivElement extends AbstractElement {
 
     public DivElement(AbstractElement parent, Screen screen) {
         super(parent, screen);
-        //TODO Auto-generated constructor stub
     }
 
     @Override

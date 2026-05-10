@@ -25,7 +25,6 @@ public class StyleTabListPanel extends AbstractElement {
         super(parent, screen);
         var mc = this.getScreen().getMinecraft();
         this.font = mc.font;
-        //TODO Auto-generated constructor stub
     }
 
     @Override

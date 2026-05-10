@@ -13,7 +13,7 @@ import java.util.List;
 
 public class DogBreedGoal extends Goal {
 
-    private static final TargetingConditions breedPredicate = TargetingConditions.forNonCombat().range(8.0D).ignoreLineOfSight(); // TODO check this works
+    private static final TargetingConditions breedPredicate = TargetingConditions.forNonCombat().range(8.0D).ignoreLineOfSight(); // verify targeting conditions still work
     private final Dog dog;
     private final Level world;
     private final double moveSpeed;

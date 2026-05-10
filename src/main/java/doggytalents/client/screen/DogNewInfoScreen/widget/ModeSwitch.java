@@ -209,8 +209,6 @@ public class ModeSwitch extends AbstractWidget {
 
     @Override
     protected void updateWidgetNarration(NarrationElementOutput p_259858_) {
-        // TODO Auto-generated method stub
-        
     }
 
     // @Override

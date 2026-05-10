@@ -29,7 +29,6 @@ public class StatsGeneralView extends AbstractElement {
 
     @Override
     public void renderElement(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTicks) {
-        // TODO Add refresh button with interval lock ah no need.
         int startX = this.getRealX() + PADDING_LEFT;
         int pY = this.getRealY() + PADDING_TOP;
         String i18nPrefix = "doggui.stats.general.";

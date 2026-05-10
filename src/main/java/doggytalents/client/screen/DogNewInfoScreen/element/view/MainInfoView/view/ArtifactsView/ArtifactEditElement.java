@@ -39,7 +39,6 @@ public class ArtifactEditElement extends AbstractElement {
 
     public ArtifactEditElement(AbstractElement parent, Screen screen, Player player, Dog dog) {
         super(parent, screen);
-        //TODO Auto-generated constructor stub
         mc = Minecraft.getInstance();
         this.player = player;
         this.dog = dog;

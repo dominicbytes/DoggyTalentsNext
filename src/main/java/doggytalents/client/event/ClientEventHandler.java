@@ -219,7 +219,7 @@ public class ClientEventHandler {
         // RenderSystem.enableBlend();
         // RenderSystem.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
         // RenderSystem.setShaderColor(0.0F, 0.0F, 0.0F, 0.7F);
-        // //TODO Used when drawing outline of bounding box
+        // // Used when drawing outline of bounding box
         // RenderSystem.lineWidth(2.0F);
 
 

@@ -17,7 +17,6 @@ public class AccessoryView extends AbstractElement {
     public AccessoryView(AbstractElement parent, Screen screen, Dog dog) {
         super(parent, screen);
         this.dog = dog;
-        //TODO Auto-generated constructor stub
     }
 
     @Override
@@ -47,8 +46,6 @@ public class AccessoryView extends AbstractElement {
 
     @Override
     public void renderElement(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTicks) {
-        // TODO Auto-generated method stub
-        
     }
     
 }

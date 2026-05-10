@@ -72,7 +72,6 @@ public class DTLootTableProvider extends LootTableProvider {
 
         protected Blocks(HolderLookup.Provider prov) {
             super(EXPLOSION_RESISTANT, FeatureFlags.VANILLA_SET, prov);
-            //TODO Auto-generated constructor stub
         }
 
         private void dropDogBed(Supplier<? extends Block> block) {

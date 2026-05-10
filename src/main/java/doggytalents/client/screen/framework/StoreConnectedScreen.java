@@ -80,7 +80,7 @@ public class StoreConnectedScreen extends Screen implements IStoreSubscriber {
     @Override
     public void setFocused(@Nullable GuiEventListener guiEventListener) {
         if (guiEventListener instanceof AbstractElement) {
-            //TODO Maybe AbstractElement::canFocus() in the future.
+            // AbstractElement::canFocus() could be used here in the future.
             return;
         }
         super.setFocused(guiEventListener);

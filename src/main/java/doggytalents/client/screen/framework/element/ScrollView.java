@@ -143,7 +143,6 @@ public class ScrollView extends AbstractElement {
         
         public ScrollContentContainer(AbstractElement parent, Screen screen) {
             super(parent, screen);
-            //TODO Auto-generated constructor stub
         }
 
         @Override

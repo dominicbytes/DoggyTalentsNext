@@ -104,9 +104,8 @@ public class DogUntameConfirmScreen extends Screen {
         ) {
             //@Override
             public void renderWidgetMain(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float pTicks) {
-                // TODO Auto-generated method stub
                 //super.renderWidget(graphics, mouseX, mouseY, pTicks);
-                
+
                 // var costStr = dogLevel < talent.getMaxLevel() ?
                 //     "Cost : " + talent.getLevelCost(dogLevel + 1)
                 //     : "Max Level Reached.";

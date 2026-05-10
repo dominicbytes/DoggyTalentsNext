@@ -214,10 +214,10 @@ public class DogMeleeAttackGoal extends Goal implements IHasTickNonRunning {
       return true;
    }
 
-   //TODO : Global problem : 
-   //due to the dog move control inaccuracy, the dog may be failed to land on a safe platform because
-   //of the "safe" area is only an 1-block edge which stick out a cliff or something. This is a part of
-   //a bigger problem, the inaccuracy of the moveControl.
+   // Global problem:
+   // due to the dog move control inaccuracy, the dog may be failed to land on a safe platform because
+   // of the "safe" area is only an 1-block edge which stick out a cliff or something. This is a part of
+   // a bigger problem, the inaccuracy of the moveControl.
    @Override
    public void tick() {
       
@@ -356,7 +356,7 @@ public class DogMeleeAttackGoal extends Goal implements IHasTickNonRunning {
       return true;
    }
 
-   //TODO make dog be able to attack in the air
+   // make dog be able to attack in the air
    protected boolean checkAndPerformAttack(LivingEntity target, double distanceToTargetSqr) {
       if (this.canReachTarget(target, distanceToTargetSqr) && this.ticksUntilNextAttack <= 0) {
          this.resetAttackCooldown();

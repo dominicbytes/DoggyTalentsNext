@@ -446,9 +446,8 @@ public class TalentInfoViewElement extends AbstractElement {
                 requestTrain();
             }
         ) {
-            //@Override // TODO 1.19.4 ???
+            //@Override
             public void renderWidgetMain(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float pTicks) {
-                // TODO Auto-generated method stub
                 //super.renderWidget(graphics, mouseX, mouseY, pTicks);
                 int tX = this.getX();
                 int tY = this.getY() - LINE_SPACING - font.lineHeight;

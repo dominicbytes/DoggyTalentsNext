@@ -69,7 +69,7 @@ public class MultiLineFlatButton extends FlatButton {
     }
 
     private void drawRight() {
-        //TODO
+        // not implemented
     }
 
 }

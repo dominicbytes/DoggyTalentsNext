@@ -7,9 +7,8 @@ import net.minecraft.data.DataProvider;
 import net.minecraft.data.PackOutput;
 
 /**
- * TODO: DTBlockstateProvider needs to be rewritten for the 26.1 data generation system.
- * NeoForge's BlockStateProvider and model generator classes were removed/redesigned.
- * Blockstate models should now use the new MC data generation system via net.minecraft.client.data.models.
+ * Stub datagen provider. Blockstate JSON files are committed to the repo; re-run datagen with
+ * ./gradlew runData to regenerate them using the new net.minecraft.client.data.models API.
  */
 public class DTBlockstateProvider implements DataProvider {
 

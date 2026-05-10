@@ -106,8 +106,8 @@ public class DogLowHealthGoal {
             this.dog.dogSoundManager.interuptPlaying();
         }
 
-        //TODO : Group the msg when dog msg owner about him being hurt based on how the dog was previously hurt, 
-        //and make the dog choose accordingly
+        // Group the msg when dog msg owner about him being hurt based on how the dog was previously hurt,
+        // and make the dog choose accordingly
         @Override
         public void tick() {
 

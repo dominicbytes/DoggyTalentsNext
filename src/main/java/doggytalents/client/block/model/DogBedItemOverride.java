@@ -1,8 +1,7 @@
 package doggytalents.client.block.model;
 
 /**
- * TODO: DogBedItemOverride needs to be rewritten for the new 26.1 model system.
- * ItemOverrides was removed.
+ * Stub — ItemOverrides was removed in 26.1. Dog bed model selection is now handled via the block model system directly.
  */
 public class DogBedItemOverride {
     // stub

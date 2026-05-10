@@ -48,7 +48,6 @@ public class DogStatusViewBoxElement extends AbstractElement {
         }) {
             @Override
             public void extractContents(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float pTicks) {
-                // TODO Auto-generated method stub
                 // super.renderWidget(graphics, mouseX, mouseY, pTicks);
                 if (this.isHovered) {
                     ToolTipOverlayManager.get().setComponents(

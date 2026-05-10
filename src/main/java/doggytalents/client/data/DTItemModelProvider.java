@@ -7,9 +7,8 @@ import net.minecraft.data.DataProvider;
 import net.minecraft.data.PackOutput;
 
 /**
- * TODO: DTItemModelProvider needs to be rewritten for the 26.1 data generation system.
- * NeoForge's ItemModelProvider and model generator classes were removed/redesigned.
- * Item models should now use the new MC data generation system via net.minecraft.client.data.models.
+ * Stub datagen provider. Item model JSON files are committed to the repo; re-run datagen with
+ * ./gradlew runData to regenerate them using the new net.minecraft.client.data.models API.
  */
 public class DTItemModelProvider implements DataProvider {
 

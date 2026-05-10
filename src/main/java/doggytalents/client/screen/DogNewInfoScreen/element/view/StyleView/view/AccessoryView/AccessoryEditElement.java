@@ -39,7 +39,6 @@ public class AccessoryEditElement extends AbstractElement {
 
     public AccessoryEditElement(AbstractElement parent, Screen screen, Player player, Dog dog) {
         super(parent, screen);
-        //TODO Auto-generated constructor stub
         mc = Minecraft.getInstance();
         this.player = player;
         this.dog = dog;

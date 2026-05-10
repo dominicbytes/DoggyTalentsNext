@@ -30,7 +30,6 @@ public class FlatCheckbox extends AbstractButton {
 
     public FlatCheckbox(int x, int y, int activeColor, FlatCheckbox.OnChange onPress) {
         super(x, y, 28, 14, Component.empty());
-        //TODO Auto-generated constructor stub
         this.font = Minecraft.getInstance().font;
         this.onPress = onPress;
         this.activeColor = activeColor;
@@ -152,7 +151,5 @@ public class FlatCheckbox extends AbstractButton {
 
     @Override
     protected void updateWidgetNarration(NarrationElementOutput p_259858_) {
-        // TODO Auto-generated method stub
-        
     }
 }
