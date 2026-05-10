@@ -11,6 +11,7 @@ import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.ThrownTridentRenderer;
 import net.minecraft.client.renderer.entity.state.EntityRenderState;
+import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.renderer.state.level.CameraRenderState;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
@@ -52,7 +53,14 @@ public class DogThrownTridentRenderer extends EntityRenderer<DogThrownTrident, D
         stack.pushPose();
         stack.mulPose(Axis.YP.rotationDegrees(state.yRot - 90.0F));
         stack.mulPose(Axis.ZP.rotationDegrees(state.xRot + 90.0F));
-        // TODO: render model using SubmitNodeCollector API when stable
+        collector.submitModel(model, net.minecraft.util.Unit.INSTANCE, stack,
+            model.renderType(ThrownTridentRenderer.TRIDENT_LOCATION),
+            state.lightCoords, OverlayTexture.NO_OVERLAY, 0xffffffff, null);
+        if (state.foil) {
+            collector.submitModel(model, net.minecraft.util.Unit.INSTANCE, stack,
+                net.minecraft.client.renderer.rendertype.RenderTypes.entityGlint(),
+                state.lightCoords, OverlayTexture.NO_OVERLAY, 0xffffffff, null);
+        }
         stack.popPose();
     }
 }

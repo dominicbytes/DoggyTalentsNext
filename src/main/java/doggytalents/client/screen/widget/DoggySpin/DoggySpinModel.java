@@ -235,9 +235,11 @@ public class DoggySpinModel {
         poseStack.translate(offset.x, offset.y, offset.z);
         poseStack.mulPose(rot);
         poseStack.translate(0.0F, -1.501F, 0.0F);
-        // TODO: update lighting setup for new API (Lighting.Entry.ENTITY_IN_UI)
-        this.doRenderModel(poseStack, bufferSource);
-        bufferSource.endBatch();
+        try (var lighting = new Lighting()) {
+            lighting.setupFor(Lighting.Entry.ENTITY_IN_UI);
+            this.doRenderModel(poseStack, bufferSource);
+            bufferSource.endBatch();
+        }
         poseStack.popPose();
     }
     

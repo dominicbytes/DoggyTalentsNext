@@ -37,7 +37,7 @@ public class DTNWolfMountCustomGuiOverlay {
             return false;
         
         int draw_x = graphics.guiWidth() / 2 + 91 - 80;
-        int draw_y = graphics.guiHeight() - 39; // TODO: rightHeight was removed in 26.1
+        int draw_y = graphics.guiHeight() - 39;
 
         var mc = Minecraft.getInstance();
         var font = mc.font;
@@ -105,8 +105,6 @@ public class DTNWolfMountCustomGuiOverlay {
         }
         
 
-        // TODO: rightHeight removed in 26.1 — vehicle health position may overlap
-        
         return true;
     }
 

@@ -11,6 +11,8 @@ import doggytalents.common.entity.misc.Piano.PianoType;
 import doggytalents.common.lib.Resources;
 import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.entity.EntityRenderer;
+import net.minecraft.client.renderer.rendertype.RenderTypes;
+import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.EntityRendererProvider.Context;
 import net.minecraft.client.renderer.entity.state.EntityRenderState;
@@ -27,6 +29,7 @@ public class PianoRenderer extends EntityRenderer<Piano, PianoRenderer.PianoRend
         public float yRot;
         public PianoType pianoType;
         public Identifier texture;
+        public boolean fallboardOpen;
     }
 
     public PianoRenderer(EntityRendererProvider.Context ctx) {
@@ -46,6 +49,7 @@ public class PianoRenderer extends EntityRenderer<Piano, PianoRenderer.PianoRend
         state.yRot = Mth.wrapDegrees(entity.getYRot());
         state.pianoType = entity.getPianoType();
         state.texture = getTextureForPiano(entity);
+        state.fallboardOpen = !entity.isFallboardClosed();
     }
 
     private Identifier getTextureForPiano(Piano piano) {
@@ -81,7 +85,16 @@ public class PianoRenderer extends EntityRenderer<Piano, PianoRenderer.PianoRend
         stack.scale(-1.0F, -1.0F, 1.0F);
         stack.translate(0.0F, -1.501F, 0.0F);
         stack.mulPose(Axis.YP.rotationDegrees(state.yRot));
-        // TODO: render model using SubmitNodeCollector API when stable
+        if (state.pianoType == PianoType.UPRIGHT) {
+            collector.submitModel(modelUpright, state, stack,
+                RenderTypes.entityCutout(getTextureLocation(state)),
+                state.lightCoords, OverlayTexture.NO_OVERLAY, 0xffffffff, null);
+        } else {
+            model.setFallboard(state.fallboardOpen);
+            collector.submitModel(model, state, stack,
+                RenderTypes.entityCutout(getTextureLocation(state)),
+                state.lightCoords, OverlayTexture.NO_OVERLAY, 0xffffffff, null);
+        }
         stack.popPose();
     }
 }

@@ -7,7 +7,6 @@ import doggytalents.client.ClientSetup;
 import doggytalents.client.entity.model.misc.SamoyedPlushieModel;
 import doggytalents.common.entity.misc.SamoyedPlushie;
 import doggytalents.common.lib.Resources;
-import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
@@ -52,8 +51,9 @@ public class SamoyedPlushieRenderer extends EntityRenderer<SamoyedPlushie, Samoy
         stack.scale(-0.6F, -0.6F, 0.6F);
         stack.translate(0.0F, -1.5F, 0.0F);
         stack.mulPose(Axis.YP.rotationDegrees(state.yRot));
-        var renderType = RenderTypes.entityTranslucent(Resources.SAMOYED_PLUSHIE_TOY);
-        // TODO: render model using SubmitNodeCollector API when stable
+        collector.submitModel(model, state, stack,
+            RenderTypes.entityTranslucent(Resources.SAMOYED_PLUSHIE_TOY),
+            state.lightCoords, OverlayTexture.NO_OVERLAY, 0xffffffff, null);
         stack.popPose();
     }
 }

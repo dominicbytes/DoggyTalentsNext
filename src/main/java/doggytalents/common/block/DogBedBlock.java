@@ -355,21 +355,20 @@ public class DogBedBlock extends BaseEntityBlock {
         return true;
     }
 
-    // NOTE: Block.appendHoverText removed in 26.1 — tooltip now handled via custom BlockItem
-    public static void addBedTooltip(ItemStack stack, List<Component> tooltip, TooltipFlag flagIn) {
+    public static void addBedTooltip(ItemStack stack, java.util.function.Consumer<Component> tooltip, TooltipFlag flagIn) {
         Pair<ICasingMaterial, IBeddingMaterial> materials = DogBedUtil.getMaterials(stack);
 
-        tooltip.add(Component.translatable("dogbed.casing.title"));
-        tooltip.add(materials.getLeft() != null
+        tooltip.accept(Component.translatable("dogbed.casing.title"));
+        tooltip.accept(materials.getLeft() != null
                 ? materials.getLeft().getTooltip()
                 : Component.translatable("dogbed.casing.null").withStyle(ChatFormatting.RED));
-        tooltip.add(Component.translatable("dogbed.bedding.title"));
-        tooltip.add(materials.getRight() != null
+        tooltip.accept(Component.translatable("dogbed.bedding.title"));
+        tooltip.accept(materials.getRight() != null
             ? materials.getRight().getTooltip()
             : Component.translatable("dogbed.bedding.null").withStyle(ChatFormatting.RED));
 
         if (materials.getLeft() == null && materials.getRight() == null) {
-            tooltip.add(Component.translatable("dogbed.explain.missing").withStyle(ChatFormatting.ITALIC));
+            tooltip.accept(Component.translatable("dogbed.explain.missing").withStyle(ChatFormatting.ITALIC));
         }
 
         CompoundTag tag = ItemUtil.getTagElement(stack, "doggytalents");
@@ -379,15 +378,15 @@ public class DogBedBlock extends BaseEntityBlock {
             Component ownerName = NBTUtil.getTextComponent(tag, "ownerName");
 
             if (name != null) {
-                tooltip.add(Component.literal("Bed Name: ").withStyle(ChatFormatting.WHITE).append(name));
+                tooltip.accept(Component.literal("Bed Name: ").withStyle(ChatFormatting.WHITE).append(name));
             }
 
             if (ownerName != null) {
-                tooltip.add(Component.literal("Name: ").withStyle(ChatFormatting.DARK_AQUA).append(ownerName));
+                tooltip.accept(Component.literal("Name: ").withStyle(ChatFormatting.DARK_AQUA).append(ownerName));
             }
 
             if (ownerId != null && flagIn.isAdvanced()) {
-                tooltip.add(Component.literal("UUID: ").withStyle(ChatFormatting.AQUA).append(Component.literal(ownerId.toString())));
+                tooltip.accept(Component.literal("UUID: ").withStyle(ChatFormatting.AQUA).append(Component.literal(ownerId.toString())));
             }
         }
     }

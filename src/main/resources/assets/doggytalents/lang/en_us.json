@@ -5,6 +5,7 @@
    "block.doggytalents.dog_bed.reclaim": "%s has reclaimed %s bed.",
    "block.doggytalents.food_bowl": "Food Bowl",
    "block.doggytalents.dog_bath": "Dog Bath",
+   "block.doggytalents.dog_bath.description": "Fill with water using a Water Bucket or Water Bottle. Dogs that walk through will be cleaned automatically.",
 
    "item.doggytalents.throw_bone": "Throw Bone",
    "item.doggytalents.throw_bone_wet": "Drool Throw Bone",

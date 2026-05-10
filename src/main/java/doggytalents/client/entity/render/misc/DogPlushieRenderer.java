@@ -59,7 +59,16 @@ public class DogPlushieRenderer extends EntityRenderer<DogPlushie, DogPlushieRen
         stack.scale(-0.6F, -0.6F, 0.6F);
         stack.translate(0.0F, -1.05F, 0.0F);
         stack.mulPose(Axis.YP.rotationDegrees(state.yRot));
-        // TODO: render model using SubmitNodeCollector API when stable
+        // Body
+        collector.submitModel(model, state, stack,
+            RenderTypes.entityTranslucent(getTextureLocation(state)),
+            state.lightCoords, OverlayTexture.NO_OVERLAY, 0xffffffff, null);
+        // Collar overlay tinted with collar color
+        var collarTex = state.collarThicc ? Resources.COLLAR_THICC : Resources.COLLAR_DEFAULT;
+        int collarArgb = ARGB.color(255, ARGB.red(state.collarColor), ARGB.green(state.collarColor), ARGB.blue(state.collarColor));
+        collector.submitModel(model, state, stack,
+            RenderTypes.entityTranslucent(collarTex),
+            state.lightCoords, OverlayTexture.NO_OVERLAY, collarArgb, null);
         stack.popPose();
     }
 }
