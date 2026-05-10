@@ -17,6 +17,7 @@ import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.client.renderer.state.level.CameraRenderState;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.world.phys.Vec3;
+import net.minecraft.util.Unit;
 
 public class RiceMillRenderer implements BlockEntityRenderer<RiceMillBlockEntity, RiceMillRenderer.RiceMillRenderState> {
 
@@ -27,7 +28,7 @@ public class RiceMillRenderer implements BlockEntityRenderer<RiceMillBlockEntity
     }
 
     public static class RiceMillRenderState extends BlockEntityRenderState {
-        public float animProgress;
+        public long animTimeMillis;
         public net.minecraft.core.Direction facing;
     }
 
@@ -39,15 +40,27 @@ public class RiceMillRenderer implements BlockEntityRenderer<RiceMillBlockEntity
     @Override
     public void extractRenderState(RiceMillBlockEntity mill, RiceMillRenderState state, float partialTick, Vec3 cameraPos, ModelFeatureRenderer.CrumblingOverlay crumblingOverlay) {
         BlockEntityRenderState.extractBase(mill, state, crumblingOverlay);
-        state.animProgress = partialTick;
-        var blockState = mill.getBlockState();
-        state.facing = RiceMillBlock.getFacing(blockState);
+        state.facing = RiceMillBlock.getFacing(mill.getBlockState());
+        double timeLine = mill.isSpinning()
+            ? (mill.getAnimationTick() + partialTick) % (double) RiceMillBlockEntity.GRIND_ANIM_TICK_LEN
+            : 0.0;
+        state.animTimeMillis = doggytalents.common.util.Util.tickMayWithPartialToMillis(timeLine);
     }
 
     @Override
     public void submit(RiceMillRenderState state, PoseStack stack, SubmitNodeCollector collector, CameraRenderState cameraRenderState) {
-        // TODO: migrate to SubmitNodeCollector-based rendering
-        // The full render is currently disabled pending render state migration
+        stack.pushPose();
+        stack.scale(1f, -1f, -1f);
+        stack.translate(0.5f, 0f, -0.5f);
+        stack.mulPose(Axis.YP.rotationDegrees(state.facing.getOpposite().toYRot()));
+        stack.scale(2f, 2f, 2f);
+        stack.translate(-0.25f, -1.501f, -0.25f);
+        model.resetAllPose();
+        model.setupAnimFromTime(state.animTimeMillis);
+        collector.submitModel(model, net.minecraft.util.Unit.INSTANCE, stack,
+            RenderTypes.entityCutout(Resources.RICE_MILL_MODEL),
+            state.lightCoords, OverlayTexture.NO_OVERLAY, 0xffffffff, state.breakProgress);
+        stack.popPose();
     }
 
     // Neoforge IBlockEntityRendererExtension

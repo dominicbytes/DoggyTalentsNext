@@ -64,6 +64,10 @@ public class RiceMillModel extends SimpleAnimatedModel {
 
 	private Vector3f tempVec = new Vector3f();
 
+	public void setupAnimFromTime(long animTimeMillis) {
+		DogKeyframeAnimations.animateSimple(this, GRIND_ANIM, animTimeMillis, 1, tempVec);
+	}
+
 	public void setUpMillAnim(RiceMillBlockEntity mill, float pTicks) {
 		if (!mill.isSpinning())
 			pTicks = 0;
