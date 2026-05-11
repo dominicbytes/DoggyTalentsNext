@@ -135,27 +135,26 @@ public class DTNItemCategory {
     }
 
     public static Stream<ItemStack> getRandomBedsForTab() {
-        final int maxBeddingEntries = 13;
-        final int maxCasingEntries = 13;
+        // Show one bed per bedding type (wool color) with the first available casing.
+        // Item-model differentiation (distinct per-material textures) requires the
+        // data-component model system — expand this list when that is implemented.
         var beddingList = DogBedMaterialManager.getBeddings().entrySet().stream()
             .map(x -> x.getValue())
             .filter(x -> !(x instanceof DogBedMaterialManager.NaniBedding))
+            .sorted(java.util.Comparator.comparing(x -> x.getSaveKey().toString()))
             .collect(Collectors.toList());
         var casingList = DogBedMaterialManager.getCasings().entrySet().stream()
             .map(x -> x.getValue())
             .filter(x -> !(x instanceof DogBedMaterialManager.NaniCasing))
+            .sorted(java.util.Comparator.comparing(x -> x.getSaveKey().toString()))
             .collect(Collectors.toList());
-        
-        Collections.shuffle(beddingList);
-        Collections.shuffle(casingList);
+        if (casingList.isEmpty() || beddingList.isEmpty())
+            return java.util.stream.Stream.of(DogBedUtil.createItemStack(
+                DogBedMaterialManager.NaniCasing.NULL, DogBedMaterialManager.NaniBedding.NULL));
+        var defaultCasing = casingList.get(0);
         var bed_list = new ArrayList<ItemStack>();
-        for (int i = 0; i < Math.min(maxCasingEntries, casingList.size()); ++i) {
-            for (int j = 0; j < Math.min(maxBeddingEntries, beddingList.size()); ++j) {
-                var beddingId = beddingList.get(j);
-                var casingId = casingList.get(i);
-                var created = DogBedUtil.createItemStack(casingId, beddingId);
-                bed_list.add(created);
-            }
+        for (var beddingId : beddingList) {
+            bed_list.add(DogBedUtil.createItemStack(defaultCasing, beddingId));
         }
         return bed_list.stream();
     }

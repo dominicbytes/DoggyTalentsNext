@@ -67,7 +67,13 @@ public class DogFollowOwnerGoalDefeated extends Goal {
     public void tick() {
         if (this.owner == null) return;
         this.dog.getLookControl().setLookAt(this.owner, 10.0F, this.dog.getMaxHeadXRot());
-        if (--this.tickTillPathRecalc > 0 ) 
+        if (tickTillWhine <= 0) {
+            var sound = this.dog.dogMood.getLowHealthWhine();
+            if (sound != null)
+                this.dog.playSound(sound, this.dog.getSoundVolume(), this.dog.getVoicePitch());
+            this.tickTillWhine = 60;
+        }
+        if (--this.tickTillPathRecalc > 0)
             return;
         this.tickTillPathRecalc = 15;
         this.dog.getNavigation().moveTo(owner, 1.0f);
@@ -75,10 +81,7 @@ public class DogFollowOwnerGoalDefeated extends Goal {
 
     @Override
     public void stop() {
-        if (this.dog.distanceToSqr(owner) > 256) {
-            // future: play whine sound here
-            this.tickTillWhine = 20;
-        }
+        this.tickTillWhine = 20;
         this.owner = null;
     }
     
