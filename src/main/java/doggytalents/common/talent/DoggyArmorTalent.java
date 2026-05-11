@@ -36,7 +36,7 @@ public class DoggyArmorTalent extends TalentInstance {
 
     protected final int SEARCH_RADIUS = 2;
 
-    protected int spareValue;
+    protected float spareValue;
 
     public DoggyArmorTalent(Talent talentIn, int levelIn) {
         super(talentIn, levelIn);
@@ -64,7 +64,7 @@ public class DoggyArmorTalent extends TalentInstance {
         super.writeToNBT(dogIn, compound);
 
         compound.merge(dogIn.dogArmors().serializeNBT(dogIn.registryAccess()));
-        compound.putInt("armors_spareXp", level);
+        compound.putInt("armors_spareXp", Math.round(this.spareValue));
     }
 
     private boolean mayNeedsDataUpgrade = false;
@@ -74,7 +74,7 @@ public class DoggyArmorTalent extends TalentInstance {
         try {
             dogIn.dogArmors().deserializeNBT(dogIn.registryAccess(), compound);
             if (compound.contains("armors_spareXp")) {
-                this.spareValue = compound.getIntOr("armors_spareXp", 0);
+                this.spareValue = (float) compound.getIntOr("armors_spareXp", 0);
                 mayNeedsDataUpgrade = false;
             } else {
                 this.spareValue = 0;

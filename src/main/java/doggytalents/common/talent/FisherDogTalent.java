@@ -27,6 +27,7 @@ import net.minecraft.world.item.crafting.SingleRecipeInput;
 import net.minecraft.world.level.storage.loot.BuiltInLootTables;
 import net.minecraft.world.level.storage.loot.LootParams;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
+import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 
 public class FisherDogTalent extends TalentInstance {
 
@@ -73,7 +74,10 @@ public class FisherDogTalent extends TalentInstance {
             loot_table = BuiltInLootTables.FISHING_TREASURE;
         }
         var loot_param = new LootParams.Builder(sLevel)
-            .create(LootContextParamSets.EMPTY);
+            .withParameter(LootContextParams.ORIGIN, dog.position())
+            .withParameter(LootContextParams.THIS_ENTITY, dog)
+            .withOptionalParameter(LootContextParams.TOOL, new ItemStack(Items.FISHING_ROD))
+            .create(LootContextParamSets.FISHING);
         var loot_list = sLevel.getServer().reloadableRegistries()
             .getLootTable(loot_table)
             .getRandomItems(loot_param);
