@@ -17,7 +17,6 @@ import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.client.renderer.state.level.CameraRenderState;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.world.phys.Vec3;
-import net.minecraft.util.Unit;
 
 public class RiceMillRenderer implements BlockEntityRenderer<RiceMillBlockEntity, RiceMillRenderer.RiceMillRenderState> {
 
@@ -57,9 +56,14 @@ public class RiceMillRenderer implements BlockEntityRenderer<RiceMillBlockEntity
         stack.translate(-0.25f, -1.501f, -0.25f);
         model.resetAllPose();
         model.setupAnimFromTime(state.animTimeMillis);
-        collector.submitModel(model, net.minecraft.util.Unit.INSTANCE, stack,
+        int light = state.lightCoords;
+        collector.submitCustomGeometry(stack,
             RenderTypes.entityCutout(Resources.RICE_MILL_MODEL),
-            state.lightCoords, OverlayTexture.NO_OVERLAY, 0xffffffff, state.breakProgress);
+            (pose, consumer) -> {
+                var ps = new com.mojang.blaze3d.vertex.PoseStack();
+                ps.last().set(pose);
+                model.renderToBuffer(ps, consumer, light, OverlayTexture.NO_OVERLAY, 0xffffffff);
+            });
         stack.popPose();
     }
 

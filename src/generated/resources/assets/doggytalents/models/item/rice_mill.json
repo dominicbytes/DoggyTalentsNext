@@ -1,3 +1,6 @@
 {
-  "parent": "doggytalents:block/rice_mill"
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "doggytalents:item/rice_mill"
+  }
 }

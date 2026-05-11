@@ -67,7 +67,7 @@ public class DoggyBlocks {
             final Function<BlockBehaviour.Properties, T> blockConstructor,
             BiFunction<T, Item.Properties, BlockItem> itemFactory) {
         Supplier<T> blockObj = register(name, blockConstructor);
-        ITEMS.registerItem(name, props -> itemFactory.apply(blockObj.get(), props));
+        ITEMS.registerItem(name, props -> itemFactory.apply(blockObj.get(), props.useBlockDescriptionPrefix()));
         return blockObj;
     }
 
@@ -76,7 +76,7 @@ public class DoggyBlocks {
             @Nullable Function<Item.Properties, Item.Properties> extraPropFunc) {
         Supplier<T> blockObj = register(name, blockConstructor);
         ITEMS.registerItem(name, props -> {
-            Item.Properties p = extraPropFunc != null ? extraPropFunc.apply(props) : props;
+            Item.Properties p = (extraPropFunc != null ? extraPropFunc.apply(props) : props).useBlockDescriptionPrefix();
             return new BlockItem(blockObj.get(), p);
         });
         return blockObj;
