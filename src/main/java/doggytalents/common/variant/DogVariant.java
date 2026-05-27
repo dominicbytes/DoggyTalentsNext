@@ -132,7 +132,7 @@ public class DogVariant {
         }
 
         public Props icon(Identifier icon) {
-            this.customTexture = Optional.of(icon);
+            this.icon = Optional.of(icon);
             return this;
         }
 

@@ -83,4 +83,9 @@ public abstract class SyncedAccessoryModel extends EntityModel<DogRenderState> {
     public void setupAnim(Dog entityIn, float limbSwing, float limbSwingAmount, float ageInTicks, float relativeHeadYRot, float headPitch) {
 
     }
+
+    @Override
+    public void setupAnim(DogRenderState state) {
+        // Pose is managed externally via sync(DogModel) — do not reset
+    }
 }

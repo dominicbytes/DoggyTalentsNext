@@ -272,9 +272,18 @@ public class DogIncapacitatedMananger {
 
         var sync_state = this.dog.getIncapSyncState();
         var type = sync_state.type;
+
+        // Particle frequency scales with injury severity: more injured = more frequent.
+        // ratio 1.0 = freshly incapacitated, 0.0 = nearly healed.
+        float ratio = dog.getDefaultInitIncapVal() > 0
+            ? Mth.clamp((float) dog.getDogIncapValue() / dog.getDefaultInitIncapVal(), 0f, 1f)
+            : 0f;
+        // interval: 4 ticks when fully injured, up to 40 ticks when almost healed
+        int particleInterval = Math.max(4, (int) (4 + 36 * (1f - ratio)));
+
         switch (type) {
         case BURN:
-            if (dog.getDogIncapValue() >= dog.getDefaultInitIncapVal() - 10) {
+            if (dog.tickCount % particleInterval == 0) {
                 for (int i = 0; i < 2; ++i) {
                     float f1 = (dog.getRandom().nextFloat() * 2.0F - 1.0F) * dog.getBbWidth() * 0.8F;
                     float f2 = (dog.getRandom().nextFloat() * 2.0F - 1.0F) * dog.getBbWidth() * 0.8F;
@@ -284,8 +293,7 @@ public class DogIncapacitatedMananger {
                     dog.getZ() + f2,
                     0, -0.05 , 0 );
                 }
-    
-                if (dog.getRandom().nextInt(3) == 0) {
+                if (ratio > 0.5f && dog.getRandom().nextInt(3) == 0) {
                     float f1 = (dog.getRandom().nextFloat() * 2.0F - 1.0F) * dog.getBbWidth() * 0.5F;
                     float f2 = (dog.getRandom().nextFloat() * 2.0F - 1.0F) * dog.getBbWidth() * 0.5F;
                     dog.level().addParticle(ParticleTypes.SMOKE,
@@ -297,7 +305,7 @@ public class DogIncapacitatedMananger {
             }
             break;
         case BLOOD:
-            if (dog.getDogIncapValue() >= dog.getDefaultInitIncapVal() - 10 && dog.tickCount % 8 == 0) {
+            if (dog.tickCount % particleInterval == 0) {
                 for (int i = 0; i < 2; ++i) {
                     float f1 = (dog.getRandom().nextFloat() * 2.0F - 1.0F) * dog.getBbWidth() * 0.8F;
                     float f2 = (dog.getRandom().nextFloat() * 2.0F - 1.0F) * dog.getBbWidth() * 0.8F;
@@ -306,13 +314,13 @@ public class DogIncapacitatedMananger {
                         dog.getX() + f1,
                         dog.getY() + 0.4,
                         dog.getZ() + f2,
-                        0, -0.05 , 0 
+                        0, -0.05 , 0
                     );
                 }
             }
             break;
         case DROWN:
-            if (dog.getDogIncapValue() >= dog.getDefaultInitIncapVal() - 10 && dog.tickCount % 8 == 0) {
+            if (dog.tickCount % particleInterval == 0) {
                 for (int i = 0; i < 2; ++i) {
                     float f1 = (dog.getRandom().nextFloat() * 2.0F - 1.0F) * dog.getBbWidth() * 0.8F;
                     float f2 = (dog.getRandom().nextFloat() * 2.0F - 1.0F) * dog.getBbWidth() * 0.8F;
@@ -321,7 +329,7 @@ public class DogIncapacitatedMananger {
                         dog.getX() + f1,
                         dog.getY() + 0.4,
                         dog.getZ() + f2,
-                        0, -0.05 , 0 
+                        0, -0.05 , 0
                     );
                 }
             }
@@ -371,6 +379,16 @@ public class DogIncapacitatedMananger {
 
         if (dog_b0_block == Blocks.AIR) {
             this.partialRecoverVal += (0.001f*this.recoveryMultiplier);
+            // Slow passive recovery: infrequent particle so player can tell it's progressing
+            if (this.dog.level() instanceof ServerLevel sLAir && this.dog.tickCount % 60 == 0) {
+                sLAir.sendParticles(
+                    ParticleTypes.COMPOSTER,
+                    this.dog.getX(), this.dog.getY() + 0.5, this.dog.getZ(),
+                    1,
+                    this.dog.getBbWidth() * 0.4, 0.2, this.dog.getBbWidth() * 0.4,
+                    0.02
+                );
+            }
         } else if (dog_b0_block == DoggyBlocks.DOG_BED.get()
             || dog_b0_state.is(BlockTags.BEDS)) {
             incapacitatedHealWithBed(owner);
@@ -435,19 +453,33 @@ public class DogIncapacitatedMananger {
     private void incapacitatedHealWithBed(LivingEntity owner) {
         this.partialRecoverVal += (0.002f*this.recoveryMultiplier);
 
+        if (!(this.dog.level() instanceof ServerLevel sLevel)) return;
+
+        // Hearts every 20 ticks regardless of owner — shows bed is actively healing the dog
+        if (this.dog.tickCount % 20 == 0) {
+            sLevel.sendParticles(
+                ParticleTypes.HEART,
+                this.dog.getX(), this.dog.getY() + 0.5, this.dog.getZ(),
+                1,
+                this.dog.getBbWidth() * 0.5, 0.4, this.dog.getBbWidth() * 0.5,
+                0.05
+            );
+        }
+
         if (owner == null) return;
         if (this.dog.distanceToSqr(owner) > 100) return;
         this.partialRecoverVal += (0.02f*this.recoveryMultiplier);
 
-        if (!(this.dog.level() instanceof ServerLevel)) return;
-        if (this.dog.tickCount % 10 != 0) return;
-        ((ServerLevel) this.dog.level()).sendParticles(
-            ParticleTypes.HEART, 
-            this.dog.getX(), this.dog.getY(), this.dog.getZ(), 
-            1, 
-            this.dog.getBbWidth(), 0.8f, this.dog.getBbWidth(), 
-            0.1
-        );
+        // Extra hearts every 10 ticks when owner is nearby — stronger visual feedback
+        if (this.dog.tickCount % 10 == 0) {
+            sLevel.sendParticles(
+                ParticleTypes.HEART,
+                this.dog.getX(), this.dog.getY() + 0.5, this.dog.getZ(),
+                2,
+                this.dog.getBbWidth() * 0.8, 0.6, this.dog.getBbWidth() * 0.8,
+                0.1
+            );
+        }
     }
 
     private void healWithBandaid(BandaidState state) {

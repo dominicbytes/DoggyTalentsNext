@@ -133,6 +133,6 @@ public class IncapacitatedRenderer extends RenderLayer<DogRenderState, DogModel>
             DogRenderState renderState, float r, float g, float b, float opacity) {
         collector.submitModel(model, renderState, poseStack,
             RenderTypes.entityTranslucent(texture), light, OverlayTexture.NO_OVERLAY,
-            ARGB.colorFromFloat(opacity, r, g, b), null);
+            ARGB.colorFromFloat(opacity, r, g, b), null, 0, null);
     }
 }

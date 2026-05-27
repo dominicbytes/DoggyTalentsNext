@@ -112,6 +112,10 @@ public class DogRenderer extends MobRenderer<Dog, DogRenderState, DogModel> {
                 this.model.setWetShade(f);
             }
         }
+
+        if (dog.isDefeated()) {
+            state.hasRedOverlay = false;
+        }
     }
 
     @Override

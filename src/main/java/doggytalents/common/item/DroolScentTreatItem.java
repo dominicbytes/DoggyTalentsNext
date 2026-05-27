@@ -31,6 +31,11 @@ public class DroolScentTreatItem extends Item {
 
         playerIn.swing(handIn);
         playerIn.playSound(SoundEvents.INK_SAC_USE, 1f , 1f);
-        return InteractionResult.SUCCESS; // consumed stack: returnStack);
+        if (!playerIn.getAbilities().instabuild) {
+            playerIn.setItemInHand(handIn, returnStack);
+        } else {
+            playerIn.addItem(returnStack);
+        }
+        return InteractionResult.SUCCESS;
     }
 }
