@@ -6,7 +6,7 @@ plugins {
     id "me.modmuss50.mod-publish-plugin" version "1.0.0"
 }
 
-version = '26.1.2.13'
+version = '26.1.2.14'
 group = 'com.github.dashiedev'
 // Note: Ensure 'target_mc_version' is defined in your gradle.properties
 base {
