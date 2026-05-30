@@ -33,18 +33,21 @@ public class HappyEaterTalent extends TalentInstance implements IDogFoodHandler 
             return false;
         if (!ItemUtil.isEddible(stackIn))
             return false;
-        return stackIn.is(ItemTags.FISHES);
+        if (stackIn.is(ItemTags.FISHES))
+            return true;
+        if (this.level() >= 3 && stackIn.is(Items.ROTTEN_FLESH))
+            return true;
+        return false;
     }
 
     @Override
     public boolean canConsume(AbstractDog dogIn, ItemStack stackIn, Entity entityIn) {
         if (dogIn.isDefeated()) return false;
-        
-        Item item = stackIn.getItem();
 
-        if (this.level() >= 2 && ItemUtil.isEddible(stackIn) && stackIn.is(ItemTags.FISHES)) {
+        if (this.level() >= 2 && ItemUtil.isEddible(stackIn) && stackIn.is(ItemTags.FISHES))
             return true;
-        }
+        if (this.level() >= 3 && stackIn.is(Items.ROTTEN_FLESH))
+            return true;
 
         return false;
     }
@@ -54,10 +57,16 @@ public class HappyEaterTalent extends TalentInstance implements IDogFoodHandler 
         if (dogIn.level().isClientSide())
             return InteractionResult.SUCCESS;
 
-        Item item = stackIn.getItem();
-
         var food_comp = stackIn.getOrDefault(DataComponents.FOOD, null);
-        if (this.level() >= 2 && food_comp != null && stackIn.is(ItemTags.FISHES)) {
+        if (food_comp == null) return InteractionResult.FAIL;
+
+        if (this.level() >= 2 && stackIn.is(ItemTags.FISHES)) {
+            dogIn.addHunger(food_comp.nutrition() * 5);
+            dogIn.consumeItemFromStack(entityIn, stackIn);
+            return InteractionResult.SUCCESS;
+        }
+
+        if (this.level() >= 3 && stackIn.is(Items.ROTTEN_FLESH)) {
             dogIn.addHunger(food_comp.nutrition() * 5);
             dogIn.consumeItemFromStack(entityIn, stackIn);
             return InteractionResult.SUCCESS;
