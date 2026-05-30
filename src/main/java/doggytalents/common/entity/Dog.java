@@ -578,8 +578,13 @@ public class Dog extends AbstractDog {
         if (self_dim.width() >= 1f) {
             self_dim = new EntityDimensions(1f, self_dim.height(), self_dim.eyeHeight(), self_dim.attachments(), self_dim.fixed());
         }
-        
-        boolean collide_passeneger = 
+
+        // Use a flat hitbox for fainted dogs so the visual matches what the player can click
+        if (this.isDefeated()) {
+            return new EntityDimensions(0.9F, 0.45F, 0.225F, self_dim.attachments(), false);
+        }
+
+        boolean collide_passeneger =
             ConfigHandler.SERVER.WOLF_MOUNT_PASSENGER_COLLISION.get();
         if (!collide_passeneger)
             return self_dim;
@@ -3278,13 +3283,16 @@ public class Dog extends AbstractDog {
             this.hungerManager.onHungerUpdated(this.getDogHunger());
         }
 
-        if (!this.level().isClientSide() && MODE.equals(key)) {
-            var mode = getMode();
-            this.incapacitatedMananger.onModeUpdate(mode);
-            if (mode == DogMode.INJURED) {
-                this.hungerManager.onBeingIncapacitated();
+        if (MODE.equals(key)) {
+            this.refreshDimensions();
+            if (!this.level().isClientSide()) {
+                var mode = getMode();
+                this.incapacitatedMananger.onModeUpdate(mode);
+                if (mode == DogMode.INJURED) {
+                    this.hungerManager.onBeingIncapacitated();
+                }
+                updateWanderState(mode);
             }
-            updateWanderState(mode);
         }
 
         if (DOG_PETTING_STATE.equals(key)) {

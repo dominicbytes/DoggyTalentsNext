@@ -1,0 +1,6 @@
+26.1.2.14
+
+Bug Fixes:
+- Fixed Happy Eater talent level 3 not allowing the dog to eat Rotten Flesh
+- Fixed Pack Puppy chest saddlebag rendering as black stripes (missing texture)
+- Fixed incapacitated dog being difficult to interact with (hitbox now matches flat fainted visual)
