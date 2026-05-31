@@ -10,10 +10,12 @@ import doggytalents.common.config.ConfigHandler;
 import doggytalents.common.lib.Resources;
 import doggytalents.common.talent.PackPuppyTalent;
 import net.minecraft.client.renderer.SubmitNodeCollector;
+import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.RenderLayerParent;
 import net.minecraft.client.renderer.entity.layers.RenderLayer;
 import net.minecraft.client.renderer.texture.OverlayTexture;
+import net.minecraft.util.ARGB;
 
 import java.util.Optional;
 
@@ -53,7 +55,11 @@ public class PackPuppyRenderer extends RenderLayer<DogRenderState, DogModel> {
             this.model.setupAnim(renderState);
             this.model.sync(getParentModel());
 
-            RenderLayer.renderColoredCutoutModel(this.model, Resources.TALENT_CHEST, poseStack, submitNodeCollector, packedLight, renderState, OverlayTexture.NO_OVERLAY, 0xffffffff);
+            // Use submitModel directly — SyncedAccessoryModel has no render-type function
+            // so RenderLayer.renderColoredCutoutModel would call model.renderType() → null
+            submitNodeCollector.submitModel(this.model, renderState, poseStack,
+                RenderTypes.entityCutout(Resources.TALENT_CHEST),
+                packedLight, OverlayTexture.NO_OVERLAY, ARGB.colorFromFloat(1, 1, 1, 1), null);
         }
 
     }

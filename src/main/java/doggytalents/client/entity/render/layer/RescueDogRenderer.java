@@ -11,10 +11,12 @@ import doggytalents.client.entity.render.DogRenderState;
 import doggytalents.common.lib.Resources;
 import doggytalents.common.talent.RescueDogTalent;
 import net.minecraft.client.renderer.SubmitNodeCollector;
+import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.RenderLayerParent;
 import net.minecraft.client.renderer.entity.layers.RenderLayer;
 import net.minecraft.client.renderer.texture.OverlayTexture;
+import net.minecraft.util.ARGB;
 
 import java.util.Optional;
 
@@ -59,7 +61,9 @@ public class RescueDogRenderer extends RenderLayer<DogRenderState, DogModel> {
             dogModel.copyPropertiesTo(this.model);
             this.model.sync(dogModel);
 
-            RenderLayer.renderColoredCutoutModel(this.model, Resources.TALENT_RESCUE, poseStack, submitNodeCollector, packedLight, renderState, OverlayTexture.NO_OVERLAY, 0xffffffff);
+            submitNodeCollector.submitModel(this.model, renderState, poseStack,
+                RenderTypes.entityCutout(Resources.TALENT_RESCUE),
+                packedLight, OverlayTexture.NO_OVERLAY, ARGB.colorFromFloat(1, 1, 1, 1), null);
         }
 
     }

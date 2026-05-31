@@ -10,11 +10,13 @@ import doggytalents.client.entity.render.DogRenderState;
 import doggytalents.common.lib.Resources;
 import doggytalents.common.talent.DoggyTorchTalent;
 import net.minecraft.client.renderer.SubmitNodeCollector;
+import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.RenderLayerParent;
 import net.minecraft.client.renderer.entity.layers.RenderLayer;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.resources.Identifier;
+import net.minecraft.util.ARGB;
 
 public class TorchDogRenderer extends RenderLayer<DogRenderState, DogModel>  {
 
@@ -51,7 +53,9 @@ public class TorchDogRenderer extends RenderLayer<DogRenderState, DogModel>  {
             res = Resources.TORCH_DOG_UNLIT;
             renderLight = packedLight;
         }
-        RenderLayer.renderColoredCutoutModel(this.model, res, poseStack, submitNodeCollector, renderLight, renderState, OverlayTexture.NO_OVERLAY, 0xffffffff);
+        submitNodeCollector.submitModel(this.model, renderState, poseStack,
+            RenderTypes.entityCutout(res),
+            renderLight, OverlayTexture.NO_OVERLAY, ARGB.colorFromFloat(1, 1, 1, 1), null);
 
     }
 
