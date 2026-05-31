@@ -352,10 +352,10 @@ public class EventHandler {
         return ConfigHandler.ServerConfig.getConfig(ConfigHandler.SERVER.STARTING_ITEMS);
     }
 
-    // @SubscribeEvent
-    // public void onLootDrop(final LootingLevelEvent event) {
-    //     HunterDogTalent.onLootDrop(event);
-    // }
+    @SubscribeEvent
+    public void onLootDrop(final LivingDropsEvent event) {
+        HunterDogTalent.onLootDrop(event);
+    }
 
     @SubscribeEvent
     public void onProjectileHit(final ProjectileImpactEvent event) {

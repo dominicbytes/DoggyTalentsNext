@@ -117,12 +117,13 @@ public class BedDogTalent extends TalentInstance {
     }
 
     public int getHungerCostPerSleep() {
-        var level = this.level();
-        if (level <= 3)
-            return 40;
-        if (level == 4)
-            return 30;
-        return 0;
+        switch (this.level()) {
+            case 1: return 40;
+            case 2: return 35;
+            case 3: return 30;
+            case 4: return 20;
+            default: return 0;
+        }
     }
     
     public int getMinHungerForSleep() {
@@ -134,12 +135,12 @@ public class BedDogTalent extends TalentInstance {
     }
 
     public int getCooldownTicks() {
-        var level = this.level();
-        //24000
-        if (level <= 3)
-            return 3 * 24000;
-        if (level == 4)
-            return 2 * 24000;
-        return 0;
+        switch (this.level()) {
+            case 1: return 5 * 24000;
+            case 2: return 4 * 24000;
+            case 3: return 3 * 24000;
+            case 4: return 2 * 24000;
+            default: return 0;
+        }
     }
 }

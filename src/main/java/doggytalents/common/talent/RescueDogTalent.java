@@ -84,16 +84,14 @@ public class RescueDogTalent extends TalentInstance {
         dog.triggerAction(new RescueAction(dog, this, target));
     }
 
-    // healCost may need tuning
+    // healCost decreases with each level: 20 → 17 → 14 → 11 → 8
     public int healCost(AbstractDog dog, LivingEntity target) {
-        int cost;
-        if (this.level() >= 5) {
-            cost = 10;
-        } else {
-            cost = 20;
-        }
-
-        return cost;
+        int lv = this.level();
+        if (lv >= 5) return 8;
+        if (lv >= 4) return 11;
+        if (lv >= 3) return 14;
+        if (lv >= 2) return 17;
+        return 20;
     }
 
     // may need tuning

@@ -170,10 +170,10 @@ public class MobRetrieverTalent extends TalentInstance {
         float target_bbH = target.getBbHeight();
         float w_ratio = target_bbW / dog.getDogVisualBbWidth();
         float h_ratio = target_bbH / dog.getDogVisualBbHeight();
-        if (target_bbW >= 1f)
-            return false;
-        if (w_ratio > 1.2)
-            return false;
+        if (lvl < 5) {
+            if (target_bbW >= 1f) return false;
+            if (w_ratio > 1.2) return false;
+        }
         if (lvl >= 5)
             return h_ratio <= 2;
         if (lvl >= 3)

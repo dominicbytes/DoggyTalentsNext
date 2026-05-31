@@ -68,10 +68,10 @@ public class CreeperSweeperTalent extends TalentInstance {
     private int getSearchRange(AbstractDog dog) {
         if ((dog instanceof Dog d)) {
             if (d.isMode(DogMode.GUARD, DogMode.GUARD_FLAT, DogMode.GUARD_MINOR)) {
-                return Math.min(this.level()*5, 8);
+                return Math.min(this.level()*6, 8);
             }
         }
-        return this.level()*5;
+        return this.level()*6;
     }
 
     @Override

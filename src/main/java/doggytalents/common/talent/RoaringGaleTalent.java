@@ -36,6 +36,11 @@ public class RoaringGaleTalent extends TalentInstance {
         this.cooldown = dogIn.tickCount;
     }
 
+    public static int getHitCooldown(int level) {
+        if (level >= 5) return 40;
+        return 160 - (level - 1) * 30;
+    }
+
     public static int getAffectDuration(int level) {
         if (level >= 5) return 70;
         if (level <= 0) return 0;
@@ -104,11 +109,11 @@ public class RoaringGaleTalent extends TalentInstance {
             int cooldown = 0;
             if (hit) {
                 dog.playSound(dog.dogMood.getSeriousGrowl(), 0.7F, 1.0F);
-                cooldown = level >= 5 ? 60 : 100;
+                cooldown = getHitCooldown(level);
                 anyHits = true;
             } else {
                 dog.playSound(dog.dogMood.getAmbientSound(), 1F, 1.2F);
-                cooldown = level >= 5 ? 30 : 50;
+                cooldown = getHitCooldown(level) / 2;
             }
 
             setRoarCooldownFor(dog, dog.tickCount + cooldown);
