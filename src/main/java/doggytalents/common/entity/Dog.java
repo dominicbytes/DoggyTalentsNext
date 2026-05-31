@@ -3284,8 +3284,8 @@ public class Dog extends AbstractDog {
         }
 
         if (MODE.equals(key)) {
-            this.refreshDimensions();
             if (!this.level().isClientSide()) {
+                this.refreshDimensions();
                 var mode = getMode();
                 this.incapacitatedMananger.onModeUpdate(mode);
                 if (mode == DogMode.INJURED) {

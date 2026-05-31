@@ -1,6 +1,18 @@
-26.1.2.14
+26.1.2.16
 
 Bug Fixes:
 - Fixed Happy Eater talent level 3 not allowing the dog to eat Rotten Flesh
-- Fixed Pack Puppy chest saddlebag rendering as black stripes (missing texture)
-- Fixed incapacitated dog being difficult to interact with (hitbox now matches flat fainted visual)
+- Fixed Pack Puppy saddlebag rendering as thin black stripes (geometry now extends fully outside dog body; brighter wooden texture)
+- Fixed incapacitated dog rendering all black (client-side refreshDimensions was disrupting the faint visual)
+- Fixed incapacitated dog hitbox — flat 0.9×0.45 hitbox now applied server-side on mode change, propagated to client via position sync
+
+Talent Fixes & Improvements:
+- Hunter Dog: Re-enabled talent; dogs now have a 10%%/20%%/30%%/40%%/60%% chance (levels 1-5) to double all drops on kills
+- Bed Finder: Re-enabled yellow bed outline rendering around the dog's assigned bed
+- Creeper Sweeper: Fixed detection range (now correctly 6 blocks per level instead of 5)
+- Roaring Gale: Cooldown now scales per level (8s/6.5s/5s/3.5s/2s for levels 1-5)
+- Rescue Dog: Heal cost now decreases per level (20/17/14/11/8 hunger points for levels 1-5)
+- Bed Dog: Hunger cost and cooldown now decrease at each level instead of only at level 4
+- Mob Retriever: Level 5 now correctly removes the mob width hitbox constraint as described
+- Black Pelt: Updated description to accurately reflect attack damage bonus, crit chance, and crit damage doubling
+- Shock Absorber: Updated description to mention explosion resistance (20%% per level, 100%% immunity at max)
