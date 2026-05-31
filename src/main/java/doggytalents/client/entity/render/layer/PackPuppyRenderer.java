@@ -36,12 +36,15 @@ public class PackPuppyRenderer extends RenderLayer<DogRenderState, DogModel> {
         Optional<PackPuppyTalent> inst = dog.getTalent(DoggyTalents.PACK_PUPPY)
             .map(x -> x.cast(PackPuppyTalent.class));
         if (inst.isPresent() && inst.get().renderChest()) {
-            // Render using the parent DogModel with the chest texture, same as every other
-            // working accessory/overlay in this codebase. SyncedAccessoryModel is routed to
-            // the item_*_unlit pipeline (ignores Sampler0), so DogModel must be used.
-            RenderLayer.renderColoredCutoutModel(this.getParentModel(), Resources.TALENT_CHEST,
-                poseStack, submitNodeCollector, packedLight, renderState,
-                OverlayTexture.NO_OVERLAY, 0xffffffff);
+            var dogModel = this.getParentModel();
+            // Use 10-arg submitModel with model.renderType() and state.outlineColor —
+            // same pattern as DogWolfArmorRenderer which is the confirmed-working approach.
+            // renderColoredCutoutModel (8-arg) silently produces no output on this build.
+            submitNodeCollector.submitModel(
+                dogModel, renderState, poseStack,
+                dogModel.renderType(Resources.TALENT_CHEST),
+                packedLight, OverlayTexture.NO_OVERLAY, 0xffffffff, null,
+                renderState.outlineColor, null);
         }
     }
 }
