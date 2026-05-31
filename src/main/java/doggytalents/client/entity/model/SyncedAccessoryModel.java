@@ -12,6 +12,7 @@ import doggytalents.client.entity.render.DogRenderState;
 import doggytalents.common.entity.Dog;
 import net.minecraft.client.model.EntityModel;
 import net.minecraft.client.model.geom.ModelPart;
+import net.minecraft.client.renderer.rendertype.RenderTypes;
 
 public abstract class SyncedAccessoryModel extends EntityModel<DogRenderState> {
 
@@ -30,7 +31,7 @@ public abstract class SyncedAccessoryModel extends EntityModel<DogRenderState> {
     public Optional<ModelPart> realTail = Optional.empty();
 
     public SyncedAccessoryModel(ModelPart root) {
-        super(root);
+        super(root, RenderTypes::entityCutout);
         populatePart(root);
     }
 

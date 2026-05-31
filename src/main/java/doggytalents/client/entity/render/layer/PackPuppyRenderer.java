@@ -10,20 +10,15 @@ import doggytalents.common.config.ConfigHandler;
 import doggytalents.common.lib.Resources;
 import doggytalents.common.talent.PackPuppyTalent;
 import net.minecraft.client.renderer.SubmitNodeCollector;
-import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.RenderLayerParent;
 import net.minecraft.client.renderer.entity.layers.RenderLayer;
 import net.minecraft.client.renderer.texture.OverlayTexture;
-import net.minecraft.util.ARGB;
 
 import java.util.Optional;
-import org.slf4j.LoggerFactory;
 
 public class PackPuppyRenderer extends RenderLayer<DogRenderState, DogModel> {
 
-    private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(PackPuppyRenderer.class);
-    private static boolean debugLogged = false;
     private DogBackpackModel model;
 
     public PackPuppyRenderer(RenderLayerParent<DogRenderState, DogModel> parentRenderer, EntityRendererProvider.Context ctx) {
@@ -58,21 +53,7 @@ public class PackPuppyRenderer extends RenderLayer<DogRenderState, DogModel> {
             this.model.setupAnim(renderState);
             this.model.sync(getParentModel());
 
-            if (!debugLogged) {
-                debugLogged = true;
-                var bodyPart = this.model.body.orElse(null);
-                LOGGER.info("[PackPuppy] submitting chest. texture={} light={} bodyNull={} bodyX={} bodyY={} bodyZ={} bodyXRot={}",
-                    Resources.TALENT_CHEST, packedLight,
-                    bodyPart == null,
-                    bodyPart != null ? bodyPart.x : 0,
-                    bodyPart != null ? bodyPart.y : 0,
-                    bodyPart != null ? bodyPart.z : 0,
-                    bodyPart != null ? bodyPart.xRot : 0);
-            }
-
-            submitNodeCollector.submitModel(this.model, renderState, poseStack,
-                RenderTypes.entityTranslucent(Resources.TALENT_CHEST),
-                packedLight, OverlayTexture.NO_OVERLAY, ARGB.colorFromFloat(1, 1, 1, 1), null);
+            RenderLayer.renderColoredCutoutModel(this.model, Resources.TALENT_CHEST, poseStack, submitNodeCollector, packedLight, renderState, OverlayTexture.NO_OVERLAY, 0xffffffff);
         }
 
     }

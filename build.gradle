@@ -6,7 +6,7 @@ plugins {
     id "me.modmuss50.mod-publish-plugin" version "1.0.0"
 }
 
-version = '26.1.2.17'
+version = '26.1.2.18'
 group = 'com.github.dashiedev'
 // Note: Ensure 'target_mc_version' is defined in your gradle.properties
 base {
@@ -33,7 +33,7 @@ afterEvaluate {
 // --- NEW NEOFORGE BLOCK (Replaces old 'minecraft' and top-level 'runs') ---
 neoForge {
     // This handles the version and the 'neoforge' dependency automatically
-    version = "26.1.2.29-beta"
+    version = "26.1.2.70-beta"
 
     accessTransformers.from file('src/main/resources/META-INF/accesstransformer.cfg')
 
