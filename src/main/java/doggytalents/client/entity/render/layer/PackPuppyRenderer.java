@@ -10,15 +10,19 @@ import doggytalents.common.config.ConfigHandler;
 import doggytalents.common.lib.Resources;
 import doggytalents.common.talent.PackPuppyTalent;
 import net.minecraft.client.renderer.SubmitNodeCollector;
+import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.RenderLayerParent;
 import net.minecraft.client.renderer.entity.layers.RenderLayer;
 import net.minecraft.client.renderer.texture.OverlayTexture;
+import net.minecraft.util.ARGB;
 
 import java.util.Optional;
 
 public class PackPuppyRenderer extends RenderLayer<DogRenderState, DogModel> {
 
+    private static final org.slf4j.Logger LOGGER = org.slf4j.LoggerFactory.getLogger(PackPuppyRenderer.class);
+    private static boolean debugLogged = false;
     private DogBackpackModel model;
 
     public PackPuppyRenderer(RenderLayerParent<DogRenderState, DogModel> parentRenderer, EntityRendererProvider.Context ctx) {
@@ -53,7 +57,16 @@ public class PackPuppyRenderer extends RenderLayer<DogRenderState, DogModel> {
             this.model.setupAnim(renderState);
             this.model.sync(getParentModel());
 
-            RenderLayer.renderColoredCutoutModel(this.model, Resources.TALENT_CHEST, poseStack, submitNodeCollector, packedLight, renderState, OverlayTexture.NO_OVERLAY, 0xffffffff);
+            if (!debugLogged) {
+                debugLogged = true;
+                LOGGER.info("[PackPuppy CLIENT] rendering chest. texture={} packedLight={} renderTypeFunc={}",
+                    Resources.TALENT_CHEST, packedLight,
+                    this.model.renderType(Resources.TALENT_CHEST));
+            }
+            // Use entityTranslucent at max brightness — same pipeline as incapacitated overlay (known working)
+            submitNodeCollector.submitModel(this.model, renderState, poseStack,
+                RenderTypes.entityTranslucent(Resources.TALENT_CHEST),
+                15728880, OverlayTexture.NO_OVERLAY, ARGB.colorFromFloat(1, 1, 1, 1), null);
         }
 
     }
