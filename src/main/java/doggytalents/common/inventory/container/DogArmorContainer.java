@@ -36,11 +36,12 @@ public class DogArmorContainer extends AbstractContainerMenu {
     private Dog dog;
 
     public static final Identifier BLOCK_ATLAS = Util.getVanillaResource("textures/atlas/blocks.png");
-    public static final Identifier EMPTY_ARMOR_SLOT_HELMET = Util.getVanillaResource("item/empty_armor_slot_helmet");
-    public static final Identifier EMPTY_ARMOR_SLOT_CHESTPLATE = Util.getVanillaResource("item/empty_armor_slot_chestplate");
-    public static final Identifier EMPTY_ARMOR_SLOT_LEGGINGS = Util.getVanillaResource("item/empty_armor_slot_leggings");
-    public static final Identifier EMPTY_ARMOR_SLOT_BOOTS = Util.getVanillaResource("item/empty_armor_slot_boots");
-    public static final Identifier EMPTY_ARMOR_SLOT_SHIELD = Util.getVanillaResource("item/empty_armor_slot_shield");
+    // Slot sprite paths moved to container/slot/* in Minecraft 26.1.2 (was item/empty_armor_slot_*)
+    public static final Identifier EMPTY_ARMOR_SLOT_HELMET = Util.getVanillaResource("container/slot/helmet");
+    public static final Identifier EMPTY_ARMOR_SLOT_CHESTPLATE = Util.getVanillaResource("container/slot/chestplate");
+    public static final Identifier EMPTY_ARMOR_SLOT_LEGGINGS = Util.getVanillaResource("container/slot/leggings");
+    public static final Identifier EMPTY_ARMOR_SLOT_BOOTS = Util.getVanillaResource("container/slot/boots");
+    public static final Identifier EMPTY_ARMOR_SLOT_SHIELD = Util.getVanillaResource("container/slot/shield");
     static final Identifier[] TEXTURE_EMPTY_SLOTS = new Identifier[]{EMPTY_ARMOR_SLOT_BOOTS, EMPTY_ARMOR_SLOT_LEGGINGS, EMPTY_ARMOR_SLOT_CHESTPLATE, EMPTY_ARMOR_SLOT_HELMET};
     private static final EquipmentSlot[] SLOT_IDS = new EquipmentSlot[]{EquipmentSlot.HEAD, EquipmentSlot.CHEST, EquipmentSlot.LEGS, EquipmentSlot.FEET};
 
