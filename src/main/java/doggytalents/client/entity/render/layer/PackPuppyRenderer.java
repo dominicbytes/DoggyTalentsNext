@@ -18,9 +18,12 @@ import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.util.ARGB;
 
 import java.util.Optional;
+import org.slf4j.LoggerFactory;
 
 public class PackPuppyRenderer extends RenderLayer<DogRenderState, DogModel> {
 
+    private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(PackPuppyRenderer.class);
+    private static boolean debugLogged = false;
     private DogBackpackModel model;
 
     public PackPuppyRenderer(RenderLayerParent<DogRenderState, DogModel> parentRenderer, EntityRendererProvider.Context ctx) {
@@ -55,10 +58,20 @@ public class PackPuppyRenderer extends RenderLayer<DogRenderState, DogModel> {
             this.model.setupAnim(renderState);
             this.model.sync(getParentModel());
 
-            // Use submitModel directly — SyncedAccessoryModel has no render-type function
-            // so RenderLayer.renderColoredCutoutModel would call model.renderType() → null
+            if (!debugLogged) {
+                debugLogged = true;
+                var bodyPart = this.model.body.orElse(null);
+                LOGGER.info("[PackPuppy] submitting chest. texture={} light={} bodyNull={} bodyX={} bodyY={} bodyZ={} bodyXRot={}",
+                    Resources.TALENT_CHEST, packedLight,
+                    bodyPart == null,
+                    bodyPart != null ? bodyPart.x : 0,
+                    bodyPart != null ? bodyPart.y : 0,
+                    bodyPart != null ? bodyPart.z : 0,
+                    bodyPart != null ? bodyPart.xRot : 0);
+            }
+
             submitNodeCollector.submitModel(this.model, renderState, poseStack,
-                RenderTypes.entityCutout(Resources.TALENT_CHEST),
+                RenderTypes.entityTranslucent(Resources.TALENT_CHEST),
                 packedLight, OverlayTexture.NO_OVERLAY, ARGB.colorFromFloat(1, 1, 1, 1), null);
         }
 

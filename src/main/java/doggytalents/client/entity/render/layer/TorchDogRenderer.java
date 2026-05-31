@@ -54,7 +54,7 @@ public class TorchDogRenderer extends RenderLayer<DogRenderState, DogModel>  {
             renderLight = packedLight;
         }
         submitNodeCollector.submitModel(this.model, renderState, poseStack,
-            RenderTypes.entityCutout(res),
+            RenderTypes.entityTranslucent(res),
             renderLight, OverlayTexture.NO_OVERLAY, ARGB.colorFromFloat(1, 1, 1, 1), null);
 
     }

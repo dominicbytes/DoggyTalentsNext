@@ -62,7 +62,7 @@ public class RescueDogRenderer extends RenderLayer<DogRenderState, DogModel> {
             this.model.sync(dogModel);
 
             submitNodeCollector.submitModel(this.model, renderState, poseStack,
-                RenderTypes.entityCutout(Resources.TALENT_RESCUE),
+                RenderTypes.entityTranslucent(Resources.TALENT_RESCUE),
                 packedLight, OverlayTexture.NO_OVERLAY, ARGB.colorFromFloat(1, 1, 1, 1), null);
         }
 
