@@ -1,4 +1,4 @@
-26.1.2.19
+26.1.2.20
 
 Bug Fixes:
 - Fixed Happy Eater talent level 3 not allowing the dog to eat Rotten Flesh
