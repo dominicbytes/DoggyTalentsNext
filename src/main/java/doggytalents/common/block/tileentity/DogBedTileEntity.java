@@ -113,9 +113,11 @@ public class DogBedTileEntity extends PlacedTileEntity {
 
     public void setOwner(@Nullable Dog owner) {
         this.setOwner(owner == null ? null : owner.getUUID());
-
         this.dog = owner;
-
+        if (owner != null) {
+            this.ownerName = owner.getDisplayName();
+            this.setChanged();
+        }
     }
 
     public void setOwner(@Nullable UUID owner) {
@@ -144,14 +146,16 @@ public class DogBedTileEntity extends PlacedTileEntity {
     public Component getOwnerName() {
         if (this.dogUUID == null || this.level == null) { return null; }
 
-        DogLocationData locData = DogLocationStorage
-                .get(this.level)
-                .getData(this.dogUUID);
+        if (!this.level.isClientSide()) {
+            DogLocationData locData = DogLocationStorage
+                    .get(this.level)
+                    .getData(this.dogUUID);
 
-        if (locData != null) {
-            Component text = locData.getName();
-            if (text != null) {
-                this.ownerName = text;
+            if (locData != null) {
+                Component text = locData.getName();
+                if (text != null) {
+                    this.ownerName = text;
+                }
             }
         }
 
