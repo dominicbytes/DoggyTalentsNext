@@ -27,6 +27,7 @@ import doggytalents.client.entity.model.animation.DogKeyframeAnimations.Animatio
 import doggytalents.client.entity.model.util.DogModelRenderType;
 import doggytalents.client.entity.render.DogRenderState;
 import doggytalents.common.entity.Dog;
+import doggytalents.common.entity.anim.DogPose;
 import doggytalents.common.util.Util;
 import net.minecraft.client.animation.AnimationDefinition;
 import net.minecraft.client.animation.KeyframeAnimations;
@@ -164,16 +165,29 @@ public class DogModel extends EntityModel<DogRenderState> {
 
         var pose = dog.getDogPose();
 
-        var anim = dog.getAnim();
-        if (anim != DogAnimation.NONE) {
-            if (anim.freeHead() && pose.canBeg)
-                this.translateBeggingDog(dog, limbSwing, limbSwingAmount, partialTickTime);
-            return;
-        };
+    private void setupProceduralPose(
+        Dog dog, 
+        float limbSwing, float limbSwingAmount, 
+        float relativeHeadYRot, float headPitch,
+        float pticks, float ageInTicks
+    ) {
+        
+        final var captured_state = dog.animationManager.capturedStateForAnim;
+        
+        var pose = dog.getDogPose();
+        if (!captured_state.isNone()) {
+            //TODO only use captured pose if it is either SIT or STAND
+            final var captured_pose = captured_state.pose();
+            if (captured_pose == DogPose.STAND || captured_pose == DogPose.SIT)
+                pose = captured_pose;
+        }
 
-        boolean stand_pose = !DogPoseSetups.setupPose(pose, this, dog, limbSwing, limbSwingAmount, partialTickTime);
-        if (stand_pose)
-            this.setUpStandPose(dog, limbSwing, limbSwingAmount, partialTickTime);
+        final var anim = dog.getAnim();
+
+        final boolean playing_full_anim = this.playingFullAnim(dog, pticks);
+        final boolean should_beg =
+            pose.canBeg
+            && (!playing_full_anim || anim.freeHead());
 
         if (pose.canShake)
         this.translateShakingDog(dog, limbSwing, limbSwingAmount, partialTickTime);
@@ -181,6 +195,21 @@ public class DogModel extends EntityModel<DogRenderState> {
         if (pose.canBeg)
         this.translateBeggingDog(dog, limbSwing, limbSwingAmount, partialTickTime);
 
+        if (should_beg)
+            this.translateBeggingDog(dog, limbSwing, limbSwingAmount, pticks);
+
+        if (pose.freeHead) {
+            this.head.xRot += headPitch * ((float)Math.PI / 180F); 
+            this.head.yRot += relativeHeadYRot *  Mth.DEG_TO_RAD;
+        }
+        if (pose.freeTail) {
+            this.tail.xRot = dog.getTailRotation();
+            this.tail.yRot = dog.getWagAngle(limbSwing, limbSwingAmount, ageInTicks);
+        }
+    }
+
+    private boolean playingFullAnim(Dog dog, float pticks) {
+        return dog.animationManager.playingFullAnim(pticks);
     }
 
     public void setUpStandPose(Dog dog, float limbSwing, float limbSwingAmount, float partialTickTime) {
@@ -293,6 +322,45 @@ public class DogModel extends EntityModel<DogRenderState> {
             this.tail.yRot = dog.getWagAngle(limbSwing, limbSwingAmount, ageInTicks);
         }
 
+        final var anim = dog.getAnim();
+
+        if (anim.isNone())
+            return;
+
+        final var cached_procedural_val =
+            new CachedProceduralValues(this.head.xRot, this.head.yRot, this.realHead.zRot);
+
+        final boolean is_anim_blending =
+            !anim.blend().isNone() && !this.playingFullAnim(dog, pticks);
+
+        if (is_anim_blending) {
+            final var pose_A = this.animSnapshot1;
+            final var pose_B = this.animSnapshot2;
+
+            if (!anim.isNone() && !anim.freeHeadXRot()) {
+                this.head.xRot = dog.animationManager.capturedStateForAnim.headXRot() * Mth.DEG_TO_RAD; 
+            }
+
+            pose_A.store(this);
+
+            setupKeyframeAnimationPose(dog, dog.getAnim(), ageInTicks, cached_procedural_val);
+            
+            pose_B.store(this);
+
+            if (anim.blend().blendHeadRotAndChildrenOnly()) {
+                AnimSnapshot.blendAndApplyHeadRotAndChildrenOnly(dog.animationManager.getBlendProgress(pticks), pose_A, pose_B, this);   
+            } else {
+                AnimSnapshot.blendAndApply(dog.animationManager.getBlendProgress(pticks), pose_A, pose_B, this);
+            }
+        } else {
+            setupKeyframeAnimationPose(dog, dog.getAnim(), ageInTicks, cached_procedural_val);
+        }
+    }
+
+    private boolean setupKeyframeAnimationPose(Dog dog, 
+        DogAnimation anim,
+        float ageInTicks, CachedProceduralValues proceduralValues) {
+        var animationManager = dog.animationManager;
         var animState = animationManager.animationState;
         var anim = dog.getAnim();
         if (anim == DogAnimation.NONE) return;
