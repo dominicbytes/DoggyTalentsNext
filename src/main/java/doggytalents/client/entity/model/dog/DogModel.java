@@ -27,6 +27,7 @@ import doggytalents.client.entity.model.animation.DogKeyframeAnimations.Animatio
 import doggytalents.client.entity.model.util.DogModelRenderType;
 import doggytalents.client.entity.render.DogRenderState;
 import doggytalents.common.entity.Dog;
+import doggytalents.common.entity.anim.DogClassicalAnimationState;
 import doggytalents.common.entity.anim.DogPose;
 import doggytalents.common.util.Util;
 import net.minecraft.client.animation.AnimationDefinition;
@@ -204,7 +205,7 @@ public class DogModel extends EntityModel<DogRenderState> {
         }
         if (pose.freeTail) {
             this.tail.xRot = dog.getTailRotation();
-            this.tail.yRot = dog.getWagAngle(limbSwing, limbSwingAmount, ageInTicks);
+            this.tail.yRot = DogClassicalAnimationState.wagAngle(limbSwing, limbSwingAmount, ageInTicks);
         }
     }
 
@@ -292,13 +293,17 @@ public class DogModel extends EntityModel<DogRenderState> {
     }
 
     public void translateShakingDog(Dog dog, float limbSwing, float limbSwingAmount, float partialTickTime) {
-        this.mane.zRot = dog.getShakeAngle(partialTickTime, -0.08F);
-        this.body.zRot = dog.getShakeAngle(partialTickTime, -0.16F);
-        this.realTail.zRot = dog.getShakeAngle(partialTickTime, -0.2F);
+        float shake_value = dog.getDogClassicalShakeAnim(partialTickTime);
+        this.mane.zRot = DogClassicalAnimationState.shakeAngle(shake_value, -0.08F);
+        this.body.zRot = DogClassicalAnimationState.shakeAngle(shake_value, -0.16F);
+        this.realTail.zRot = DogClassicalAnimationState.shakeAngle(shake_value, -0.2F);
     }
 
     public void translateBeggingDog(Dog dog, float limbSwing, float limbSwingAmount, float partialTickTime) {
-        this.realHead.zRot = dog.getInterestedAngle(partialTickTime) + dog.getShakeAngle(partialTickTime, 0.0F);
+        float beg_value = dog.getDogClassicalBegAnim(partialTickTime);
+        float shake_value = dog.getDogClassicalShakeAnim(partialTickTime);
+        this.realHead.zRot = DogClassicalAnimationState.begAngle(beg_value)
+            + DogClassicalAnimationState.shakeAngle(shake_value, 0);
     }
 
     Vector3f vecObj = new Vector3f();
