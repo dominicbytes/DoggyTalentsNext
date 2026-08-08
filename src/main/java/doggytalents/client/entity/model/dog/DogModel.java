@@ -195,14 +195,22 @@ public class DogModel extends EntityModel<DogRenderState> {
             pose.canBeg
             && (!playing_full_anim || anim.freeHead());
 
-        if (pose.canShake)
-        this.translateShakingDog(dog, limbSwing, limbSwingAmount, partialTickTime);
+        final float shake_value = !captured_state.isNone() ? 
+            captured_state.shakeAnim() : dog.getDogClassicalShakeAnim(pticks);
+        final float beg_value = !captured_state.isNone() ? 
+            captured_state.begAnim() : dog.getDogClassicalBegAnim(pticks);
 
-        if (pose.canBeg)
-        this.translateBeggingDog(dog, limbSwing, limbSwingAmount, partialTickTime);
+        if (!playing_full_anim) {
+            boolean stand_pose = !DogPoseSetups.setupPose(pose, this, dog, limbSwing, limbSwingAmount, pticks);
+            if (stand_pose)
+                this.setUpStandPose(dog, limbSwing, limbSwingAmount, pticks);
+
+            if (pose.canShake)
+                this.translateShakingDog(dog, shake_value, limbSwing, limbSwingAmount, pticks);
+        }
 
         if (should_beg)
-            this.translateBeggingDog(dog, limbSwing, limbSwingAmount, pticks);
+            this.translateBeggingDog(dog, shake_value, beg_value, limbSwing, limbSwingAmount, pticks);
 
         if (pose.freeHead) {
             this.head.xRot += headPitch * ((float)Math.PI / 180F); 
@@ -255,60 +263,16 @@ public class DogModel extends EntityModel<DogRenderState> {
         }
     }
 
-    @Deprecated
-    public void animateStandWalking(Dog dog, float limbSwing, float limbSwingAmount, float partialTickTime) {
-        float w = Mth.cos(limbSwing * 0.6662F);
-        float w1 = Mth.cos(limbSwing * 0.6662F + (float) Math.PI);
-        float swing = Mth.clamp(limbSwingAmount, 0, 1);
-        float modifier = 2.5f;
-        this.body.xRot += getAnimateWalkingValue(w, swing, modifier * -5f*Mth.DEG_TO_RAD);
-        this.body.y += getAnimateWalkingValue(w, swing, -0.25f*modifier);
-        this.body.z +=  getAnimateWalkingValue(w, swing, -0.25f*modifier);
-
-        this.mane.xRot += getAnimateWalkingValue(w, swing, modifier * 2.5f*Mth.DEG_TO_RAD );
-        this.mane.y += getAnimateWalkingValue(w, swing, -0.25f*modifier);
-
-        this.head.y += getAnimateWalkingValue(w, swing, -0.25f*modifier);
-
-        this.tail.y += getAnimateWalkingValue(w, swing, 0.5f*modifier);
-        this.tail.z += getAnimateWalkingValue(w, swing, -0.5f*modifier);
-
-        if (this.earRight.isPresent()) {
-            this.earRight.get().xRot += getAnimateWalkingValue(w, swing, -40f*Mth.DEG_TO_RAD );
-            this.earRight.get().zRot += getAnimateWalkingValue(w, swing, -27.5f*Mth.DEG_TO_RAD );
-            this.earRight.get().y += getAnimateWalkingValue(w, swing, 0.5f );
-        }
-        if (this.earLeft.isPresent()) {
-            this.earLeft.get().xRot += getAnimateWalkingValue(w, swing, -40f*Mth.DEG_TO_RAD );
-            this.earLeft.get().zRot += getAnimateWalkingValue(w, swing, 27.5f*Mth.DEG_TO_RAD );
-            this.earLeft.get().y += getAnimateWalkingValue(w, swing, 0.5f );
-        }
-
-        this.legBackRight.xRot += w * 1.4F * limbSwingAmount;
-        this.legBackLeft.xRot += w1 * 1.4F * limbSwingAmount;
-        this.legFrontRight.xRot += w1 * 1.4F * limbSwingAmount;
-        this.legFrontLeft.xRot += w * 1.4F * limbSwingAmount;
+    public void translateShakingDog(Dog dog, float shakeValue, float limbSwing, float limbSwingAmount, float partialTickTime) {
+        this.mane.zRot = DogClassicalAnimationState.shakeAngle(shakeValue, -0.08F);
+        this.body.zRot = DogClassicalAnimationState.shakeAngle(shakeValue, -0.16F);
+        this.realTail.zRot = DogClassicalAnimationState.shakeAngle(shakeValue, -0.2F);
     }
 
-    @Deprecated
-    private float getAnimateWalkingValue(float w, float swingAmount, float amplitude) {
-        int sign = Mth.sign(amplitude);
-        amplitude = Math.abs(amplitude);
-        return sign*Math.abs(amplitude * swingAmount * w);
-    }
-
-    public void translateShakingDog(Dog dog, float limbSwing, float limbSwingAmount, float partialTickTime) {
-        float shake_value = dog.getDogClassicalShakeAnim(partialTickTime);
-        this.mane.zRot = DogClassicalAnimationState.shakeAngle(shake_value, -0.08F);
-        this.body.zRot = DogClassicalAnimationState.shakeAngle(shake_value, -0.16F);
-        this.realTail.zRot = DogClassicalAnimationState.shakeAngle(shake_value, -0.2F);
-    }
-
-    public void translateBeggingDog(Dog dog, float limbSwing, float limbSwingAmount, float partialTickTime) {
-        float beg_value = dog.getDogClassicalBegAnim(partialTickTime);
-        float shake_value = dog.getDogClassicalShakeAnim(partialTickTime);
-        this.realHead.zRot = DogClassicalAnimationState.begAngle(beg_value)
-            + DogClassicalAnimationState.shakeAngle(shake_value, 0);
+    public void translateBeggingDog(Dog dog, float shakeValue, float begValue, 
+        float limbSwing, float limbSwingAmount, float partialTickTime) {
+        this.realHead.zRot = DogClassicalAnimationState.begAngle(begValue)
+            + DogClassicalAnimationState.shakeAngle(shakeValue, 0);
     }
 
     Vector3f vecObj = new Vector3f();
