@@ -307,6 +307,9 @@ public class DogModel extends EntityModel<DogRenderState> {
         final boolean is_anim_blending =
             !anim.blend().isNone() && !this.playingFullAnim(dog, pticks);
 
+        final long anim_time_millis = dog.animationManager.animationState
+            .updateTimeAndGet(ageInTicks, anim.getSpeedModifier());
+
         if (is_anim_blending) {
             final var pose_A = this.animSnapshot1;
             final var pose_B = this.animSnapshot2;
@@ -317,7 +320,7 @@ public class DogModel extends EntityModel<DogRenderState> {
 
             pose_A.store(this);
 
-            setupKeyframeAnimationPose(dog, dog.getAnim(), ageInTicks, cached_procedural_val);
+            setupKeyframeAnimationPose(dog, dog.getAnim(), anim_time_millis, cached_procedural_val);
             
             pose_B.store(this);
 
@@ -327,35 +330,52 @@ public class DogModel extends EntityModel<DogRenderState> {
                 AnimSnapshot.blendAndApply(dog.animationManager.getBlendProgress(pticks), pose_A, pose_B, this);
             }
         } else {
-            setupKeyframeAnimationPose(dog, dog.getAnim(), ageInTicks, cached_procedural_val);
+            setupKeyframeAnimationPose(dog, dog.getAnim(), anim_time_millis, cached_procedural_val);
         }
     }
 
     private boolean setupKeyframeAnimationPose(Dog dog, 
-        DogAnimation anim,
-        float ageInTicks, CachedProceduralValues proceduralValues) {
-        var animationManager = dog.animationManager;
-        var animState = animationManager.animationState;
-        var anim = dog.getAnim();
-        if (anim == DogAnimation.NONE) return;
+        DogAnimation anim, long animTimeMillis, 
+        CachedProceduralValues proceduralValues) {
+
+        if (anim.isNone()) 
+            return false;
+
         var sequence = this.getAnimationSequence(anim);
-        if (sequence == null) return;
-        if (pose.freeHead && anim.freeHead()) {
-            headXRot0 = this.head.xRot;
-            headYRot0 = this.head.yRot;
-            realHeadZRot0 = this.realHead.zRot;
-        } else if (pose.freeHead && anim.freeHeadXRotOnly()) {
-            headXRot0 = this.head.xRot;
+        if (sequence == null) 
+            return false;
+
+        resetAllPoseForAnim(dog, anim, proceduralValues);
+            
+        DogKeyframeAnimations.animate(this, dog, sequence, animTimeMillis, 1.0F, vecObj);
+
+        return true;
+    }
+
+    private static record CachedProceduralValues(
+        float headXRot, float headYRot, float realHeadZRot 
+    ) {}
+
+    private void resetAllPoseForAnim(Dog dog, DogAnimation anim, CachedProceduralValues proceduralValues) {
+        this.resetAllPose();
+        
+        if (anim.freeTail()) {
+            this.tail.xRot = dog.getTailRotation();
+        }
+
+        if (anim.freeHead() && dog.getDogPose().freeHead) {
+            this.head.xRot = proceduralValues.headXRot;
+            this.head.yRot = proceduralValues.headYRot;
+            this.realHead.zRot = proceduralValues.realHeadZRot;
+        }
+
+        if (anim.freeHeadXRotOnly()) {
+            this.head.xRot = proceduralValues.headXRot;
         }
 
         anim.rootRotation().ifPresent(x -> {
-            this.root.yRot += x * Mth.DEG_TO_RAD;
+            this.root.yRot = x * Mth.DEG_TO_RAD;
         });
-        
-        if (animState.isStarted()) {
-            animState.updateTime(ageInTicks, anim.getSpeedModifier());
-            DogKeyframeAnimations.animate(this, dog, sequence, animState.getAccumulatedTimeMillis(), 1.0F, vecObj);
-        }
     }
 
     private void setDogUpDebugAnim(Dog dog) {
