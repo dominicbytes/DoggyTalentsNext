@@ -114,6 +114,7 @@ public enum DogAnimation {
     private final boolean interupting;
     private final Optional<Float> rootRotation;
     private final BlendConfig blend;
+    private final BlendOutConfig blendOut;
 
     private DogAnimation(int id, int lengthTicks, Function<Props, Props> props_consumer) {
         this.id = id;
@@ -127,6 +128,7 @@ public enum DogAnimation {
         this.interupting = props.interupting;
         this.rootRotation = props.rootRotation;
         this.blend = props.blend;
+        this.blendOut = props.blendOut;
     }
     
     private DogAnimation(int id, int lengthTicks) {
@@ -153,6 +155,9 @@ public enum DogAnimation {
     public boolean interupting() { return this.interupting; }
     public Optional<Float> rootRotation() { return this.rootRotation; }
     public BlendConfig blend() { return this.blend; }
+    public BlendOutConfig blendOut() { return this.blendOut; }
+    public boolean hasBlendIn() { return !this.blend.isNone(); }
+    public boolean hasBlendOut() { return !this.blendOut.isNone(); }
 
     public boolean isNone() { return this == DogAnimation.NONE; }
 
@@ -173,6 +178,7 @@ public enum DogAnimation {
         private boolean interupting = false;
         private Optional<Float> rootRotation = Optional.empty();
         private BlendConfig blend = BlendConfig.DEFAULT;
+        private BlendOutConfig blendOut = BlendOutConfig.DEFAULT;
 
         public Props speedMod(float val) {
             this.speedModifier = val;
@@ -230,6 +236,16 @@ public enum DogAnimation {
             this.blend = new BlendConfig(DogAnimBlendMode.HEAD_ROT_AND_CHILDREN_ONLY, ticks);
             return this;
         }
+
+        public Props noBlendOut() {
+            this.blendOut = new BlendOutConfig(DogAnimBlendOutMode.NONE, 0);
+            return this;
+        }
+
+        public Props blendOut(int ticks) {
+            this.blendOut = new BlendOutConfig(DogAnimBlendOutMode.CAPTURE_POSE, ticks);
+            return this;
+        }
     }
 
     public static enum DogAnimBlendMode { NONE, BLEND, HEAD_ROT_AND_CHILDREN_ONLY }
@@ -250,5 +266,17 @@ public enum DogAnimation {
             return this.mode() == DogAnimBlendMode.NONE;
         }
     }
+
+    public static enum DogAnimBlendOutMode { NONE, CAPTURE_POSE }
+
+    public static record BlendOutConfig(DogAnimBlendOutMode mode, int blendTick) {
+        public static final BlendOutConfig NONE = new BlendOutConfig(DogAnimBlendOutMode.NONE, 0);
+        public static final BlendOutConfig DEFAULT = new BlendOutConfig(DogAnimBlendOutMode.CAPTURE_POSE, 3);
+
+        public boolean isNone() {
+            return this.mode() == DogAnimBlendOutMode.NONE;
+        }
+    }
+    
 
 }
