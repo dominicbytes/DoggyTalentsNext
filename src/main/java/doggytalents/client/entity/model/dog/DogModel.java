@@ -182,7 +182,7 @@ public class DogModel extends EntityModel<DogRenderState> {
 
         final var captured_procedural = 
             anim_manager.getBlendState(pticks).hasProceduralCapture() ? 
-                dog.animationManager.capturedStateForAnim
+                dog.animationManager.capturedProcedural
                 : DogCapturedProceduralState.NONE;
         
         var pose = dog.getDogPose();
@@ -322,11 +322,11 @@ public class DogModel extends EntityModel<DogRenderState> {
         
         //TODO Move this into setupProceduralPose.
         if (blend_state.hasProceduralCapture() && !anim.freeHeadXRot()) {
-            this.head.xRot = dog.animationManager.capturedStateForAnim.headXRot() * Mth.DEG_TO_RAD; 
+            this.head.xRot = dog.animationManager.capturedProcedural.headXRot() * Mth.DEG_TO_RAD; 
         }
 
         if (blend_state == BlendState.ANIM_TO_ANIM) {
-            final var captured_keyframe = dog.animationManager.capturedStateForAnimPose;
+            final var captured_keyframe = dog.animationManager.capturedKeyframeAnim;
 
             if (!captured_keyframe.isNone()) {
                 setupKeyframeAnimationPose(dog, captured_keyframe.anim(), 
@@ -337,7 +337,7 @@ public class DogModel extends EntityModel<DogRenderState> {
         pose_A.store(this);
 
         if (blend_state == BlendState.BLEND_OUT) {
-            final var captured_keyframe = dog.animationManager.capturedStateForAnimPose;
+            final var captured_keyframe = dog.animationManager.capturedKeyframeAnim;
 
             if (!captured_keyframe.isNone()) {
                 setupKeyframeAnimationPose(dog, captured_keyframe.anim(), 
