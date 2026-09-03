@@ -16,6 +16,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.network.FriendlyByteBuf;
 import doggytalents.common.network.DTNNetworkHandler.NetworkEvent.Context;
 import doggytalents.common.network.IPacket;
+import doggytalents.common.network.NetworkDecodeUtil;
 import doggytalents.common.network.PacketDistributor;
 import doggytalents.common.network.PacketHandler;
 
@@ -89,7 +90,7 @@ public class DogGroupPackets {
         @Override
         public void encode(DogGroupsData.UPDATE data, FriendlyByteBuf buf) {
             buf.writeInt(data.dogId);
-            buf.writeInt(data.groups.size());
+            NetworkDecodeUtil.writeCollectionSize(buf, data.groups.size(), DogGroupsManager.MAX_GROUP_SIZE, "dog groups");
             for (var group : data.groups) {
                 buf.writeUtf(group.name, DogGroupsManager.MAX_GROUP_STRLEN);
                 buf.writeInt(group.color);
@@ -99,7 +100,7 @@ public class DogGroupPackets {
         @Override
         public DogGroupsData.UPDATE decode(FriendlyByteBuf buf) {
             int id = buf.readInt();
-            int size = buf.readInt();
+            int size = NetworkDecodeUtil.readCollectionSize(buf, DogGroupsManager.MAX_GROUP_SIZE, "dog groups");
             var groups = new ArrayList<DogGroup>(size);
             for (int i = 0; i < size; ++i) {
                 String group = buf.readUtf(DogGroupsManager.MAX_GROUP_STRLEN);
