@@ -2,13 +2,13 @@ package doggytalents.common.talent;
 
 import java.util.Map;
 
+import doggytalents.DoggyTalentsNext;
 import doggytalents.api.impl.DogAlterationProps;
 import doggytalents.api.inferface.AbstractDog;
 import doggytalents.api.registry.Talent;
 import doggytalents.api.registry.TalentInstance;
 import doggytalents.common.Screens;
 import doggytalents.common.entity.Dog;
-import doggytalents.common.lib.Constants;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.server.level.ServerLevel;
@@ -80,7 +80,12 @@ public class DoggyArmorTalent extends TalentInstance {
                 this.spareValue = 0;
                 mayNeedsDataUpgrade = true;
             }
-        } catch (Exception e) {}
+        } catch (Exception e) {
+            DoggyTalentsNext.LOGGER.warn(
+                "[SAVE-02-ARMOR-DIAGNOSTIC] Failed to load dog armor talent data for dog {}",
+                dogIn.getUUID(), e
+            );
+        }
     }
 
 
@@ -93,7 +98,12 @@ public class DoggyArmorTalent extends TalentInstance {
             if (compound.contains("dogArmors"))
                 dogIn.dogArmors().deserializeNBT(dogIn.registryAccess(), compound);
             this.spareValue = compound.getIntOr("armors_spareXp", 0);
-        } catch (Exception e) {}
+        } catch (Exception e) {
+            DoggyTalentsNext.LOGGER.warn(
+                "[SAVE-02-ARMOR-DIAGNOSTIC] Failed to upgrade legacy dog armor talent data for dog {}",
+                dogIn.getUUID(), e
+            );
+        }
     }
 
     @Override

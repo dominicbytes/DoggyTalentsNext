@@ -16,4 +16,4 @@ The fixture is derived directly from the writer and reader contract in `Dog` at 
 
 The loader-aware test covers core state and behavior flags, normal level, the legacy `level_dire` fallback, the legacy `customSkinHash` fallback, a talent, dyed accessory, artifact, bed and bowl positions, all persisted statistics, dog group, wander restriction, owner-distance state, and petting state. It then writes the loaded dog through the 26.1 serializer and verifies canonical `level_kami` and `doggytalents_dog_skin` output.
 
-This closes the representative frozen 1.21.1 dog-payload subgate of `SAVE-01`. Full save persistence across a stopped and restarted server process remains open.
+This closes the representative frozen 1.21.1 dog-payload subgate of `SAVE-01`. The separate `SAVE-01-RESTART` production-server gate now proves broad dog state across a stopped and restarted server process. An authentic captured full-world upgrade remains an optional evidence improvement.
