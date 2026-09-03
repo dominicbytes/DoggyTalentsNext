@@ -35,11 +35,12 @@ DashieDev PR #184 is open, non-draft, merge-conflicted (`mergeable_state: dirty`
 - `test` reports `NO-SOURCE`; no `src/test` or CI workflow exists.
 - Static artifact audit reports zero errors. The two namespace warnings (`data/minecraft` and `data/neoforge`) require intent review but are not automatic defects.
 - An isolated headless Gradle run loads Doggy Talents Next `26.1.2.24`, Minecraft `26.1.2`, and NeoForge `26.1.2.101`, creates a new world, and reaches server `Done` without a client-classloading failure.
+- The exact packaged JAR (`388b4de5a1551cc8fd53b0e53eab002020afff3381130aa738aa859e2d3ff187`) also loads from a clean NeoForge `26.1.2.101` server `mods/` directory and reaches `Done (1.561s)` without a DTN classloading failure. See `docs/PRODUCTION_SERVER_QA_26.1.2.md`.
 - The vanilla automation bot is correctly rejected by the NeoForge server because it is not a NeoForge client, so two-sided login/gameplay remains untested.
 - All 149 generated item-definition JSON files resolve to existing model JSON files. The apparent missing `rice_crop` and `soy_crop` item definitions are crops without registered block items, so they are not gaps.
 - The branch still produces 72 Java warnings against `.101`, dominated by NeoForge item-handler APIs marked for removal. These are maintenance debt, not immediate 26.1.2 blockers.
 
-Evidence boundary: `COMPILES`, static packaging, 30 unit tests, and a development-classpath dedicated-server/new-world smoke test are proven. Production-JAR server installation, client, restart/persistence integration, and visual parity are not yet proven. Multiplayer acceptance is explicitly waived for the dominicbytes fork and remains upstream work.
+Evidence boundary: `COMPILES`, static packaging, 30 unit tests, development-classpath server startup, and clean production-JAR dedicated-server startup are proven. Client, restart/persistence integration, and visual parity are not yet proven. Multiplayer acceptance is explicitly waived for the dominicbytes fork and remains upstream work.
 
 ## Confirmed parity gaps
 
@@ -51,7 +52,7 @@ Evidence boundary: `COMPILES`, static packaging, 30 unit tests, and a developmen
 
 3. **Packet decode hardening is only partially complete.** The stacked network branch adds non-negative maximum counts to `CanineTrackerPackets`, `ConductingBonePackets`, `DogGroupPackets`, `HeelByGroupPackets`, `DogSyncDataPacket`, `DoggyArtifactsSerializer`, and `Dim2BlockPosSerializer`, bounds tracker names, validates dog-sync state IDs, and exercises those paths with hostile-input tests. Remaining work is explicit per-message size budgeting, truncated/trailing-byte policy, and verified disconnect/reporting behavior at the channel boundary.
 
-4. **Production-JAR dedicated-server classloading remains unproven.** The development-classpath server now reaches `Done`, but common packet classes still directly import `net.minecraft.client` and `doggytalents.client` types. Run the packaged JAR on a clean dedicated NeoForge server and separate client-only payload handlers if production class resolution fails or remains ambiguous.
+4. **Production-JAR dedicated-server classloading is proven.** The exact packaged JAR loads from a clean NeoForge server `mods/` directory and reaches `Done`. No DTN client-class resolution failure occurs; the remaining log errors are environment-level native transport probing and external-service timeouts documented in the QA report.
 
 5. **Persistence and upgrade behavior is only partially proven.** Original 1.21.1 respawn-owner UUIDs, the interim 26.1.2 string UUID format, legacy location-list/entity-ID keys, canonical respawn re-encoding, and malformed-entry rejection now have unit coverage. Dog state, talents, accessories, beds/bowls, pack-puppy contents, tracker data, and full save/restart/reload still need assertions. Remaining silent exception handlers in persistence paths must log enough context to diagnose partial data loss.
 
@@ -104,7 +105,7 @@ Each PR should start from a failing test or fixed reproduction, make the smalles
 | BUILD-02 | Two clean builds produce the same JAR hash | artifact hashes |
 | NET-01 | Wrong-direction, unknown, negative, oversized, duplicate, and truncated payloads are rejected safely | unit/loader tests |
 | NET-02 | Non-owner cannot mutate another player's dog; owner can | two-client GameTest/manual |
-| SERVER-01 | Production JAR starts on a clean dedicated NeoForge server without client class resolution | server log |
+| SERVER-01 | Production JAR starts on a clean dedicated NeoForge server without client class resolution | PASS — `docs/PRODUCTION_SERVER_QA_26.1.2.md` |
 | SAVE-01 | 1.21.1 fixture upgrades with dog identity, talents, accessories, inventories, locations, and respawn state intact | restart integration test |
 | RENDER-01 | Adult/puppy, default/custom skin, armor/trim/helmet, wet/incapacitated, and accessory matrix matches oracle | fixed captures + manual approval |
 | RENDER-02 | Every nameplate config changes only its documented behavior | client test/manual captures |
@@ -121,6 +122,8 @@ The stacked network-hardening branch enables NeoForge's JUnit environment and ad
 The stacked render-state branch restores puppy head scaling from `LivingEntityRenderState.isBaby`, propagates it to copied dog and synchronized accessory models, and covers adult, puppy, custom-model opt-out, and accessory propagation behavior. Client visual acceptance remains required.
 
 The persistence compatibility branch restores the original UUID NBT contract for dead-dog owners while continuing to read the interim string format emitted by the 26.1.2 draft. It also restores component-preserving custom-name storage, rejects malformed location/respawn records before constructing data objects, and freezes the original location keys in tests. Five persistence compatibility tests and the 30-test suite pass; full-world restart coverage remains open.
+
+The production-server gate installs the official checksum-verified NeoForge `26.1.2.101` server into a clean disposable directory, copies only the freshly built production JAR into `mods/`, and reaches `Done`. The strict Modmaker artifact validator also passes with zero findings. This closes dedicated-server packaging/classloading acceptance; it does not substitute for client or save-restart testing.
 
 ## Bytecraft state
 
