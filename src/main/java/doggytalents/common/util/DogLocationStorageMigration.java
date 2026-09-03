@@ -1,5 +1,6 @@
 package doggytalents.common.util;
 
+import doggytalents.DoggyTalentsNext;
 import doggytalents.common.lib.Constants;
 import doggytalents.common.storage.DogLocationStorage;
 import net.minecraft.resources.Identifier;
@@ -23,14 +24,24 @@ public class DogLocationStorageMigration {
         DogLocationStorage newStorage = null;
         try {
             newStorage = savedData.get(DogLocationStorage.TYPE);
-        } catch (Exception e) {}
+        } catch (Exception e) {
+            DoggyTalentsNext.LOGGER.warn(
+                "[SAVE-02-LOCATION-MIGRATION-DIAGNOSTIC] Failed to read current dog location storage in dimension {}",
+                level.dimension().identifier(), e
+            );
+        }
         if (newStorage != null)
             return;
 
         DogLocationStorage oldStorage = null;
         try {
             oldStorage = savedData.get(OLD_TYPE);
-        } catch (Exception e) {}
+        } catch (Exception e) {
+            DoggyTalentsNext.LOGGER.warn(
+                "[SAVE-02-LOCATION-MIGRATION-DIAGNOSTIC] Failed to read legacy dog location storage {} in dimension {}",
+                Constants.STORAGE_DOG_LOCATION_OLD, level.dimension().identifier(), e
+            );
+        }
         if (oldStorage == null)
             return;
         if (oldStorage.getAll().isEmpty())

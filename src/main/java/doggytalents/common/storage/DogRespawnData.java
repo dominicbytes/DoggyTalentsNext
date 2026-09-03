@@ -125,6 +125,10 @@ public class DogRespawnData implements IDogData {
                 target.remove(tag);
             }
         } catch (Exception e) {
+            DoggyTalentsNext.LOGGER.warn(
+                "[SAVE-02-RESPAWN-DIAGNOSTIC] Failed to apply configured respawn tag exclusions for dog {}",
+                this.uuid, e
+            );
         }
     }
 
@@ -160,7 +164,10 @@ public class DogRespawnData implements IDogData {
                 target.put(toKeepStr, toKeep);
             }
         } catch (Exception e) {
-
+            DoggyTalentsNext.LOGGER.warn(
+                "[SAVE-02-RESPAWN-DIAGNOSTIC] Failed to preserve configured additional respawn tags for dog {}",
+                this.uuid, e
+            );
         }
     }
 
@@ -181,6 +188,10 @@ public class DogRespawnData implements IDogData {
                 if (name != null)
                     dog.setDogCustomName(name);
             } catch (Exception e) {
+                DoggyTalentsNext.LOGGER.warn(
+                    "[SAVE-02-RESPAWN-DIAGNOSTIC] Failed to decode the stored respawn name component for dog {}; trying the legacy string format",
+                    this.uuid, e
+                );
                 var name = tag.getStringOr(STORAGE_NAME_TAG, "");
                 if (!name.isEmpty())
                     dog.setDogCustomName(Component.literal(name));
@@ -244,10 +255,24 @@ public class DogRespawnData implements IDogData {
     public void read(CompoundTag compound) {
         this.data = compound.getCompoundOrEmpty("data");
         if (compound.contains("dog_name")) {
-            try {
-                var name_str = compound.getStringOr("dog_name", "");
-                this.dogName = Optional.ofNullable(name_str);
-            } catch (Exception e) {}
+            var nameTag = compound.get("dog_name");
+            if (nameTag == null || nameTag.getId() != Tag.TAG_STRING) {
+                DoggyTalentsNext.LOGGER.warn(
+                    "[SAVE-02-RESPAWN-DIAGNOSTIC] Ignoring respawn index name with the wrong NBT type for dog {}",
+                    this.uuid
+                );
+            } else {
+                try {
+                    var name_str = compound.getStringOr("dog_name", "");
+                    if (!name_str.isEmpty())
+                        this.dogName = Optional.of(name_str);
+                } catch (Exception e) {
+                    DoggyTalentsNext.LOGGER.warn(
+                        "[SAVE-02-RESPAWN-DIAGNOSTIC] Failed to read the respawn index name for dog {}; using the unnamed fallback",
+                        this.uuid, e
+                    );
+                }
+            }
         }
         if (compound.contains("owner_uuid")) {
             this.ownerUUID = readUUID(compound, "owner_uuid").orElse(null);
@@ -267,7 +292,7 @@ public class DogRespawnData implements IDogData {
         return compound;
     }
 
-    private static Optional<UUID> readUUID(CompoundTag compound, String key) {
+    private Optional<UUID> readUUID(CompoundTag compound, String key) {
         var uuid = NBTUtil.getUniqueId(compound, key);
         if (uuid != null)
             return Optional.of(uuid);
@@ -278,7 +303,10 @@ public class DogRespawnData implements IDogData {
         try {
             return Optional.of(UUID.fromString(uuidString));
         } catch (IllegalArgumentException e) {
-            DoggyTalentsNext.LOGGER.warn("Unable to read dog respawn UUID from tag {}", key);
+            DoggyTalentsNext.LOGGER.warn(
+                "[SAVE-02-RESPAWN-DIAGNOSTIC] Ignoring malformed UUID tag {} for dog {}",
+                key, this.uuid
+            );
             return Optional.empty();
         }
     }

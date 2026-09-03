@@ -3,6 +3,7 @@ package doggytalents.common.storage;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 import java.util.UUID;
 
@@ -45,6 +46,30 @@ class DogStorageCompatibilityTest {
 
         assertNotNull(data);
         assertEquals(ownerId, data.getOwnerId());
+    }
+
+    @Test
+    void fallsBackWhenRespawnNameHasTheWrongTagType() {
+        UUID dogId = UUID.fromString("11111111-2222-3333-4444-555555555555");
+        CompoundTag entry = respawnEntry(dogId);
+        entry.put("dog_name", new CompoundTag());
+
+        DogRespawnData data = decodeRespawnStorage(entry).getData(dogId);
+
+        assertNotNull(data);
+        assertEquals("noname", data.getDogName());
+    }
+
+    @Test
+    void ignoresMalformedRespawnOwnerUuid() {
+        UUID dogId = UUID.fromString("11111111-2222-3333-4444-555555555555");
+        CompoundTag entry = respawnEntry(dogId);
+        entry.putString("owner_uuid", "not-a-uuid");
+
+        DogRespawnData data = decodeRespawnStorage(entry).getData(dogId);
+
+        assertNotNull(data);
+        assertNull(data.getOwnerId());
     }
 
     @Test
