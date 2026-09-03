@@ -7,7 +7,7 @@ Working branch: `dominicbytes/26.1.2-parity`
 
 ## Verdict
 
-MiiRaGe's `26.1.2` branch is the correct implementation base, but it is not at feature parity and is not release-ready. It compiles and packages successfully, including against the current stable NeoForge 26.1.2 loader, but multiple 1.21.1 behaviors were replaced by explicit stubs, disabled registrations, or incomplete render-state/network migrations. There are no automated tests, no GameTests, and no runtime evidence broad enough to support the branch's "GUI / client rendering done" claim.
+MiiRaGe's `26.1.2` branch is the correct implementation base, but it is not at feature parity and is not release-ready. It compiles, packages, and reaches a new-world dedicated-server `Done` state against the current stable NeoForge 26.1.2 loader, but multiple 1.21.1 behaviors were replaced by explicit stubs, disabled registrations, or incomplete render-state/network migrations. There are no automated tests or GameTests, and no client/runtime evidence broad enough to support the branch's "GUI / client rendering done" claim.
 
 The `26.1.2-beta` branch should not be continued. It is an older, separately developed migration line. The stable branch contains 32 post-forkpoint commits and more than 100 later fixes relative to beta. Keep beta for archaeology only.
 
@@ -34,10 +34,12 @@ DashieDev PR #184 is open, non-draft, merge-conflicted (`mergeable_state: dirty`
 - NeoForge's official Maven metadata identifies `26.1.2.101` as the current stable release. The parity branch builds successfully against it.
 - `test` reports `NO-SOURCE`; no `src/test` or CI workflow exists.
 - Static artifact audit reports zero errors. The two namespace warnings (`data/minecraft` and `data/neoforge`) require intent review but are not automatic defects.
+- An isolated headless Gradle run loads Doggy Talents Next `26.1.2.24`, Minecraft `26.1.2`, and NeoForge `26.1.2.101`, creates a new world, and reaches server `Done` without a client-classloading failure.
+- The vanilla automation bot is correctly rejected by the NeoForge server because it is not a NeoForge client, so two-sided login/gameplay remains untested.
 - All 149 generated item-definition JSON files resolve to existing model JSON files. The apparent missing `rice_crop` and `soy_crop` item definitions are crops without registered block items, so they are not gaps.
 - The branch still produces 72 Java warnings against `.101`, dominated by NeoForge item-handler APIs marked for removal. These are maintenance debt, not immediate 26.1.2 blockers.
 
-Evidence boundary: `COMPILES` and static packaging are proven. Dedicated-server, client, multiplayer, restart/persistence, visual parity, and production-artifact installation are not yet proven.
+Evidence boundary: `COMPILES`, static packaging, and a development-classpath dedicated-server/new-world smoke test are proven. Production-JAR server installation, client, multiplayer, restart/persistence, and visual parity are not yet proven.
 
 ## Confirmed parity gaps
 
@@ -49,7 +51,7 @@ Evidence boundary: `COMPILES` and static packaging are proven. Dedicated-server,
 
 3. **Several packet decoders trust peer-controlled collection sizes.** `CanineTrackerPackets`, `ConductingBonePackets`, `DogGroupPackets`, `HeelByGroupPackets`, and `DogSyncDataPacket` allocate lists from an unbounded signed `readInt`; two name decoders also use unbounded `readUtf()`. Add non-negative maximum counts, bounded strings, remaining-byte checks, rejection/disconnect behavior, and hostile-input tests.
 
-4. **Dedicated-server classloading is unproven.** Common packet classes directly import `net.minecraft.client` and `doggytalents.client` types. Run the production JAR on a clean dedicated NeoForge server and separate client-only payload handlers if class resolution fails or remains ambiguous.
+4. **Production-JAR dedicated-server classloading remains unproven.** The development-classpath server now reaches `Done`, but common packet classes still directly import `net.minecraft.client` and `doggytalents.client` types. Run the packaged JAR on a clean dedicated NeoForge server and separate client-only payload handlers if production class resolution fails or remains ambiguous.
 
 5. **Persistence and upgrade behavior is unproven.** The ValueInput/ValueOutput conversion compiles, but dog state, talents, accessories, beds/bowls, respawn data, pack-puppy contents, tracker data, and legacy 1.21.1 saves need save/restart/reload assertions. Silent exception handlers in persistence paths must log enough context to diagnose partial data loss.
 
@@ -112,7 +114,7 @@ Each PR should start from a failing test or fixed reproduction, make the smalles
 
 ## Current implementation change
 
-The parity branch removes the Linux-only Java path, raises the clean-build heap to 8 GiB, makes `neoforge_version` the single source of truth, updates it to stable `26.1.2.101`, and configures deterministic archive ordering/timestamps while removing the wall-clock manifest timestamp. A fresh `clean build` succeeds on Java 25; deterministic double-build verification and CI are still pending.
+The parity branch removes the Linux-only Java path, raises the clean-build heap to 8 GiB, makes `neoforge_version` the single source of truth, updates it to stable `26.1.2.101`, and configures deterministic archive ordering/timestamps while removing the wall-clock manifest timestamp. Two fresh Java 25 builds produced the same SHA-256 (`b7bc05bd7d32b5a65619c400ab3fd64b388409cbf4d1c14978e22512e7cdb286`), GitHub Actions passed, and the isolated development server reached `Done`. The server run configuration honors the modmaker runtime directory and leased port when those environment variables are present.
 
 ## Bytecraft state
 

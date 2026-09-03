@@ -49,6 +49,16 @@ neoForge {
         server {
             server()
             programArgument '--nogui'
+
+            def mcpRunDirectory = providers.environmentVariable('MINECRAFT_MCP_RUN_DIRECTORY')
+            if (mcpRunDirectory.isPresent()) {
+                gameDirectory = file(mcpRunDirectory.get())
+            }
+
+            def mcpPort = providers.environmentVariable('MINECRAFT_MCP_PORT')
+            if (mcpPort.isPresent()) {
+                programArguments.addAll '--port', mcpPort.get()
+            }
         }
 
         data {
