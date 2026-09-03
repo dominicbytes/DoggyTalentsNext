@@ -33,7 +33,7 @@ afterEvaluate {
 // --- NEW NEOFORGE BLOCK (Replaces old 'minecraft' and top-level 'runs') ---
 neoForge {
     // This handles the version and the 'neoforge' dependency automatically
-    version = "26.1.2.70-beta"
+    version = project.neoforge_version
 
     accessTransformers.from file('src/main/resources/META-INF/accesstransformer.cfg')
 
@@ -49,6 +49,16 @@ neoForge {
         server {
             server()
             programArgument '--nogui'
+
+            def mcpRunDirectory = providers.environmentVariable('MINECRAFT_MCP_RUN_DIRECTORY')
+            if (mcpRunDirectory.isPresent()) {
+                gameDirectory = file(mcpRunDirectory.get())
+            }
+
+            def mcpPort = providers.environmentVariable('MINECRAFT_MCP_PORT')
+            if (mcpPort.isPresent()) {
+                programArguments.addAll '--port', mcpPort.get()
+            }
         }
 
         data {
@@ -81,6 +91,8 @@ tasks.named("processResources") {
 }
 
 jar {
+    preserveFileTimestamps = false
+    reproducibleFileOrder = true
     from sourceSets.main.output
     from sourceSets.api.output
     manifest {
@@ -90,8 +102,7 @@ jar {
             "Specification-Version": project.version,
             "Implementation-Title": project.name,
             "Implementation-Version": project.version,
-            "Implementation-Vendor" :"dashiedev",
-            "Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")
+            "Implementation-Vendor" :"dashiedev"
         ])
     }
 }
