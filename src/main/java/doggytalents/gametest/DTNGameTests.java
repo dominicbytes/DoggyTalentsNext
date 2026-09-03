@@ -231,6 +231,33 @@ public final class DTNGameTests {
         helper.succeed();
     }
 
+    /** SAVE-01: an in-progress rice-mill operation retains its progress through 26.1 serialization. */
+    public static void save01RiceMillProgressRoundTrip(GameTestHelper helper) {
+        BlockPos millPos = new BlockPos(5, 1, 1);
+        helper.setBlock(millPos, DoggyBlocks.RICE_MILL.get());
+        RiceMillBlockEntity mill = helper.getBlockEntity(millPos, RiceMillBlockEntity.class);
+        mill.getWorldlyContainer().setItem(0, new ItemStack(DoggyItems.RICE_GRAINS.get(), 9));
+        mill.getWorldlyContainer().setItem(1, new ItemStack(Items.BOWL, 3));
+
+        var level = helper.getLevel();
+        var fixture = mill.saveWithFullMetadata(level.registryAccess());
+        fixture.putInt("grindingTime", 23);
+        BlockEntity loadedFixture = BlockEntity.loadStatic(
+            millPos, mill.getBlockState(), fixture, level.registryAccess());
+        require(helper, loadedFixture instanceof RiceMillBlockEntity,
+            "rice mill progress fixture could not be reconstructed");
+        RiceMillBlockEntity loadedMill = (RiceMillBlockEntity) loadedFixture;
+        int loadedProgress = new RiceMillBlockEntity.RiceMillSyncedData(loadedMill)
+            .get(RiceMillBlockEntity.GRINDING_TIME_ID);
+        require(helper, loadedProgress == 23, "rice mill grinding progress fixture was not read");
+
+        RiceMillBlockEntity roundTrippedMill = roundTripBlockEntity(helper, loadedMill, RiceMillBlockEntity.class);
+        int roundTrippedProgress = new RiceMillBlockEntity.RiceMillSyncedData(roundTrippedMill)
+            .get(RiceMillBlockEntity.GRINDING_TIME_ID);
+        require(helper, roundTrippedProgress == 23, "rice mill grinding progress was not preserved");
+        helper.succeed();
+    }
+
     private static Dog roundTrip(GameTestHelper helper, Dog source) {
         var output = TagValueOutput.createWithoutContext(ProblemReporter.DISCARDING);
         source.saveWithoutId(output);

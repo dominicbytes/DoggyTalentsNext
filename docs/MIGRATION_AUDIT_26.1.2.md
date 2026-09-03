@@ -7,7 +7,7 @@ Canonical branch: `26.1.2`
 
 ## Verdict
 
-MiiRaGe's `26.1.2` branch was the correct implementation base, but it was not at feature parity or release-ready. The dominicbytes continuation now compiles, packages, passes 30 unit tests and three DTN GameTests, and reaches a dedicated-server `Done` state against the current stable NeoForge 26.1.2 loader. Client/runtime evidence is still not broad enough to support the original branch's "GUI / client rendering done" claim.
+MiiRaGe's `26.1.2` branch was the correct implementation base, but it was not at feature parity or release-ready. The dominicbytes continuation now compiles, packages, passes 30 unit tests and four DTN GameTests, and reaches a dedicated-server `Done` state against the current stable NeoForge 26.1.2 loader. Client/runtime evidence is still not broad enough to support the original branch's "GUI / client rendering done" claim.
 
 The `26.1.2-beta` branch should not be continued. It is an older, separately developed migration line. The stable branch contains 32 post-forkpoint commits and more than 100 later fixes relative to beta. Keep beta for archaeology only.
 
@@ -32,21 +32,21 @@ DashieDev PR #184 is open, non-draft, merge-conflicted (`mergeable_state: dirty`
 - The original project hard-codes a Linux-only `org.gradle.java.home`, making ordinary Windows builds fail without a command-line override.
 - The original source has conflicting NeoForge declarations: `.29-beta` in `gradle.properties` and `.70-beta` in `build.gradle`.
 - NeoForge's official Maven metadata identifies `26.1.2.101` as the current stable release. The parity branch builds successfully against it.
-- `test` passes 30 tests, and the NeoForge GameTest server runs three registered DTN persistence tests successfully. Java 25 CI remains open.
+- `test` passes 30 tests, and the NeoForge GameTest server runs four registered DTN persistence tests successfully. Java 25 CI remains open.
 - Static artifact audit reports zero errors. The two namespace warnings (`data/minecraft` and `data/neoforge`) require intent review but are not automatic defects.
 - An isolated headless Gradle run loads Doggy Talents Next `26.1.2.24`, Minecraft `26.1.2`, and NeoForge `26.1.2.101`, creates a new world, and reaches server `Done` without a client-classloading failure.
-- The exact packaged JAR (`7989657c3ff63a554f2fde983ac537417b8fd29d6766c0d911cd26c7eaf95a0a`) also loads from a clean NeoForge `26.1.2.101` server `mods/` directory and reaches `Done (0.329s)` without a DTN classloading failure. See `docs/PRODUCTION_SERVER_QA_26.1.2.md`.
+- The exact packaged JAR (`adb23d3b45bf17e421bf7c1ff27f830607dc2d585fd83fada81f5327c0794c31`) also loads from a clean NeoForge `26.1.2.101` server `mods/` directory and reaches `Done (0.327s)` without a DTN classloading failure. See `docs/PRODUCTION_SERVER_QA_26.1.2.md`.
 - The vanilla automation bot is correctly rejected by the NeoForge server because it is not a NeoForge client, so two-sided login/gameplay remains untested.
 - All 149 generated item-definition JSON files resolve to existing model JSON files. The apparent missing `rice_crop` and `soy_crop` item definitions are crops without registered block items, so they are not gaps.
 - The branch still produces 72 Java warnings against `.101`, dominated by NeoForge item-handler APIs marked for removal. These are maintenance debt, not immediate 26.1.2 blockers.
 
-Evidence boundary: `COMPILES`, static packaging, 30 unit tests, three DTN in-process persistence GameTests, development-classpath server startup, and clean production-JAR dedicated-server startup are proven. Client, process-restart persistence, frozen-fixture upgrades, and visual parity are not yet proven. Multiplayer acceptance is explicitly waived for the dominicbytes fork and remains upstream work.
+Evidence boundary: `COMPILES`, static packaging, 30 unit tests, four DTN in-process persistence GameTests, development-classpath server startup, and clean production-JAR dedicated-server startup are proven. Client, process-restart persistence, broad frozen-fixture upgrades, and visual parity are not yet proven. Multiplayer acceptance is explicitly waived for the dominicbytes fork and remains upstream work.
 
 ## Confirmed parity gaps
 
 ### P0 — release and multiplayer safety
 
-1. **The automated harness is still incomplete.** JUnit covers network and storage compatibility, while NeoForge GameTests prove real-dog core serialization, representative talents, dog-owned inventories, accessory color, artifact state, and established food-bowl, dog-bed, and rice-mill inventory state. Add lifecycle, frozen-fixture, tracker, rice-mill progress, and restart coverage. Java 25 CI remains required.
+1. **The automated harness is still incomplete.** JUnit covers network and storage compatibility, while NeoForge GameTests prove real-dog core serialization, representative talents, dog-owned inventories, accessory color, artifact state, established food-bowl/dog-bed/rice-mill state, and nonzero rice-mill progress. Add lifecycle, broad frozen-fixture, tracker, and restart coverage. Java 25 CI remains required.
 
 2. **Legacy generic network tunnel remains direction-unsafe.** Every message is multiplexed through one `playBidirectional` payload and integer discriminator. `DogPacket` assumes a serverbound sender without first checking direction, while client-only handlers share the same registry. A packet delivered on the wrong flow can dereference a null sender or resolve client classes on the wrong side. Replace it with typed, explicitly directional payload registrations or add strict direction metadata while migrating incrementally.
 
@@ -54,7 +54,7 @@ Evidence boundary: `COMPILES`, static packaging, 30 unit tests, three DTN in-pro
 
 4. **Production-JAR dedicated-server classloading is proven.** The exact packaged JAR loads from a clean NeoForge server `mods/` directory and reaches `Done`. No DTN client-class resolution failure occurs; the remaining log errors are environment-level native transport probing and external-service timeouts documented in the QA report.
 
-5. **Persistence and upgrade behavior is only partially proven.** Original 1.21.1 respawn-owner UUIDs, the interim 26.1.2 string UUID format, legacy location-list/entity-ID keys, canonical respawn re-encoding, and malformed-entry rejection have unit coverage. Loader-aware GameTests now prove that a real `Dog` round-trips UUID, owner/tame/name, gender, mode, hunger, incapacitation value, normal/kami levels, behavior flags, bed/bowl locations, representative plain/stateful talents, Pack Puppy and Doggy Tools inventories/options, accessory color, and an artifact through the 26.1 `ValueInput`/`ValueOutput` entity bridge. Production block-entity serialization also preserves food-bowl inventory/placer, dog-bed materials/owner/names, and rice-mill inventory. Tracker data, rice-mill processing progress, frozen 1.21.1 fixtures, and a process restart still need assertions. Remaining silent exception handlers in persistence paths must log enough context to diagnose partial data loss.
+5. **Persistence and upgrade behavior is only partially proven.** Original 1.21.1 respawn-owner UUIDs, the interim 26.1.2 string UUID format, legacy location-list/entity-ID keys, canonical respawn re-encoding, and malformed-entry rejection have unit coverage. Loader-aware GameTests now prove that a real `Dog` round-trips UUID, owner/tame/name, gender, mode, hunger, incapacitation value, normal/kami levels, behavior flags, bed/bowl locations, representative plain/stateful talents, Pack Puppy and Doggy Tools inventories/options, accessory color, and an artifact through the 26.1 `ValueInput`/`ValueOutput` entity bridge. Production block-entity serialization also preserves food-bowl inventory/placer, dog-bed materials/owner/names, rice-mill inventory, and canonical nonzero rice-mill progress. Tracker data, broad frozen 1.21.1 fixtures, and a process restart still need assertions. Remaining silent exception handlers in persistence paths must log enough context to diagnose partial data loss.
 
 ### P1 — user-visible parity regressions
 
@@ -106,7 +106,7 @@ Each PR should start from a failing test or fixed reproduction, make the smalles
 | NET-01 | Wrong-direction, unknown, negative, oversized, duplicate, and truncated payloads are rejected safely | unit/loader tests |
 | NET-02 | Non-owner cannot mutate another player's dog; owner can | two-client GameTest/manual |
 | SERVER-01 | Production JAR starts on a clean dedicated NeoForge server without client class resolution | PASS — `docs/PRODUCTION_SERVER_QA_26.1.2.md` |
-| SAVE-01 | 1.21.1 fixture upgrades with dog identity, talents, accessories, inventories, locations, and respawn state intact | PARTIAL — unit compatibility tests plus three in-process persistence GameTests, including established block-entity state; frozen fixture, tracker data, rice-mill progress, and restart remain |
+| SAVE-01 | 1.21.1 fixture upgrades with dog identity, talents, accessories, inventories, locations, and respawn state intact | PARTIAL — unit compatibility tests plus four in-process persistence GameTests, including established block-entity state and rice-mill progress; broad frozen fixtures, tracker data, and restart remain |
 | RENDER-01 | Adult/puppy, default/custom skin, armor/trim/helmet, wet/incapacitated, and accessory matrix matches oracle | fixed captures + manual approval |
 | RENDER-02 | Every nameplate config changes only its documented behavior | client test/manual captures |
 | ITEM-01 | Every registered item has a definition/model; dye colors and dog-bed material variants survive save/reload | datagen validation + client captures |
@@ -123,7 +123,7 @@ The stacked render-state branch restores puppy head scaling from `LivingEntityRe
 
 The persistence compatibility branch restores the original UUID NBT contract for dead-dog owners while continuing to read the interim string format emitted by the 26.1.2 draft. It also restores component-preserving custom-name storage, rejects malformed location/respawn records before constructing data objects, and freezes the original location keys in tests. Five persistence compatibility tests and the 30-test suite pass; full-world restart coverage remains open.
 
-The dog persistence branches add the NeoForge `gameTestServer` run and three stable `SAVE-01` subgates. The harness registers explicit 26.1 `GameTestInstance`s, correcting the earlier function-only registration that did not create runnable tests. The core test asserts vanilla identity, core DTN state, and location maps. The extended test asserts talent levels, Pack Puppy and Doggy Tools inventory/options, dyed accessory state, and an artifact. The block-entity test reconstructs production food-bowl, dog-bed, and rice-mill block entities and asserts their established identity/material/name/inventory contracts. All three DTN tests pass in the loader-aware server; frozen fixtures, tracker data, rice-mill processing progress, and process restart remain open.
+The dog persistence branches add the NeoForge `gameTestServer` run and four stable `SAVE-01` subgates. The harness registers explicit 26.1 `GameTestInstance`s, correcting the earlier function-only registration that did not create runnable tests. The core test asserts vanilla identity, core DTN state, and location maps. The extended test asserts talent levels, Pack Puppy and Doggy Tools inventory/options, dyed accessory state, and an artifact. The block-entity tests reconstruct production food-bowl, dog-bed, and rice-mill block entities and assert their established identity/material/name/inventory contracts plus canonical nonzero rice-mill progress. All four DTN tests pass in the loader-aware server; broad frozen fixtures, tracker data, and process restart remain open.
 
 The production-server gate installs the official checksum-verified NeoForge `26.1.2.101` server into a clean disposable directory, copies only the freshly built production JAR into `mods/`, and reaches `Done`. The strict Modmaker artifact validator also passes with zero findings. This closes dedicated-server packaging/classloading acceptance; it does not substitute for client or save-restart testing.
 
