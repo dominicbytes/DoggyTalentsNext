@@ -9,6 +9,7 @@ import doggytalents.DoggyItems;
 import doggytalents.DoggyTalentsNext;
 import doggytalents.api.anim.DogAnimation;
 import doggytalents.client.DoggyKeybinds;
+import doggytalents.client.block.model.DogBedItemModel;
 import doggytalents.client.block.model.DogBedModel;
 import doggytalents.client.entity.model.animation.DogAnimationRegistry;
 import doggytalents.client.entity.model.animation.DogKeyframeAnimations;
@@ -39,6 +40,7 @@ import net.minecraft.client.gui.screens.inventory.CreativeModeInventoryScreen;
 import net.minecraft.client.gui.screens.inventory.InventoryScreen;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.LevelRenderer;
+import net.minecraft.client.renderer.item.ModelRenderProperties;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.Identifier;
@@ -127,6 +129,20 @@ public class ClientEventHandler {
             for (var blockState : dogBedBlock.getStateDefinition().getPossibleStates()) {
                 bakingResult.blockStateModels().put(blockState, dynamicModel);
             }
+
+            Identifier itemModelLocation = Util.getResource(resourceLocation.getNamespace(), "item/" + resourceLocation.getPath());
+            var itemResolvedModel = resolvedModels.get(itemModelLocation);
+            if (itemResolvedModel == null) {
+                DoggyTalentsNext.LOGGER.warn("Could not find resolved item model for dog bed: {}", itemModelLocation);
+                return;
+            }
+
+            var itemProperties = ModelRenderProperties.fromResolvedModel(
+                variantBaker,
+                itemResolvedModel,
+                itemResolvedModel.getTopTextureSlots()
+            );
+            bakingResult.itemStackModels().put(resourceLocation, new DogBedItemModel(dynamicModel, itemProperties));
 
         } catch (Exception e) {
             DoggyTalentsNext.LOGGER.warn("Error setting up DogBed custom model. Reverting to default textures...", e);
