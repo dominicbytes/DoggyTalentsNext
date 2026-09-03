@@ -9,6 +9,7 @@ import doggytalents.api.feature.DogGender;
 import doggytalents.api.feature.DogLevel;
 import doggytalents.api.feature.DogMode;
 import doggytalents.api.feature.DogSize;
+import doggytalents.api.inferface.DTNItemStackHandler;
 import doggytalents.common.block.DogBedMaterialManager;
 import doggytalents.common.block.tileentity.DogBedTileEntity;
 import doggytalents.common.block.tileentity.FoodBowlTileEntity;
@@ -17,8 +18,11 @@ import doggytalents.common.entity.Dog;
 import doggytalents.common.entity.DogGroupsManager;
 import doggytalents.common.entity.stats.StatsTracker;
 import doggytalents.common.entity.texture.DogSkinData;
+import doggytalents.common.inventory.TreatBagItemHandler;
+import doggytalents.common.item.TreatBagItem;
 import doggytalents.common.talent.PackPuppyTalent;
 import doggytalents.common.talent.doggy_tools.DoggyToolsTalent;
+import doggytalents.common.util.InventoryUtil;
 import doggytalents.common.util.ItemUtil;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
@@ -40,6 +44,9 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.storage.TagValueInput;
 import net.minecraft.world.level.storage.TagValueOutput;
+import net.neoforged.neoforge.transfer.item.ItemResource;
+import net.neoforged.neoforge.transfer.transaction.Transaction;
+import net.neoforged.neoforge.transfer.transaction.TransactionContext;
 
 public final class DTNGameTests {
     private static final UUID DOG_UUID = UUID.fromString("81b99c9b-ecfa-4c3c-8e6a-2f986814c731");
@@ -52,6 +59,79 @@ public final class DTNGameTests {
         "da18b522d67f6fe1bee143ae833f3f4d7a14f7f3b521d44cfcab83741180d88b";
 
     private DTNGameTests() {
+    }
+
+    /** ITEM-HANDLER-01: modern transactions retain the mod's established stack-oriented behavior. */
+    public static void itemHandler01TransactionalStorage(GameTestHelper helper) {
+        var handler = new DTNItemStackHandler(2);
+        handler.setStackInSlot(0, new ItemStack(Items.STONE, 4));
+
+        try (var transaction = Transaction.openRoot()) {
+            require(helper, handler.insert(0, ItemResource.of(Items.STONE), 5, transaction) == 5,
+                "transactional insertion rejected a compatible stack");
+        }
+        require(helper, handler.getStackInSlot(0).getCount() == 4,
+            "aborted transaction changed stored items");
+
+        try (var transaction = Transaction.openRoot()) {
+            require(helper, handler.insert(0, ItemResource.of(Items.STONE), 5, transaction) == 5,
+                "committed insertion rejected a compatible stack");
+            transaction.commit();
+        }
+        require(helper, handler.getStackInSlot(0).getCount() == 9,
+            "committed transaction did not update stored items");
+        handler.setStackInSlot(1, new ItemStack(Items.STONE, 90));
+        require(helper, handler.extractItem(1, 80, false).getCount() == 64
+            && handler.getStackInSlot(1).getCount() == 26,
+            "stack-oriented extraction did not retain the legacy per-call item limit");
+
+        var diamondsOnly = new DTNItemStackHandler(1) {
+            @Override
+            public boolean isItemValid(int slot, ItemStack stack) {
+                return stack.is(Items.DIAMOND);
+            }
+        };
+        var rejected = diamondsOnly.insertItem(0, new ItemStack(Items.STONE, 3), false);
+        require(helper, rejected.getCount() == 3 && diamondsOnly.getStackInSlot(0).isEmpty(),
+            "legacy insertion bypassed slot validation");
+        require(helper, diamondsOnly.insertItem(0, new ItemStack(Items.DIAMOND, 3), false).isEmpty()
+            && diamondsOnly.getStackInSlot(0).getCount() == 3,
+            "legacy insertion did not commit an accepted stack");
+
+        var bagStack = new ItemStack(DoggyItems.TREAT_BAG.get());
+        var bagHandler = new TreatBagItemHandler(bagStack);
+        require(helper, bagHandler.insertItem(0, new ItemStack(Items.COOKED_BEEF, 2), false).isEmpty(),
+            "treat bag rejected valid food");
+        requireStack(helper, TreatBagItem.inventory(bagStack).getFirst(), Items.COOKED_BEEF, 2,
+            "treat bag committed contents");
+
+        var mergeTarget = new DTNItemStackHandler(2);
+        mergeTarget.setStackInSlot(1, new ItemStack(Items.STONE, 60));
+        require(helper, InventoryUtil.addItem(mergeTarget, new ItemStack(Items.STONE, 6)).isEmpty(),
+            "resource insertion returned an unexpected remainder");
+        require(helper, mergeTarget.getStackInSlot(1).getCount() == 64
+            && mergeTarget.getStackInSlot(0).getCount() == 2,
+            "resource insertion did not preserve merge-before-empty-slot ordering");
+
+        var refusingSource = new DTNItemStackHandler(1) {
+            @Override
+            public int extract(int index, ItemResource resource, int amount, TransactionContext transaction) {
+                return 0;
+            }
+        };
+        refusingSource.setStackInSlot(0, new ItemStack(Items.DIAMOND, 2));
+        var rollbackTarget = new DTNItemStackHandler(1);
+        boolean rejectedTransfer = false;
+        try {
+            InventoryUtil.transferStacks(refusingSource, rollbackTarget);
+        } catch (IllegalStateException expected) {
+            rejectedTransfer = true;
+        }
+        require(helper, rejectedTransfer, "inconsistent source extraction was not rejected");
+        require(helper, rollbackTarget.getStackInSlot(0).isEmpty()
+            && refusingSource.getStackInSlot(0).getCount() == 2,
+            "failed transfer did not roll back both inventories");
+        helper.succeed();
     }
 
     /** SAVE-01: a real DTN dog retains identity and core state through 26.1 entity serialization. */
@@ -119,6 +199,8 @@ public final class DTNGameTests {
             "failed to add pack puppy talent");
         require(helper, source.setTalentLevel(DoggyTalents.DOGGY_TOOLS.get(), 4).consumesAction(),
             "failed to add doggy tools talent");
+        require(helper, source.setTalentLevel(DoggyTalents.DOGGY_ARMOR.get(), 1).consumesAction(),
+            "failed to add doggy armor talent");
 
         PackPuppyTalent packPuppy = source.getTalent(DoggyTalents.PACK_PUPPY.get(), PackPuppyTalent.class)
             .orElseThrow();
@@ -136,6 +218,7 @@ public final class DTNGameTests {
         doggyTools.getTools().setStackInSlot(0, pickaxe);
         doggyTools.getTools().setStackInSlot(3, new ItemStack(Items.BOW));
         doggyTools.setPickFirstTool(true);
+        source.dogArmors().setArmorInSlot(new ItemStack(Items.IRON_BOOTS));
 
         require(helper, source.addAccessory(DoggyAccessories.DYEABLE_COLLAR.get().create(0x2468ac)),
             "failed to add dyeable collar");
@@ -170,6 +253,8 @@ public final class DTNGameTests {
         requireStack(helper, loadedDoggyTools.getTools().getStackInSlot(3), Items.BOW, 1,
             "doggy tools slot 3");
         require(helper, loadedDoggyTools.pickFirstTool(), "doggy tools pick-first option was not preserved");
+        requireStack(helper, loaded.dogArmors().getArmorFromSlot(net.minecraft.world.entity.EquipmentSlot.FEET),
+            Items.IRON_BOOTS, 1, "dog armor feet slot");
 
         require(helper, loaded.getAccessories().size() == 1, "accessory count was not preserved");
         require(helper, loaded.getAccessory(DoggyAccessories.DYEABLE_COLLAR.get()).isPresent(),

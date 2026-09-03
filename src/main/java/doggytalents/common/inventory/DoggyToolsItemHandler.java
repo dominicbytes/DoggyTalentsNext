@@ -1,14 +1,14 @@
 package doggytalents.common.inventory;
 
+import doggytalents.api.inferface.DTNItemStackHandler;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.Tag;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.neoforge.items.ItemStackHandler;
 
-public class DoggyToolsItemHandler extends ItemStackHandler {
+public class DoggyToolsItemHandler extends DTNItemStackHandler {
     public DoggyToolsItemHandler() {
         super(5);
     }

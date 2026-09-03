@@ -11,7 +11,7 @@ import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.neoforge.items.SlotItemHandler;
+import net.neoforged.neoforge.transfer.item.ResourceHandlerSlot;
 
 public class DoggyToolsMenu extends AbstractContainerMenu {
 
@@ -54,7 +54,7 @@ public class DoggyToolsMenu extends AbstractContainerMenu {
         int pX = mX - toolsSlotsOffsetX;
         
         for (int i = 0; i < toolsSize; ++i) {
-            this.addSlot(new SlotItemHandler(this.tools, i, pX, aY));
+            this.addSlot(new ResourceHandlerSlot(this.tools, this.tools::set, i, pX, aY));
             pX += 18;
         }
     }

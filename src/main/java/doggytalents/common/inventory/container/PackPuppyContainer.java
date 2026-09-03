@@ -3,6 +3,7 @@ package doggytalents.common.inventory.container;
 import doggytalents.DoggyContainerTypes;
 import doggytalents.DoggyTalents;
 import doggytalents.api.inferface.AbstractDog;
+import doggytalents.common.inventory.PackPuppyItemHandler;
 import doggytalents.common.talent.PackPuppyTalent;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.Inventory;
@@ -10,8 +11,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.neoforge.items.ItemStackHandler;
-import net.neoforged.neoforge.items.SlotItemHandler;
+import net.neoforged.neoforge.transfer.item.ResourceHandlerSlot;
 
 /**
  * @author ProPercivalalb
@@ -19,7 +19,7 @@ import net.neoforged.neoforge.items.SlotItemHandler;
 public class PackPuppyContainer extends AbstractContainerMenu {
 
     private AbstractDog dog;
-    private ItemStackHandler packInventory;
+    private PackPuppyItemHandler packInventory;
     private int level;
 
     public PackPuppyContainer(int windowId, Inventory playerInventory, AbstractDog dogIn) {
@@ -32,7 +32,7 @@ public class PackPuppyContainer extends AbstractContainerMenu {
 
         for (int j = 0; j < 3; j++) {
             for (int i1 = 0; i1 < this.level; i1++) {
-                this.addSlot(new SlotItemHandler(this.packInventory, i1 * 3 + j, 79 + 18 * i1, 1 + 18 * j + 24));
+                this.addSlot(new ResourceHandlerSlot(this.packInventory, this.packInventory::set, i1 * 3 + j, 79 + 18 * i1, 1 + 18 * j + 24));
             }
         }
 

@@ -131,8 +131,7 @@ public class DogInventoriesContainer extends AbstractContainerMenu {
 
     private void replaceDogSlot(int i, DogInventorySlot slotIn) {
         this.dogSlots.set(i, slotIn);
-        // Work around to set Slot#slotNumber (MCP name) which is Slot#index in official
-        // mappings. Needed because SlotItemHandler#index shadows the latter.
+        // The replacement keeps the original AbstractContainerMenu slot index.
         Slot s = slotIn;
         this.slots.set(s.index, slotIn);
     }

@@ -17,7 +17,8 @@ import net.minecraft.world.item.component.DyedItemColor;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.level.block.Block;
-import net.neoforged.neoforge.items.IItemHandler;
+import net.neoforged.neoforge.transfer.ResourceHandler;
+import net.neoforged.neoforge.transfer.item.ItemResource;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -31,11 +32,11 @@ import doggytalents.common.item.IDyeableArmorItem;
 public class ItemUtil {
 
     private static int MAX_OVERVIEW = 3;
-    public static ContentOverview getContentOverview(IItemHandler inventory) {
+    public static ContentOverview getContentOverview(ResourceHandler<ItemResource> inventory) {
         var retMap = new HashMap<Item, Integer>(MAX_OVERVIEW);
         int isMore = 0;
-        for (int i = 0; i < inventory.getSlots(); ++i) {
-            var stack = inventory.getStackInSlot(i);
+        for (int i = 0; i < inventory.size(); ++i) {
+            var stack = net.neoforged.neoforge.transfer.item.ItemUtil.getStack(inventory, i);
             if (stack.isEmpty())
                 continue;
             var item = stack.getItem();

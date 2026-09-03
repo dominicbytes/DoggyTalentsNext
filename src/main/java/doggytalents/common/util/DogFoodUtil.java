@@ -6,6 +6,7 @@ import javax.annotation.Nullable;
 
 import doggytalents.api.feature.FoodHandler;
 import doggytalents.api.inferface.AbstractDog;
+import doggytalents.api.inferface.DTNItemStackHandler;
 import doggytalents.api.inferface.IDogFoodHandler;
 import doggytalents.common.config.ConfigHandler;
 import doggytalents.common.entity.Dog;
@@ -18,8 +19,6 @@ import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.neoforged.neoforge.items.IItemHandlerModifiable;
-import net.neoforged.neoforge.items.ItemStackHandler;
 
 public class DogFoodUtil {
     
@@ -36,12 +35,12 @@ public class DogFoodUtil {
         return meat_food_handler_limited;
     }
 
-    public static int dogFindFoodInInv(Dog dog, boolean findHealingFood, ItemStackHandler inv) {
+    public static int dogFindFoodInInv(Dog dog, boolean findHealingFood, DTNItemStackHandler inv) {
         return dogFindFoodInInv(dog, dog, findHealingFood, inv);
     }
 
     public static int dogFindFoodInInv(Dog finder, 
-        Dog target, boolean findHealingFood, ItemStackHandler inv) {
+        Dog target, boolean findHealingFood, DTNItemStackHandler inv) {
         int eddibleFoodId = dogFindBestDogEddibleFood(finder, target, findHealingFood, inv);
         if (eddibleFoodId >= 0)
             return eddibleFoodId;
@@ -52,7 +51,7 @@ public class DogFoodUtil {
         return -1;
     }
 
-    public static int dogFindBestDogEddibleFood(Dog finder, Dog target, boolean findHealingFood, ItemStackHandler inv) {
+    public static int dogFindBestDogEddibleFood(Dog finder, Dog target, boolean findHealingFood, DTNItemStackHandler inv) {
         var inventory = inv;
         if (inventory == null)
             return -1;
@@ -94,7 +93,7 @@ public class DogFoodUtil {
         return false;
     }
 
-    public static int dogFindMeatFood(Dog finder, Dog target, ItemStackHandler inv) {
+    public static int dogFindMeatFood(Dog finder, Dog target, DTNItemStackHandler inv) {
         var inventory = inv;
         if (inventory == null)
             return -1;
@@ -118,12 +117,12 @@ public class DogFoodUtil {
     }
 
     public static boolean tryFeed(Dog dog, boolean findHealingFood,
-        ItemStackHandler inv) {
+        DTNItemStackHandler inv) {
         return tryFeed(dog, dog, findHealingFood, inv);
     }
 
     public static boolean tryFeed(Dog dog, Dog feeder, 
-        boolean findHealingFood, ItemStackHandler inv) {
+        boolean findHealingFood, DTNItemStackHandler inv) {
         int foodSlot = DogFoodUtil.dogFindFoodInInv(feeder, dog, 
             findHealingFood, inv);
         if (foodSlot < 0)
@@ -141,7 +140,7 @@ public class DogFoodUtil {
     }
 
     public static InteractionResult tryFeedAny(
-        AbstractDog dog, @Nullable Entity feeder, IItemHandlerModifiable inv) {
+        AbstractDog dog, @Nullable Entity feeder, DTNItemStackHandler inv) {
 
         int found_food_id = -1;
         IDogFoodHandler found_food = null;

@@ -1,14 +1,14 @@
 package doggytalents.common.inventory;
 
 import doggytalents.common.talent.PackPuppyTalent;
+import doggytalents.api.inferface.DTNItemStackHandler;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.neoforge.items.ItemStackHandler;
 
-public class PackPuppyItemHandler extends ItemStackHandler {
+public class PackPuppyItemHandler extends DTNItemStackHandler {
 
     private PackPuppyTalent inst;
 

@@ -10,9 +10,10 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.neoforge.items.IItemHandler;
-import net.neoforged.neoforge.items.IItemHandlerModifiable;
-import net.neoforged.neoforge.items.ItemStackHandler;
+import net.neoforged.neoforge.transfer.ResourceHandler;
+import net.neoforged.neoforge.transfer.item.ItemResource;
+import net.neoforged.neoforge.transfer.transaction.Transaction;
+import net.neoforged.neoforge.transfer.transaction.TransactionContext;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.joml.Math;
@@ -23,10 +24,10 @@ import java.util.function.Predicate;
 
 public class InventoryUtil {
 
-    public static Pair<ItemStack, Integer> findStack(IItemHandler source, Predicate<ItemStack> searchCriteria) {
-        for (int i = 0; i < source.getSlots(); i++) {
+    public static Pair<ItemStack, Integer> findStack(ResourceHandler<ItemResource> source, Predicate<ItemStack> searchCriteria) {
+        for (int i = 0; i < source.size(); i++) {
 
-            ItemStack stack = source.getStackInSlot(i);
+            ItemStack stack = net.neoforged.neoforge.transfer.item.ItemUtil.getStack(source, i);
             if (searchCriteria.test(stack)) {
                 return Pair.of(stack.copy(), i);
             }
@@ -35,65 +36,85 @@ public class InventoryUtil {
         return null;
     }
 
-    public static void transferStacks(IItemHandlerModifiable source, IItemHandler target) {
-        for (int i = 0; i < source.getSlots(); i++) {
-            ItemStack stack = source.getStackInSlot(i);
-            source.setStackInSlot(i, addItem(target, stack));
+    public static void transferStacks(ResourceHandler<ItemResource> source, ResourceHandler<ItemResource> target) {
+        try (var transaction = Transaction.openRoot()) {
+            for (int i = 0; i < source.size(); i++) {
+                var resource = source.getResource(i);
+                int amount = source.getAmountAsInt(i);
+                if (resource.isEmpty() || amount == 0) {
+                    continue;
+                }
+                int inserted = insertResource(target, resource, amount, transaction);
+                int extracted = source.extract(i, resource, inserted, transaction);
+                if (extracted != inserted) {
+                    throw new IllegalStateException("Source inventory changed during item transfer");
+                }
+            }
+            transaction.commit();
         }
     }
 
-    public static ItemStack addItem(IItemHandler target, ItemStack remaining) {
+    public static ItemStack addItem(ResourceHandler<ItemResource> target, ItemStack remaining) {
         if (remaining.isEmpty()) {
             return remaining;
         }
-        // Try to merge the stack into existing stack with same item first
-        for (int i = 0; i < target.getSlots(); i++) {
-            var stack = target.getStackInSlot(i);
-            if (!stack.is(remaining.getItem()))
-                continue;
-            if (target.isItemValid(i, remaining)) {
-                remaining = target.insertItem(i, remaining, false);
-            }
 
-            if (remaining.isEmpty()) {
+        var resource = ItemResource.of(remaining);
+        int inserted;
+        try (var transaction = Transaction.openRoot()) {
+            inserted = insertResource(target, resource, remaining.getCount(), transaction);
+            transaction.commit();
+        }
+        int remainder = remaining.getCount() - inserted;
+        return remainder == 0 ? ItemStack.EMPTY : remaining.copyWithCount(remainder);
+    }
+
+    private static int insertResource(ResourceHandler<ItemResource> target, ItemResource resource,
+            int amount, TransactionContext transaction) {
+        int inserted = 0;
+        // Try to merge the stack into existing stack with same item first
+        for (int i = 0; i < target.size(); i++) {
+            var current = target.getResource(i);
+            if (current.isEmpty() || current.getItem() != resource.getItem())
+                continue;
+            inserted += target.insert(i, resource, amount - inserted, transaction);
+            if (inserted == amount) {
                 break;
             }
         }
 
-        if (remaining.isEmpty()) {
-            return remaining;
+        if (inserted == amount) {
+            return inserted;
         }
 
         // Try to insert item into all slots
-        for (int i = 0; i < target.getSlots(); i++) {
-            if (target.isItemValid(i, remaining)) {
-                remaining = target.insertItem(i, remaining, false);
-            }
-
-            if (remaining.isEmpty()) {
+        for (int i = 0; i < target.size(); i++) {
+            inserted += target.insert(i, resource, amount - inserted, transaction);
+            if (inserted == amount) {
                 break;
             }
         }
-        return remaining;
+        return inserted;
     }
 
-    // Same as net.minecraft.inventory.container.Container.calcRedstoneFromInventory but for IItemHandler
-    public static int calcRedstoneFromInventory(@Nullable IItemHandler inv) {
+    // Same as net.minecraft.inventory.container.Container.calcRedstoneFromInventory but for item resource handlers
+    public static int calcRedstoneFromInventory(@Nullable ResourceHandler<ItemResource> inv) {
         if (inv == null) {
            return 0;
         } else {
            int i = 0;
            float f = 0.0F;
 
-           for (int j = 0; j < inv.getSlots(); ++j) {
-              ItemStack itemstack = inv.getStackInSlot(j);
+           for (int j = 0; j < inv.size(); ++j) {
+              ItemStack itemstack = net.neoforged.neoforge.transfer.item.ItemUtil.getStack(inv, j);
               if (!itemstack.isEmpty()) {
-                 f += itemstack.getCount() / (float)Math.min(inv.getSlotLimit(j), itemstack.getMaxStackSize());
+                 f += itemstack.getCount() / (float)Math.min(
+                     inv.getCapacityAsInt(j, inv.getResource(j)), itemstack.getMaxStackSize());
                  ++i;
               }
            }
 
-           f = f / inv.getSlots();
+           f = f / inv.size();
            return Mth.floor(f * 14.0F) + (i > 0 ? 1 : 0);
         }
      }
@@ -116,9 +137,9 @@ public class InventoryUtil {
         return Math.min(stack_maxSize, container_maxSize);
     }
 
-    public static int maxStackSizeWithContainer(ItemStackHandler container, int slot, ItemStack stack) {
+    public static int maxStackSizeWithContainer(ResourceHandler<ItemResource> container, int slot, ItemStack stack) {
         var stack_maxSize = stack.getMaxStackSize();
-        var container_maxSize = container.getSlotLimit(slot); 
+        var container_maxSize = container.getCapacityAsInt(slot, ItemResource.of(stack));
         return Math.min(stack_maxSize, container_maxSize);
     }
 

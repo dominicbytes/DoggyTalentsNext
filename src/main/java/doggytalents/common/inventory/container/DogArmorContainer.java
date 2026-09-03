@@ -2,7 +2,7 @@ package doggytalents.common.inventory.container;
 
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.level.Level;
-import net.neoforged.neoforge.items.SlotItemHandler;
+import net.neoforged.neoforge.transfer.item.ResourceHandlerSlot;
 
 import com.google.errorprone.annotations.Var;
 import com.mojang.datafixers.util.Pair;
@@ -58,11 +58,11 @@ public class DogArmorContainer extends AbstractContainerMenu {
         for (int i = 0; i < 2; ++i) {  
             final EquipmentSlot equipmentslot = SLOT_IDS[i];
             var dogSlot = DogArmorItemHandlerImpl.DogArmorSlots.byEquipment(equipmentslot);
-            this.addSlot(new SlotItemHandler(dogArmors, dogSlot.slotId, 17, 27 + i * 18) {
+            this.addSlot(new ResourceHandlerSlot(dogArmors, dogArmors::set, dogSlot.slotId, 17, 27 + i * 18) {
                 @Override
-                public void set(ItemStack p_219985_) {
-                    var itemstack = this.getItem();
-                    super.set(p_219985_);
+                protected void setStackCopy(ItemStack p_219985_) {
+                    var itemstack = this.getStackCopy();
+                    super.setStackCopy(p_219985_);
                     dog.onEquipItem(equipmentslot, itemstack, p_219985_);
                 }
     
@@ -82,12 +82,12 @@ public class DogArmorContainer extends AbstractContainerMenu {
         for (int i = 2; i < 4; ++i) {  
             final EquipmentSlot equipmentslot = SLOT_IDS[i];
             var dogSlot = DogArmorItemHandlerImpl.DogArmorSlots.byEquipment(equipmentslot);
-            this.addSlot(new SlotItemHandler(dogArmors, dogSlot.slotId, 138, 27 + (i-2) * 18) {
+            this.addSlot(new ResourceHandlerSlot(dogArmors, dogArmors::set, dogSlot.slotId, 138, 27 + (i-2) * 18) {
 
                 @Override
-                public void set(ItemStack p_219985_) {
-                    var itemstack = this.getItem();
-                    super.set(p_219985_);
+                protected void setStackCopy(ItemStack p_219985_) {
+                    var itemstack = this.getStackCopy();
+                    super.setStackCopy(p_219985_);
                     dog.onEquipItem(equipmentslot, itemstack, p_219985_);
                 }
                 

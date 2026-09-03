@@ -28,6 +28,8 @@ public final class DTNGameTestRegistry {
         TESTS.register("save_01_stats_tracker_round_trip", () -> DTNGameTests::save01StatsTrackerRoundTrip);
     private static final DeferredHolder<Consumer<GameTestHelper>, Consumer<GameTestHelper>> SAVE_01_LEGACY_FIXTURE =
         TESTS.register("save_01_legacy_dog_fixture_upgrade", () -> DTNGameTests::save01LegacyDogFixtureUpgrade);
+    private static final DeferredHolder<Consumer<GameTestHelper>, Consumer<GameTestHelper>> ITEM_HANDLER_01 =
+        TESTS.register("item_handler_01_transactional_storage", () -> DTNGameTests::itemHandler01TransactionalStorage);
 
     private DTNGameTestRegistry() {
     }
@@ -51,6 +53,8 @@ public final class DTNGameTestRegistry {
             SAVE_01_STATS_TRACKER.getKey(), new TestData<>(environment, Identifier.withDefaultNamespace("empty"), 100, 0, true)));
         event.registerTest(id("save_01_legacy_dog_fixture_upgrade"), new FunctionGameTestInstance(
             SAVE_01_LEGACY_FIXTURE.getKey(), new TestData<>(environment, Identifier.withDefaultNamespace("empty"), 100, 0, true)));
+        event.registerTest(id("item_handler_01_transactional_storage"), new FunctionGameTestInstance(
+            ITEM_HANDLER_01.getKey(), new TestData<>(environment, Identifier.withDefaultNamespace("empty"), 100, 0, true)));
     }
 
     private static Identifier id(String path) {

@@ -8,14 +8,13 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.neoforge.items.IItemHandler;
-import net.neoforged.neoforge.items.SlotItemHandler;
+import net.neoforged.neoforge.transfer.item.ResourceHandlerSlot;
 
 public class TreatBagContainer extends AbstractContainerMenu {
 
     public int slot;
     public ItemStack itemstack;
-    public IItemHandler bagInventory;
+    public TreatBagItemHandler bagInventory;
 
     public TreatBagContainer(int windowId, Inventory playerInventory, int slotIn, ItemStack itemstackIn) {
         super(DoggyContainerTypes.TREAT_BAG.get(), windowId);
@@ -26,7 +25,7 @@ public class TreatBagContainer extends AbstractContainerMenu {
         checkContainerSize(playerInventory, 3 * 5);
 
         for (int l = 0; l < 5; l++) {
-            this.addSlot(new SlotItemHandler(this.bagInventory, l, 44 + l * 18, 22));
+            this.addSlot(new ResourceHandlerSlot(this.bagInventory, this.bagInventory::set, l, 44 + l * 18, 22));
         }
 
         for (int j = 0; j < 3; j++) {

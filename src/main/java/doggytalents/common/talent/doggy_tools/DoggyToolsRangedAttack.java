@@ -8,6 +8,7 @@ import doggytalents.DoggyTalents;
 import doggytalents.api.impl.IDogRangedAttackManager;
 import doggytalents.api.impl.IDogRangedAttackManager.UsingWeaponContext;
 import doggytalents.api.inferface.AbstractDog;
+import doggytalents.api.inferface.DTNItemStackHandler;
 import doggytalents.common.config.ConfigHandler;
 import doggytalents.common.entity.Dog;
 import doggytalents.common.entity.misc.DogThrownTrident;
@@ -26,7 +27,6 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.item.enchantment.Enchantments;
-import net.neoforged.neoforge.items.ItemStackHandler;
 
 public class DoggyToolsRangedAttack implements IDogRangedAttackManager {
 
@@ -130,14 +130,14 @@ public class DoggyToolsRangedAttack implements IDogRangedAttackManager {
         return true;
     }
 
-    public static Optional<Pair<ItemStackHandler, Integer>> findArrowsInInventory(AbstractDog dog) {
+    public static Optional<Pair<DTNItemStackHandler, Integer>> findArrowsInInventory(AbstractDog dog) {
         var talentInstOptional = dog.getTalent(DoggyTalents.DOGGY_TOOLS);
         if (!talentInstOptional.isPresent())
             return Optional.empty();
         if (!(talentInstOptional.get() instanceof DoggyToolsTalent tools))
             return Optional.empty();
 
-        ItemStackHandler inv = tools.getTools();
+        DTNItemStackHandler inv = tools.getTools();
         int id = findArrowStackInInventory(inv);
         if (id >= 0)
             return Optional.of(Pair.of(inv, id));
@@ -155,7 +155,7 @@ public class DoggyToolsRangedAttack implements IDogRangedAttackManager {
         return Optional.empty();
     }
 
-    private static int findArrowStackInInventory(ItemStackHandler inv) {
+    private static int findArrowStackInInventory(DTNItemStackHandler inv) {
         if (inv == null)
             return -1;
         int selected_id = -1;
