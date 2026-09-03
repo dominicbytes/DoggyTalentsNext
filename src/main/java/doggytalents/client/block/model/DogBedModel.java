@@ -106,7 +106,7 @@ public class DogBedModel implements DynamicBlockStateModel {
         return part != null ? part.materialFlags() : 0;
     }
 
-    private BlockStateModelPart getModelPart(ICasingMaterial casing, IBeddingMaterial bedding, Direction facing) {
+    BlockStateModelPart getModelPart(ICasingMaterial casing, IBeddingMaterial bedding, Direction facing) {
         // Return default if no materials specified or materials are the null placeholders
         if (casing == null || bedding == null || casing.isNani() || bedding.isNani()) {
             BlockStateModelPart defaultPart = defaultParts.get(facing);

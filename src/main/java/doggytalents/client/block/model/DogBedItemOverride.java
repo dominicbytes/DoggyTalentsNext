@@ -1,8 +1,14 @@
 package doggytalents.client.block.model;
 
-/**
- * Stub — ItemOverrides was removed in 26.1. Dog bed model selection is now handled via the block model system directly.
- */
+import doggytalents.common.util.DogBedUtil;
+import net.minecraft.client.renderer.block.dispatch.BlockStateModelPart;
+import net.minecraft.core.Direction;
+import net.minecraft.world.item.ItemStack;
+
 public class DogBedItemOverride {
-    // stub
+
+    public BlockStateModelPart resolve(DogBedModel model, ItemStack stack) {
+        var materials = DogBedUtil.getMaterials(stack);
+        return model.getModelPart(materials.getLeft(), materials.getRight(), Direction.NORTH);
+    }
 }
