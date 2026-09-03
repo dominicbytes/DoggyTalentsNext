@@ -32,15 +32,15 @@ DashieDev PR #184 is open, non-draft, merge-conflicted (`mergeable_state: dirty`
 - The original project hard-codes a Linux-only `org.gradle.java.home`, making ordinary Windows builds fail without a command-line override.
 - The original source has conflicting NeoForge declarations: `.29-beta` in `gradle.properties` and `.70-beta` in `build.gradle`.
 - NeoForge's official Maven metadata identifies `26.1.2.101` as the current stable release. The parity branch builds successfully against it.
-- `test` passes 32 tests, and the NeoForge GameTest server runs six registered DTN persistence tests successfully. Java 25 CI remains open.
+- `test` passes 33 tests, and the NeoForge GameTest server runs six registered DTN persistence tests successfully. Java 25 CI passes.
 - Static artifact audit reports zero errors. The two namespace warnings (`data/minecraft` and `data/neoforge`) require intent review but are not automatic defects.
 - An isolated headless Gradle run loads Doggy Talents Next `26.1.2.24`, Minecraft `26.1.2`, and NeoForge `26.1.2.101`, creates a new world, and reaches server `Done` without a client-classloading failure.
 - The exact packaged JAR (`df14ae8bb8960cdd652ee52dc81aa8f63755ffb1499f13d23edc89e818af8f99`) also loads from a clean NeoForge `26.1.2.101` server `mods/` directory and reaches `Done (0.287s)` without a DTN classloading failure. See `docs/PRODUCTION_SERVER_QA_26.1.2.md`.
 - The vanilla automation bot is correctly rejected by the NeoForge server because it is not a NeoForge client, so two-sided login/gameplay remains untested.
 - All 149 generated item-definition JSON files resolve to existing model JSON files. The apparent missing `rice_crop` and `soy_crop` item definitions are crops without registered block items, so they are not gaps.
-- The branch still produces 72 Java warnings against `.101`, dominated by NeoForge item-handler APIs marked for removal. These are maintenance debt, not immediate 26.1.2 blockers.
+- The branch produces 65 Java warnings against `.101`, all on NeoForge item-handler APIs marked for removal. The deprecated dog-bed tag-refresh event path has been migrated and regression-tested. The remaining item-handler warnings are maintenance debt, not immediate 26.1.2 blockers.
 
-Evidence boundary: `COMPILES`, static packaging, 30 unit tests, six DTN in-process persistence GameTests, a representative frozen 1.21.1 dog-payload upgrade, development-classpath server startup, clean production-JAR dedicated-server startup, and production-JAR persistence across a stopped-process restart are proven. Client, full-world fixture upgrades, and visual parity are not yet proven. Multiplayer acceptance is explicitly waived for the dominicbytes fork and remains upstream work.
+Evidence boundary: `COMPILES`, static packaging, 33 unit tests, six DTN in-process persistence GameTests, a representative frozen 1.21.1 dog-payload upgrade, development-classpath server startup, clean production-JAR dedicated-server startup, and production-JAR persistence across a stopped-process restart are proven. Client, full-world fixture upgrades, and visual parity are not yet proven. Multiplayer acceptance is explicitly waived for the dominicbytes fork and remains upstream work.
 
 ## Confirmed parity gaps
 
@@ -78,7 +78,7 @@ Evidence boundary: `COMPILES`, static packaging, 30 unit tests, six DTN in-proce
 
 14. **Item custom data is only partially migrated.** Most legacy item NBT is now wrapped in `DataComponents.CUSTOM_DATA`; this is functional compatibility, not a typed data-component migration. Inventory-like items already use native container/equippable components. Introduce typed components only where they add validation, networking, or persistence value, with old-key migration tests. Do not rewrite entity save NBT merely to satisfy the README wording.
 
-15. **Deprecated NeoForge item-handler surface.** Migrate the 72 warnings after parity-critical work so the change does not obscure behavior fixes. Cover transfer, slot validation, Pack Puppy, Treat Bag, food bowl, rice mill, armor, and dog-tool inventory semantics first.
+15. **Deprecated NeoForge item-handler surface.** Migrate the remaining 65 warnings after parity-critical work so the change does not obscure behavior fixes. Cover transfer, slot validation, Pack Puppy, Treat Bag, food bowl, rice mill, armor, and dog-tool inventory semantics first. The separate deprecated tag-refresh path is complete; see `docs/DOG_BED_TAG_REFRESH_QA_26.1.2.md`.
 
 16. **README status is inaccurate.** It labels GUI/client rendering done and references an old beta loader. Update it only after the corresponding acceptance scenarios pass.
 
@@ -110,6 +110,7 @@ Each PR should start from a failing test or fixed reproduction, make the smalles
 | RENDER-01 | Adult/puppy, default/custom skin, armor/trim/helmet, wet/incapacitated, and accessory matrix matches oracle | fixed captures + manual approval |
 | RENDER-02 | Every nameplate config changes only its documented behavior | client test/manual captures |
 | ITEM-01 | Every registered item has a definition/model; dye colors and dog-bed material variants survive save/reload | datagen validation + client captures |
+| ITEM-01-TAG-RELOAD | Integrated-client tag synchronization does not replace the integrated server's shared dog-bed material maps | PASS — `DogBedMaterialManagerTest` and `docs/DOG_BED_TAG_REFRESH_QA_26.1.2.md` |
 | GAME-01 | Representative happy, boundary, invalid, authority, and persistence case for every talent family passes | GameTests + manual gaps |
 | RELEASE-01 | Exact production JAR passes clean client/server install, restart, log, license, and metadata gates | release QA report; multiplayer waived for this fork |
 
@@ -121,7 +122,9 @@ The stacked network-hardening branch enables NeoForge's JUnit environment and ad
 
 The stacked render-state branch restores puppy head scaling from `LivingEntityRenderState.isBaby`, propagates it to copied dog and synchronized accessory models, and covers adult, puppy, custom-model opt-out, and accessory propagation behavior. Client visual acceptance remains required.
 
-The persistence compatibility branches restore the original UUID NBT contract for dead-dog owners while continuing to read the interim string format emitted by the 26.1.2 draft. They also restore component-preserving custom-name storage, reject malformed location/respawn records before constructing data objects, freeze the original location keys in tests, and add contextual warnings to eight respawn, armor, and location-migration fallback paths. Seven persistence compatibility tests and the 32-test suite pass; an authentic captured full-world upgrade remains an optional evidence improvement.
+The persistence compatibility branches restore the original UUID NBT contract for dead-dog owners while continuing to read the interim string format emitted by the 26.1.2 draft. They also restore component-preserving custom-name storage, reject malformed location/respawn records before constructing data objects, freeze the original location keys in tests, and add contextual warnings to eight respawn, armor, and location-migration fallback paths. Seven persistence compatibility tests pass; an authentic captured full-world upgrade remains an optional evidence improvement.
+
+The dog-bed tag-refresh branch follows NeoForge 26.1.2's `shouldUpdateStaticData()` ownership contract. It prevents the integrated client's follow-up tag packet from clearing material maps populated by the integrated server, retains client-only texture validation for remote-client updates, removes seven removal warnings, and raises the aggregate suite to 33 tests. See `docs/DOG_BED_TAG_REFRESH_QA_26.1.2.md`.
 
 The dog persistence branches add the NeoForge `gameTestServer` run and six stable `SAVE-01` subgates. The harness registers explicit 26.1 `GameTestInstance`s, correcting the earlier function-only registration that did not create runnable tests. The core test asserts vanilla identity, core DTN state, and location maps. The extended test asserts talent levels, Pack Puppy and Doggy Tools inventory/options, dyed accessory state, and an artifact. The block-entity tests reconstruct production food-bowl, dog-bed, and rice-mill block entities and assert their established identity/material/name/inventory contracts plus canonical nonzero rice-mill progress. The statistics test covers every persisted counter and entity-kill entry, catches stale derived totals, and proves replacement-load semantics. The checksum-locked oracle fixture covers broad 1.21.1 DTN payload loading, legacy field fallbacks, and canonical rewrite. All six DTN tests pass in the loader-aware server. The separate `SAVE-01-RESTART` gate then proves that the exact audited production JAR retains broad dog state through a flushed save, complete server stop, fresh JVM start, and same-world reload.
 
