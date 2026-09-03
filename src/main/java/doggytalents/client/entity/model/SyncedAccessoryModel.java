@@ -18,6 +18,7 @@ public abstract class SyncedAccessoryModel extends EntityModel<DogRenderState> {
 
     // root is inherited from Model as protected final ModelPart root
     private Vector3f pivot = DogModel.DEFAULT_ROOT_PIVOT;
+    private boolean baby;
     
     public Optional<ModelPart> head = Optional.empty();
     public Optional<ModelPart> realHead = Optional.empty();
@@ -70,8 +71,7 @@ public abstract class SyncedAccessoryModel extends EntityModel<DogRenderState> {
 
     public DogModel.DogModelRenderContext createDogRenderContext(VertexConsumer p_103014_, int p_103015_, int p_103016_, int color_overlay) {
         var part_ctx = new DogModel.DogRenderPartContext(p_103014_, p_103015_, p_103016_, color_overlay);
-        // 'young' field removed in 26.1.2 - baby head scaling disabled in accessory models
-        return new DogModel.DogModelRenderContext(this.root(), this.pivot, getDogModelBabyHead(head, false), Optional.of(part_ctx), Optional.empty());
+        return new DogModel.DogModelRenderContext(this.root(), this.pivot, getDogModelBabyHead(head, this.baby), Optional.of(part_ctx), Optional.empty());
     }
     
     protected static Optional<ModelPart> getDogModelBabyHead(Optional<ModelPart> head, boolean young) {
@@ -87,6 +87,15 @@ public abstract class SyncedAccessoryModel extends EntityModel<DogRenderState> {
 
     @Override
     public void setupAnim(DogRenderState state) {
+        this.baby = state.isBaby;
         // Pose is managed externally via sync(DogModel) — do not reset
+    }
+
+    public void setBaby(boolean baby) {
+        this.baby = baby;
+    }
+
+    protected boolean isBaby() {
+        return this.baby;
     }
 }

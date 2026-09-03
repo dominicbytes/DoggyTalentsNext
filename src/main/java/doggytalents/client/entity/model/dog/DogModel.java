@@ -21,6 +21,7 @@ import doggytalents.api.inferface.AbstractDog;
 import doggytalents.api.registry.Accessory;
 import doggytalents.api.registry.AccessoryInstance;
 import doggytalents.client.entity.model.animation.DTNAnimationLoader;
+import doggytalents.client.entity.model.SyncedAccessoryModel;
 import doggytalents.client.entity.model.animation.DogAnimationRegistry;
 import doggytalents.client.entity.model.animation.DogKeyframeAnimations;
 import doggytalents.client.entity.model.animation.DTNAnimationLoader.DogAnimationHolder;
@@ -72,6 +73,7 @@ public class DogModel extends EntityModel<DogRenderState> {
 
     private final AnimSnapshot animSnapshot1 = new AnimSnapshot();
     private final AnimSnapshot animSnapshot2 = new AnimSnapshot();
+    private boolean baby;
 
     private final DogAnimationHolder WALK_SLOW_TROT = DTNAnimationLoader.INSTANCE.getAnim("slow_trot");
     private final DogAnimationHolder WALK_GALLOP = DTNAnimationLoader.INSTANCE.getAnim("gallop");
@@ -481,6 +483,7 @@ public class DogModel extends EntityModel<DogRenderState> {
 
     @Override
     public void setupAnim(DogRenderState state) {
+        this.baby = state.isBaby;
         if (state.dog != null) {
             prepareMobModel(state.dog, state.walkAnimPos, state.walkAnimSpeed, state.ageInTicksForAnim);
             setupAnim(state.dog, state.walkAnimPos, state.walkAnimSpeed, state.ageInTicksForAnim, state.headYawForAnim, state.headPitchForAnim);
@@ -488,7 +491,11 @@ public class DogModel extends EntityModel<DogRenderState> {
     }
 
     public void copyPropertiesTo(EntityModel<DogRenderState> model) {
-        // young field removed in 26.1.2 - baby scaling now handled via isBaby in render state
+        if (model instanceof DogModel dogModel) {
+            dogModel.baby = this.baby;
+        } else if (model instanceof SyncedAccessoryModel accessoryModel) {
+            accessoryModel.setBaby(this.baby);
+        }
     }
 
     protected float wetShade = 1f;
@@ -520,8 +527,7 @@ public class DogModel extends EntityModel<DogRenderState> {
     }
 
     protected boolean doScaleBabyHead() {
-        // 'young' field removed in 26.1.2 - always disabled here; handled via render state
-        return false && this.scaleBabyDog();
+        return this.baby && this.scaleBabyDog();
     }
     
     public static void renderDogModelFromRootWithPivot(PoseStack stack, DogModelRenderContext ctx) {
