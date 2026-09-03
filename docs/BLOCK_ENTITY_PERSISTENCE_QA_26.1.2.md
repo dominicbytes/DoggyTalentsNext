@@ -19,7 +19,7 @@ The NeoForge GameTest server ran three DTN tests plus Minecraft's control test a
 ## Aggregate gates
 
 - Fresh Java 25 `clean build`: PASS, 30 tests.
-- Strict Modmaker 26.1.2 NeoForge validation: PASS, zero findings.
+- Strict Modmaker 26.1.2 NeoForge validation: PASS; project audit had zero errors and two shared-namespace warnings, while the artifact audit had zero findings.
 - Production JAR SHA-256: `7989657c3ff63a554f2fde983ac537417b8fd29d6766c0d911cd26c7eaf95a0a`.
 - Official NeoForge 26.1.2.101 production server: PASS; the exact JAR reached `Done (0.329s)` and stopped cleanly.
 

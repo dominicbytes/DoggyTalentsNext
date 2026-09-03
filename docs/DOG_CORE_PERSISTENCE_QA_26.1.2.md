@@ -52,7 +52,7 @@ Raw log: `run/logs/latest.log`
 ## Aggregate and artifact gates
 
 - Fresh `gradlew.bat clean build`: PASS, 30 tests, zero failures/errors.
-- Strict Modmaker project/artifact validation: PASS, zero findings.
+- Strict Modmaker validation: PASS; project audit had zero errors and two shared-namespace warnings, while the artifact audit had zero findings.
 - Production JAR SHA-256: `7989657c3ff63a554f2fde983ac537417b8fd29d6766c0d911cd26c7eaf95a0a`.
 - Clean official NeoForge 26.1.2.101 server: PASS; the exact JAR loaded from `mods/` and reached `Done (0.329s)` before a clean `stop`.
 

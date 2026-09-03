@@ -12,7 +12,7 @@ Result: **PASS**
 - SHA-512: `81e0c18fdeb24ea3de7f96050ea30406f3373a2652aa6b7685643db8d17731ebd8caf98ed4d21d6317d7ad4a9e9d9ce2fb61f6770f1335c7f0c09b5344bad7eb`
 - Build: Java 25, `gradlew.bat clean build`
 - Automated tests: 30 passed
-- Strict Modmaker artifact validation: PASS, zero findings
+- Strict Modmaker validation: PASS; project audit had zero errors and two shared-namespace warnings, while the artifact audit had zero findings
 
 ## Clean-server setup
 
