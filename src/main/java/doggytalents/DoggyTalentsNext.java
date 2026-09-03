@@ -2,6 +2,7 @@ package doggytalents;
 
 import doggytalents.api.feature.FoodHandler;
 import doggytalents.client.ClientSetup;
+import doggytalents.client.DTNTintSources;
 import doggytalents.client.DTNClientDogSleepOnManager;
 import doggytalents.client.DoggyKeybinds;
 import doggytalents.client.DTNClientPettingManager;
@@ -103,8 +104,8 @@ public class DoggyTalentsNext {
         if (FMLEnvironment.getDist() == Dist.CLIENT) {
             modEventBus.addListener(DoggyKeybinds::registerDTKeyMapping);
             modEventBus.addListener(this::clientSetup);
-            // modEventBus.addListener(DoggyBlocks::registerBlockColours); // needs migration to ItemTintSource
-            // modEventBus.addListener(DoggyItems::registerItemColours); // needs migration to ItemTintSource
+            modEventBus.addListener(DTNTintSources::registerBlockTintSources);
+            modEventBus.addListener(DTNTintSources::registerItemTintSources);
             modEventBus.addListener(ClientEventHandler::registerModelForBaking);
             modEventBus.addListener(ClientEventHandler::modifyBakedModels);
             modEventBus.addListener(ClientSetup::setupTileEntityRenderers);
