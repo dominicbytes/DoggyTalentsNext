@@ -51,11 +51,12 @@ public class StatsTracker {
     }
 
     public void readAdditional(CompoundTag compound) {
+        this.ENTITY_KILLS.clear();
         ListTag killList = compound.getListOrEmpty("entityKills");
         for (int i = 0; i < killList.size(); i++) {
             CompoundTag stats = killList.getCompoundOrEmpty(i);
             EntityType<?> type = NBTUtil.getRegistryValue(stats, "type", BuiltInRegistries.ENTITY_TYPE);
-            this.ENTITY_KILLS.put(type, stats.getIntOr("count", 0));
+            if (type != null) this.ENTITY_KILLS.put(type, stats.getIntOr("count", 0));
         }
         this.damageDealt = compound.getFloatOr("damageDealt", 0f);
         this.distanceOnWater = compound.getIntOr("distanceOnWater", 0);
@@ -64,6 +65,7 @@ public class StatsTracker {
         this.distanceSneaking = compound.getIntOr("distanceSneaking", 0);
         this.distanceWalking = compound.getIntOr("distanceWalking", 0);
         this.distanceRidden = compound.getIntOr("distanceRidden", 0);
+        this.killCount.markForRefresh();
     }
 
     public int getKillCountFor(EntityType<?> type) {
@@ -102,6 +104,7 @@ public class StatsTracker {
 
     private void incrementKillCount(EntityType<?> type) {
         this.ENTITY_KILLS.compute(type, (k, v) -> (v == null ? 0 : v) + 1);
+        this.killCount.markForRefresh();
     }
 
     public void increaseDamageDealt(float damage) {
@@ -164,6 +167,7 @@ public class StatsTracker {
 
     public void clearAllStatsKill() {
         this.ENTITY_KILLS.clear();
+        this.killCount.markForRefresh();
     }
 
     public void serializeToBuf(FriendlyByteBuf buf) {
@@ -206,6 +210,7 @@ public class StatsTracker {
             var type = BuiltInRegistries.ENTITY_TYPE.get(typeId).map(net.minecraft.core.Holder::value).orElse(null);
             if (type != null) this.ENTITY_KILLS.put(type, killCount);
         }
+        this.killCount.markForRefresh();
     }
 
     public void shallowCopyFrom(StatsTracker stats) {
@@ -217,5 +222,6 @@ public class StatsTracker {
         this.distanceSneaking = stats.distanceSneaking;
         this.distanceWalking = stats.distanceWalking;
         this.distanceRidden = stats.distanceRidden;
+        this.killCount.markForRefresh();
     }
 }
