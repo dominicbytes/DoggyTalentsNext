@@ -24,11 +24,13 @@ import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.RenderLayerParent;
 import net.minecraft.client.renderer.entity.layers.RenderLayer;
 import net.minecraft.client.renderer.texture.OverlayTexture;
+import net.minecraft.client.resources.model.EquipmentClientInfo;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.ARGB;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.item.ItemStack;
+import net.neoforged.neoforge.client.extensions.common.IClientItemExtensions;
 
 public class DoggyArmorRenderer extends RenderLayer<DogRenderState, DogModel> {
 
@@ -136,9 +138,13 @@ public class DoggyArmorRenderer extends RenderLayer<DogRenderState, DogModel> {
     private Optional<Model> getAlternativeArmorModel(doggytalents.common.entity.Dog dog, EquipmentSlot slot, PoseStack stack, ItemStack itemStack) {
         if (slot == EquipmentSlot.HEAD && ConfigHandler.CLIENT.USE_THIRD_PARTY_PLAYER_HELMET_MODEL.get()) {
             var dummy = this.helmetAltModel.getDummy();
-            if (dummy != null) {
-                // ClientHooks.getArmorModel no longer exists in 26.1.2; skip third-party model lookup
-            }
+            var customHeadModel = IClientItemExtensions.of(itemStack).getGenericArmorModel(
+                itemStack,
+                EquipmentClientInfo.LayerType.HUMANOID,
+                dummy
+            );
+            if (customHeadModel != dummy && customHeadModel != null)
+                return Optional.of(customHeadModel);
         }
         if (slot == EquipmentSlot.HEAD && ConfigHandler.CLIENT.USE_PLAYER_HELMET_MODEL_BY_DEFAULT.get()) {
             var m = this.helmetAltModel.getModel();
