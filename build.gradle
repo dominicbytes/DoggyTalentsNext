@@ -22,6 +22,10 @@ sourceSets {
         compileClasspath += sourceSets.api.output
         runtimeClasspath += sourceSets.api.output
     }
+    test {
+        compileClasspath += sourceSets.api.output
+        runtimeClasspath += sourceSets.api.output
+    }
 }
 
 afterEvaluate {

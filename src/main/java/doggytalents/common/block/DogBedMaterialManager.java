@@ -28,7 +28,6 @@ import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.block.Block;
 import net.neoforged.neoforge.event.TagsUpdatedEvent;
-import net.neoforged.neoforge.event.TagsUpdatedEvent.UpdateCause;
 
 public class DogBedMaterialManager {
 
@@ -105,7 +104,7 @@ public class DogBedMaterialManager {
         return list.get(RANDOM.nextInt(list.size())).getValue();
     }
 
-    public static void refresh(UpdateCause cause) {
+    private static void refresh(boolean clientOwnedRefresh) {
         beddingMap.clear();
         casingMap.clear();
 
@@ -115,18 +114,18 @@ public class DogBedMaterialManager {
             BuiltInRegistries.BLOCK, DoggyTags.DOG_BED_CASINGS);
         boolean specific_mode = !specific_beddings.isEmpty() && !specific_casings.isEmpty();
 
-        populateBedding(cause, specific_mode ? 
+        populateBedding(clientOwnedRefresh, specific_mode ?
             Optional.of(specific_beddings) : Optional.empty());
-        populateCasing(cause, specific_mode ? 
+        populateCasing(clientOwnedRefresh, specific_mode ?
             Optional.of(specific_casings) : Optional.empty());
         
-        if (cause == UpdateCause.CLIENT_PACKET_RECEIVED 
+        if (clientOwnedRefresh
             && ConfigHandler.CLIENT.DOG_BED_CLEAR_CACHE_AUTO.get()) {
             DogBedModel.clearCache();
         }
     }
 
-    private static void populateBedding(UpdateCause cause, Optional<List<Block>> specific) {
+    private static void populateBedding(boolean clientOwnedRefresh, Optional<List<Block>> specific) {
         var blocks = specific.isPresent() ? 
             new ArrayList<>(specific.get()) : fetchBeddingBlocksAuto();
         for (var block : blocks) {
@@ -134,7 +133,7 @@ public class DogBedMaterialManager {
                 continue;
             var id = BuiltInRegistries.BLOCK.getKey(block);
             var value = (IBeddingMaterial) new BeddingMaterial(id, () -> block);
-            if (cause == UpdateCause.CLIENT_PACKET_RECEIVED) {
+            if (clientOwnedRefresh) {
                 if (!ClientEventHandler.vertifyBlockTexture(value.getTexture()))
                     value = new NaniBedding(id);
             }
@@ -142,7 +141,7 @@ public class DogBedMaterialManager {
         }
     }
 
-    private static void populateCasing(UpdateCause cause, Optional<List<Block>> specific) {
+    private static void populateCasing(boolean clientOwnedRefresh, Optional<List<Block>> specific) {
         var blocks = specific.isPresent() ? 
             new ArrayList<>(specific.get()) : fetchCasingBlocksAuto();
         for (var block : blocks) {
@@ -150,7 +149,7 @@ public class DogBedMaterialManager {
                 continue;
             var id = BuiltInRegistries.BLOCK.getKey(block);
             var value = (ICasingMaterial) new CasingMaterial(id, () -> block);
-            if (cause == UpdateCause.CLIENT_PACKET_RECEIVED) {
+            if (clientOwnedRefresh) {
                 if (!ClientEventHandler.vertifyBlockTexture(value.getTexture()))
                     value = new NaniCasing(id);
             }
@@ -178,7 +177,10 @@ public class DogBedMaterialManager {
     }
 
     public static void onTagsUpdated(TagsUpdatedEvent event) {
-        refresh(event.getUpdateCause());
+        if (!event.shouldUpdateStaticData()) {
+            return;
+        }
+        refresh(event instanceof TagsUpdatedEvent.ClientPacketReceived);
     }
 
     public static class NaniCasing extends ICasingMaterial {
