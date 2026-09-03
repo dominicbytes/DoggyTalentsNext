@@ -13,16 +13,20 @@ import doggytalents.common.block.tileentity.DogBedTileEntity;
 import doggytalents.common.block.tileentity.FoodBowlTileEntity;
 import doggytalents.common.block.tileentity.RiceMillBlockEntity;
 import doggytalents.common.entity.Dog;
+import doggytalents.common.entity.stats.StatsTracker;
 import doggytalents.common.talent.PackPuppyTalent;
 import doggytalents.common.talent.doggy_tools.DoggyToolsTalent;
 import doggytalents.common.util.ItemUtil;
 import java.util.UUID;
 import net.minecraft.core.BlockPos;
 import net.minecraft.gametest.framework.GameTestHelper;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.ProblemReporter;
 import net.minecraft.world.entity.EntitySpawnReason;
+import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -255,6 +259,71 @@ public final class DTNGameTests {
         int roundTrippedProgress = new RiceMillBlockEntity.RiceMillSyncedData(roundTrippedMill)
             .get(RiceMillBlockEntity.GRINDING_TIME_ID);
         require(helper, roundTrippedProgress == 23, "rice mill grinding progress was not preserved");
+        helper.succeed();
+    }
+
+    /** SAVE-01: dog statistics and per-entity kill counts survive serialization. */
+    public static void save01StatsTrackerRoundTrip(GameTestHelper helper) {
+        Dog source = createDog(helper);
+        var stats = source.getStatTracker();
+        require(helper, stats.getTotalKillCount() == 0, "new stats tracker had kills");
+
+        var zombie = EntityType.ZOMBIE.create(helper.getLevel(), EntitySpawnReason.LOAD);
+        var skeleton = EntityType.SKELETON.create(helper.getLevel(), EntitySpawnReason.LOAD);
+        require(helper, zombie != null && skeleton != null, "test kill entities could not be created");
+        stats.incrementKillCount(zombie);
+        stats.incrementKillCount(zombie);
+        stats.incrementKillCount(skeleton);
+        stats.increaseDamageDealt(12.75F);
+        stats.increaseDistanceOnWater(11);
+        stats.increaseDistanceInWater(22);
+        stats.increaseDistanceSprint(33);
+        stats.increaseDistanceSneaking(44);
+        stats.increaseDistanceWalk(55);
+        stats.increaseDistanceRidden(66);
+        require(helper, stats.getTotalKillCount() == 3, "cached total kill count did not refresh");
+
+        var loadedStats = roundTrip(helper, source).getStatTracker();
+        require(helper, loadedStats.getKillCountFor(EntityType.ZOMBIE) == 2,
+            "zombie kill count was not preserved");
+        require(helper, loadedStats.getKillCountFor(EntityType.SKELETON) == 1,
+            "skeleton kill count was not preserved");
+        require(helper, loadedStats.getTotalKillCount() == 3, "total kill count was not preserved");
+        require(helper, Float.compare(loadedStats.getDamageDealt(), 12.75F) == 0,
+            "damage dealt was not preserved");
+        require(helper, loadedStats.getDistanceOnWater() == 11, "distance on water was not preserved");
+        require(helper, loadedStats.getDistanceInWater() == 22, "distance in water was not preserved");
+        require(helper, loadedStats.getDistanceSprint() == 33, "sprinting distance was not preserved");
+        require(helper, loadedStats.getDistanceSneaking() == 44, "sneaking distance was not preserved");
+        require(helper, loadedStats.getDistanceWalk() == 55, "walking distance was not preserved");
+        require(helper, loadedStats.getDistanceRidden() == 66, "ridden distance was not preserved");
+
+        var creeper = EntityType.CREEPER.create(helper.getLevel(), EntitySpawnReason.LOAD);
+        require(helper, creeper != null, "test stale kill entity could not be created");
+        var replacementStats = new StatsTracker();
+        replacementStats.incrementKillCount(creeper);
+        require(helper, replacementStats.getTotalKillCount() == 1, "replacement tracker setup failed");
+        var tag = new CompoundTag();
+        loadedStats.writeAdditional(tag);
+        replacementStats.readAdditional(tag);
+        require(helper, replacementStats.getKillCountFor(EntityType.CREEPER) == 0,
+            "NBT load retained a stale kill count");
+        require(helper, replacementStats.getTotalKillCount() == 3,
+            "NBT load did not refresh total kill count");
+        replacementStats.clearAllStatsKill();
+        require(helper, replacementStats.getTotalKillCount() == 0,
+            "clearing kills did not refresh total kill count");
+
+        var invalidEntry = new CompoundTag();
+        invalidEntry.putString("type", "missing:entity");
+        invalidEntry.putInt("count", 99);
+        var invalidKills = new ListTag();
+        invalidKills.add(invalidEntry);
+        var invalidTag = new CompoundTag();
+        invalidTag.put("entityKills", invalidKills);
+        replacementStats.readAdditional(invalidTag);
+        require(helper, replacementStats.getAllKillCount().isEmpty(),
+            "unknown entity type created an invalid kill entry");
         helper.succeed();
     }
 
