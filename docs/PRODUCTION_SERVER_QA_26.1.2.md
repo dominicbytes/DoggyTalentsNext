@@ -53,4 +53,4 @@ The Windows run logged one OSHI warning for an invalid local PerfOS registry val
 
 ## Evidence boundary
 
-This proves clean production-JAR installation and dedicated-server classloading. The loader-aware suite separately proves the frozen 1.21.1 dog-payload upgrade. This does not prove client rendering, client startup, multiplayer behavior, or save persistence across a stopped-process restart. Multiplayer is explicitly waived for the dominicbytes fork.
+This proves clean production-JAR installation and dedicated-server classloading. The loader-aware suite separately proves the frozen 1.21.1 dog-payload upgrade, and `docs/SAVE_RESTART_QA_26.1.2.md` proves broad dog state survives a stopped-process restart using this exact JAR. This does not prove client rendering, client startup, multiplayer behavior, or a captured full-world upgrade. Multiplayer is explicitly waived for the dominicbytes fork.

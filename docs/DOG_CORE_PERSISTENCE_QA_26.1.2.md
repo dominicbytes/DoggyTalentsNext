@@ -50,7 +50,7 @@ The registry now creates explicit 26.1 `GameTestInstance`s through NeoForge's `R
 
 ## Evidence boundary
 
-This result validates the 26.1 `ValueInput`/`ValueOutput` bridge for identity, core dog state, representative talents, accessories, artifacts, dog-owned inventories, statistics, and the established state of three DTN block entities in a loader-aware server. It also proves a checksum-locked, oracle-derived 1.21.1 dog payload loads and rewrites legacy fields canonically. It does not yet prove persistence across a server process restart.
+This result validates the 26.1 `ValueInput`/`ValueOutput` bridge for identity, core dog state, representative talents, accessories, artifacts, dog-owned inventories, statistics, and the established state of three DTN block entities in a loader-aware server. It also proves a checksum-locked, oracle-derived 1.21.1 dog payload loads and rewrites legacy fields canonically. The separate `SAVE-01-RESTART` production-server gate proves broad dog state also survives a stopped-process restart.
 
 Raw log: `run/logs/latest.log`
 
