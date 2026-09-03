@@ -200,6 +200,98 @@ public class DogRenderer extends MobRenderer<Dog, DogRenderState, DogModel> {
         return alpha | color;
     }
 
+    @Override
+    protected void submitNameDisplay(DogRenderState state, PoseStack stack,
+            SubmitNodeCollector nodeCollector, CameraRenderState camera) {
+        var dog = state.dog;
+        var text = state.nameTag;
+        if (dog == null || text == null) return;
+
+        if (!ConfigHandler.CLIENT.BLOCK_THIRD_PARTY_NAMETAG.get()) {
+            var event = new net.neoforged.neoforge.client.event.RenderNameTagEvent.DoRender(
+                state, text, this, stack, nodeCollector, camera, state.partialTick);
+            if (net.neoforged.neoforge.common.NeoForge.EVENT_BUS.post(event).isCanceled()) return;
+        }
+
+        var player = Minecraft.getInstance().player;
+        boolean isDifferentOwner = player == null || !Objects.equals(player.getUUID(), dog.getOwnerUUID());
+        if (isDifferentOwner && ConfigHandler.CLIENT.DONT_RENDER_DIFFOWNER_NAME.get()) return;
+
+        boolean renderDifferentOwner = isDifferentOwner
+            && ConfigHandler.ClientConfig.getConfig(ConfigHandler.CLIENT.RENDER_DIFFOWNER_NAME_DIFFERENT)
+            && dog != this.entityRenderDispatcher.crosshairPickEntity;
+        double distanceToCameraSq = state.distanceToCameraSq;
+
+        if (net.neoforged.neoforge.client.ClientHooks.isNameplateInRenderDistance(dog, distanceToCameraSq)) {
+            boolean renderDogOnDuty = !isDifferentOwner && WhistleItem.isHoldingDutyWhistle(player);
+            renderMainName(dog, text, stack, nodeCollector, camera, state.lightCoords,
+                renderDifferentOwner, isDifferentOwner, renderDogOnDuty);
+        }
+        if (distanceToCameraSq <= 64 * 64) {
+            renderExtraInfo(dog, stack, nodeCollector, camera, state.lightCoords,
+                distanceToCameraSq, renderDifferentOwner, isDifferentOwner);
+        }
+    }
+
+    private void renderMainName(Dog dog, Component text, PoseStack stack,
+            SubmitNodeCollector nodeCollector, CameraRenderState camera, int light,
+            boolean renderDifferentOwner, boolean isDifferentOwner, boolean renderDogOnDuty) {
+        var renderedText = modifyMainText(dog, text, renderDifferentOwner, renderDogOnDuty);
+        renderDogText(dog, renderedText, 0, 0.025F, stack, nodeCollector, camera, light,
+            renderDifferentOwner, isDifferentOwner);
+    }
+
+    private void renderDogText(Dog dog, Component text, double yOffset, float scale,
+            PoseStack stack, SubmitNodeCollector nodeCollector, CameraRenderState camera, int light,
+            boolean renderDifferentOwner, boolean isDifferentOwner) {
+        boolean dogNotSneaking = !dog.isDiscrete();
+
+        stack.pushPose();
+        stack.translate(0, dog.getBbHeight() + 0.5F + yOffset, 0);
+        stack.mulPose(camera.orientation);
+        stack.scale(scale, -scale, scale);
+
+        float textX = -this.getFont().width(text) / 2.0F;
+        boolean seeThrough = dogNotSneaking && !isDifferentOwner
+            && ConfigHandler.CLIENT.SHOW_DOG_NAME_THRU_WALL.get();
+        var backgroundMode = seeThrough ? Font.DisplayMode.SEE_THROUGH : Font.DisplayMode.NORMAL;
+        nodeCollector.submitText(stack, textX, 0, text.getVisualOrderText(), false,
+            backgroundMode, light, 0x20FFFFFF, getBkgTextColorWithOpacity(renderDifferentOwner), 0);
+
+        if (dogNotSneaking) {
+            stack.translate(0, 0, 0.1F);
+            nodeCollector.submitText(stack, textX, 0, text.getVisualOrderText(), false,
+                Font.DisplayMode.NORMAL, light, 0xFFFFFFFF, 0, 0);
+        }
+        stack.popPose();
+    }
+
+    private void renderExtraInfo(Dog dog, PoseStack stack, SubmitNodeCollector nodeCollector,
+            CameraRenderState camera, int light, double distanceToCameraSq,
+            boolean renderDifferentOwner, boolean isDifferentOwner) {
+        boolean renderHealth = this.entityRenderDispatcher.camera.entity().isShiftKeyDown()
+            && ConfigHandler.ClientConfig.getConfig(ConfigHandler.CLIENT.RENDER_HEALTH_IN_NAME);
+        var separator = createC1WithColor(ConfigHandler.CLIENT.DOG_INFO_SEPERATOR.get(), TXCLR_SEPERATOR);
+        var status = Component.translatable(dog.getMode().getTip());
+
+        var hunger = getHungerC1(dog, renderHealth);
+        if (hunger.isPresent()) status.append(separator).append(hunger.get());
+        var gender = getGenderC1(dog);
+        if (gender.isPresent()) status.append(separator).append(gender.get());
+        if (renderDifferentOwner) status = createC1WithColor(status, TXTCLR_DIFFOWNER);
+
+        renderDogText(dog, status, 0.12F, 0.01F, stack, nodeCollector, camera, light,
+            renderDifferentOwner, isDifferentOwner);
+
+        var cameraEntity = this.entityRenderDispatcher.camera.entity();
+        if (distanceToCameraSq > 25 || !cameraEntity.isShiftKeyDown() || dog.getOwner() == cameraEntity) return;
+
+        var ownerName = dog.getOwnersName().orElseGet(() -> this.getNameUnknown(dog));
+        if (renderDifferentOwner) ownerName = createC1WithColor(ownerName, TXTCLR_DIFFOWNER);
+        renderDogText(dog, ownerName, -0.25F, 0.01F, stack, nodeCollector, camera, light,
+            renderDifferentOwner, isDifferentOwner);
+    }
+
     private Optional<Component> getHungerC1(Dog dog, boolean renderHealthInNameActivated) {
         if (ConfigHandler.SERVER.DISABLE_HUNGER.get() && !dog.isDefeated())
             return Optional.empty();
@@ -257,8 +349,12 @@ public class DogRenderer extends MobRenderer<Dog, DogRenderState, DogModel> {
     }
 
     private Component colorTextWithHealth(Dog dog, Component text) {
+        return colorTextWithHealth(text, dog.getHealth(), dog.getMaxHealth());
+    }
+
+    static MutableComponent colorTextWithHealth(Component text, float health, float maxHealth) {
         int noCharsInName = text.getString().length();
-        float healthPercentage = dog.getHealth()/dog.getMaxHealth();
+        float healthPercentage = health / maxHealth;
         healthPercentage = Mth.clamp(healthPercentage, 0, 1);
         int noCharHighlighted = Mth.ceil( noCharsInName * healthPercentage );
         noCharHighlighted = Mth.clamp(noCharHighlighted, 0, noCharsInName);
@@ -268,26 +364,25 @@ public class DogRenderer extends MobRenderer<Dog, DogRenderState, DogModel> {
             nonHlPart = text.getString().substring(noCharHighlighted, noCharsInName);
         }
         int color = TXTCLR_HEALTH_0_30;
-        if (healthPercentage >= 0.7) {
+        if (health >= maxHealth * 0.7F) {
             color = TXTCLR_HEALTH_70_100;
-        } else if (healthPercentage >= 0.3) {
+        } else if (health >= maxHealth * 0.3F) {
             color = TXTCLR_HEALTH_30_70;
         }
         var newTxt = createC1WithColor(hlPart, color);
         var restTxt = createC1WithColor(nonHlPart, TXTCLR_HEALTH_BKG);
         newTxt.append(restTxt);
-        text = newTxt;
-        return text;
+        return newTxt;
     }
 
-    private MutableComponent createC1WithColor(String str, int color) {
+    private static MutableComponent createC1WithColor(String str, int color) {
         return Component.literal(str).withStyle(
             Style.EMPTY
             .withColor(color)
         );
     }
 
-    private MutableComponent createC1WithColor(Component c1, int color) {
+    private static MutableComponent createC1WithColor(Component c1, int color) {
         return createC1WithColor(c1.getString(), color);
     }
 
