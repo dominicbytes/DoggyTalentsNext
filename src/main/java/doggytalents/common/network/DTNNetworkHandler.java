@@ -15,6 +15,7 @@ import com.google.common.collect.Maps;
 import doggytalents.common.util.Util;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.PacketFlow;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.server.level.ServerPlayer;
@@ -31,15 +32,16 @@ public class DTNNetworkHandler {
 
     public static final CustomPacketPayload.Type<DTNNetworkPayload<?>> CHANNEL_ID =
         new CustomPacketPayload.Type<>(Util.getResource("payload_channel"));
-    private static Map<Integer, PacketCodec<?>> PACKET_MAP = Maps.newHashMap(); 
-    private static Map<Class<?>, Integer> DATACLASS_ID_MAP = Maps.newHashMap();
+    private static final Map<Integer, PacketCodec<?>> PACKET_MAP = Maps.newHashMap();
+    private static final Map<Class<?>, Integer> DATACLASS_ID_MAP = Maps.newHashMap();
 
     public static void init() {}
 
     public static synchronized <D> void registerMessage(int id, Class<D> dataClass, 
         BiConsumer<D, FriendlyByteBuf> encoder, Function<FriendlyByteBuf, D> decoder, 
-        BiConsumer<D, Supplier<NetworkEvent.Context>> messageConsumer) {
-        PACKET_MAP.put(id, new PacketCodec<>(dataClass, encoder, decoder, messageConsumer));
+        BiConsumer<D, Supplier<NetworkEvent.Context>> messageConsumer,
+        PayloadDirection direction) {
+        PACKET_MAP.put(id, new PacketCodec<>(dataClass, encoder, decoder, messageConsumer, direction));
         DATACLASS_ID_MAP.put(dataClass, id);
     }
 
@@ -66,14 +68,17 @@ public class DTNNetworkHandler {
         public final BiConsumer<T, FriendlyByteBuf> encoder;
         public final Function<FriendlyByteBuf, T> decoder;
         public final BiConsumer<T, Supplier<NetworkEvent.Context>> messageConsumer;
+        public final PayloadDirection direction;
         
         PacketCodec(Class<T> dataClass, 
             BiConsumer<T, FriendlyByteBuf> encoder, Function<FriendlyByteBuf, T> decoder, 
-            BiConsumer<T, Supplier<NetworkEvent.Context>> messageConsumer) {
+            BiConsumer<T, Supplier<NetworkEvent.Context>> messageConsumer,
+            PayloadDirection direction) {
             this.dataClass = dataClass;
             this.encoder = encoder;
             this.decoder = decoder;
             this.messageConsumer = messageConsumer;
+            this.direction = direction;
         }
 
         public void consume(T data, Context ctx) {
@@ -183,8 +188,25 @@ public class DTNNetworkHandler {
             LOGGER.error("Recieved error data!");
             return;
         }
+        if (!payload.codec.direction.accepts(context.flow())) {
+            LOGGER.warn("Rejecting {} payload received on {} flow; expected {}",
+                payload.codec.dataClass.getName(), context.flow(), payload.codec.direction);
+            context.disconnect(Component.literal(
+                "Doggy Talents Next received a packet on the wrong network direction."));
+            return;
+        }
         var ctx = new NetworkEvent.Context(context);
         handleForCodec(payload, ctx);
+    }
+
+    static PayloadDirection directionFor(Class<?> dataClass) {
+        var id = DATACLASS_ID_MAP.get(dataClass);
+        var codec = id == null ? null : PACKET_MAP.get(id);
+        return codec == null ? null : codec.direction;
+    }
+
+    static Integer idFor(Class<?> dataClass) {
+        return DATACLASS_ID_MAP.get(dataClass);
     }
 
     private static <T> void handleForCodec(DTNNetworkPayload<T> payload, NetworkEvent.Context ctx) {
@@ -206,5 +228,20 @@ public class DTNNetworkHandler {
             return CHANNEL_ID;
         }
 
+    }
+}
+
+enum PayloadDirection {
+    CLIENTBOUND(PacketFlow.CLIENTBOUND),
+    SERVERBOUND(PacketFlow.SERVERBOUND);
+
+    private final PacketFlow flow;
+
+    PayloadDirection(PacketFlow flow) {
+        this.flow = flow;
+    }
+
+    boolean accepts(PacketFlow flow) {
+        return this.flow == flow;
     }
 }
