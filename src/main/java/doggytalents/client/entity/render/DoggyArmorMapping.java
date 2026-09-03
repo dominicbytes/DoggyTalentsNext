@@ -1,7 +1,6 @@
 package doggytalents.client.entity.render;
 
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Maps;
 
 import doggytalents.DoggyAccessories;
 import doggytalents.api.inferface.AbstractDog;
@@ -13,6 +12,8 @@ import doggytalents.common.config.ConfigHandler;
 import doggytalents.common.entity.Dog;
 import doggytalents.common.lib.Resources;
 import net.minecraft.core.component.DataComponents;
+import net.minecraft.client.resources.model.EquipmentAssetManager;
+import net.minecraft.client.resources.model.EquipmentClientInfo;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -24,6 +25,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.equipment.Equippable;
 import net.minecraft.world.level.Level;
+import net.neoforged.neoforge.client.extensions.common.IClientItemExtensions;
 
 import java.util.Map;
 import java.util.Optional;
@@ -58,25 +60,40 @@ public class DoggyArmorMapping {
         .put(Items.NETHERITE_LEGGINGS, Resources.NETHERITE_BODY_PIECE)
        .build();
 
-    private static Map<Item, Identifier> MAPPING = Maps.newConcurrentMap();
-
-    private static Identifier computeArmorTexture(Item item, Dog dog, ItemStack stack) {
-        // ArmorItem no longer exists in 26.1.2; check via DataComponents.EQUIPPABLE instead
+    private static Identifier computeArmorTexture(ItemStack stack, EquipmentAssetManager equipmentAssets) {
         var equippable = stack.getOrDefault(DataComponents.EQUIPPABLE, null);
         if (equippable == null) return Resources.DEFAULT_DOG_ARMOR;
+        var assetId = equippable.assetId();
+        if (assetId.isEmpty()) return Resources.DEFAULT_DOG_ARMOR;
 
-        // Check legacy mapping first (vanilla armor items)
-        var legacy = LEGACY_MAPPING.get(item);
-        if (legacy != null) return legacy;
+        var layerOptional = firstHumanoidLayer(equipmentAssets.get(assetId.get()));
+        if (layerOptional.isEmpty()) return Resources.DEFAULT_DOG_ARMOR;
 
-        return Resources.DEFAULT_DOG_ARMOR;
+        var layer = layerOptional.get();
+        var texture = layer.getTextureLocation(EquipmentClientInfo.LayerType.HUMANOID);
+        var customTexture = IClientItemExtensions.of(stack).getArmorTexture(
+            stack,
+            EquipmentClientInfo.LayerType.HUMANOID,
+            layer,
+            texture
+        );
+        if (customTexture != null)
+            texture = customTexture;
+
+        return ClientEventHandler.vertifyArmorTexture(texture)
+            ? texture
+            : Resources.DEFAULT_DOG_ARMOR;
     }
 
-    public static Identifier getMappedResource(Item item, Dog dog, ItemStack stack) {
-        if (ConfigHandler.CLIENT.USE_LEGACY_DOG_ARMOR_RENDER.get())
-            return getLegacyMappedResource(dog, item);
+    static Optional<EquipmentClientInfo.Layer> firstHumanoidLayer(EquipmentClientInfo equipmentInfo) {
+        return equipmentInfo.getLayers(EquipmentClientInfo.LayerType.HUMANOID).stream().findFirst();
+    }
 
-        return MAPPING.computeIfAbsent(item, x -> computeArmorTexture(x, dog, stack));
+    public static Identifier getMappedResource(Dog dog, ItemStack stack, EquipmentAssetManager equipmentAssets) {
+        if (ConfigHandler.CLIENT.USE_LEGACY_DOG_ARMOR_RENDER.get())
+            return getLegacyMappedResource(dog, stack.getItem());
+
+        return computeArmorTexture(stack, equipmentAssets);
     }
 
     public static Identifier getLegacyMappedResource(Dog dog, Item item) {

@@ -14,6 +14,7 @@ import doggytalents.client.entity.render.DoggyArmorMapping;
 import doggytalents.client.entity.render.DogRenderState;
 import doggytalents.client.entity.render.layer.DogArmorHelmetAltModel;
 import doggytalents.common.config.ConfigHandler;
+import doggytalents.common.entity.Dog;
 import doggytalents.common.util.ItemUtil;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.Model;
@@ -27,6 +28,7 @@ import net.minecraft.client.renderer.entity.RenderLayerParent;
 import net.minecraft.client.renderer.entity.layers.RenderLayer;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.renderer.texture.TextureAtlas;
+import net.minecraft.client.resources.model.EquipmentAssetManager;
 import net.minecraft.client.resources.model.EquipmentClientInfo;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.data.AtlasIds;
@@ -49,6 +51,7 @@ public class DoggyArmorRenderer extends RenderLayer<DogRenderState, DogModel> {
 
     private DogArmorHelmetAltModel helmetAltModel;
     private final TextureAtlas dogArmorTrimAtlas;
+    private final EquipmentAssetManager equipmentAssets;
 
     public DoggyArmorRenderer(RenderLayerParent<DogRenderState, DogModel> parentRenderer, EntityRendererProvider.Context ctx) {
         super(parentRenderer);
@@ -60,6 +63,7 @@ public class DoggyArmorRenderer extends RenderLayer<DogRenderState, DogModel> {
 
         this.helmetAltModel = new DogArmorHelmetAltModel(ctx);
         this.dogArmorTrimAtlas = ctx.getAtlas(AtlasIds.ARMOR_TRIMS);
+        this.equipmentAssets = ctx.getEquipmentAssets();
     }
 
     @Override
@@ -138,7 +142,7 @@ public class DoggyArmorRenderer extends RenderLayer<DogRenderState, DogModel> {
             return;
         }
 
-        renderArmorCutout(this.model, DoggyArmorMapping.getMappedResource(itemStack.getItem(), dog, itemStack), stack, buffer, light);
+        renderArmorCutout(this.model, DoggyArmorMapping.getMappedResource(dog, itemStack, equipmentAssets), stack, buffer, light);
 
         var trim = ItemUtil.getTrim(itemStack);
         if (trim.isPresent() && equippable.assetId().isPresent())
@@ -171,7 +175,7 @@ public class DoggyArmorRenderer extends RenderLayer<DogRenderState, DogModel> {
             stack1.pushPose();
             stack1.scale(0.6f, 0.6f, 0.6f);
             stack1.translate(0, 0.15f, 0.07);
-            renderAlternativeModel(model, stack1, buffer, light, itemStack);
+            renderAlternativeModel(model, dog, stack1, buffer, light, itemStack);
 
             var trim = ItemUtil.getTrim(itemStack);
             var equippable = itemStack.get(DataComponents.EQUIPPABLE);
@@ -185,8 +189,9 @@ public class DoggyArmorRenderer extends RenderLayer<DogRenderState, DogModel> {
         });
     }
 
-    private void renderAlternativeModel(Model model, PoseStack stack, MultiBufferSource buffer, int light, ItemStack itemStack) {
-        var texLoc = DoggyArmorMapping.getMappedResource(itemStack.getItem(), null, itemStack);
+    private void renderAlternativeModel(Model model, Dog dog, PoseStack stack,
+            MultiBufferSource buffer, int light, ItemStack itemStack) {
+        var texLoc = DoggyArmorMapping.getMappedResource(dog, itemStack, equipmentAssets);
         VertexConsumer ivertexbuilder = buffer.getBuffer(RenderTypes.armorCutoutNoCull(texLoc));
         model.renderToBuffer(stack, ivertexbuilder, light, OverlayTexture.NO_OVERLAY, 0xffffffff);
     }
