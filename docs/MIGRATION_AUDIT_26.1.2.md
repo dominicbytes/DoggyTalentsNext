@@ -46,7 +46,7 @@ Evidence boundary: `COMPILES`, static packaging, 30 unit tests, development-clas
 
 ### P0 — release and multiplayer safety
 
-1. **No test harness or acceptance evidence.** Add a small JUnit layer for pure codecs/state and NeoForge GameTests for registration, dog lifecycle, talent mutation, inventory, and persistence. Add checked-in CI for Java 25 `clean build` and tests.
+1. **The automated harness is still incomplete.** JUnit now covers network and storage compatibility, and a NeoForge GameTest proves real-dog core serialization. Add lifecycle, talent mutation, inventory, block-entity, and restart coverage. Java 25 CI remains required.
 
 2. **Legacy generic network tunnel remains direction-unsafe.** Every message is multiplexed through one `playBidirectional` payload and integer discriminator. `DogPacket` assumes a serverbound sender without first checking direction, while client-only handlers share the same registry. A packet delivered on the wrong flow can dereference a null sender or resolve client classes on the wrong side. Replace it with typed, explicitly directional payload registrations or add strict direction metadata while migrating incrementally.
 
@@ -54,7 +54,7 @@ Evidence boundary: `COMPILES`, static packaging, 30 unit tests, development-clas
 
 4. **Production-JAR dedicated-server classloading is proven.** The exact packaged JAR loads from a clean NeoForge server `mods/` directory and reaches `Done`. No DTN client-class resolution failure occurs; the remaining log errors are environment-level native transport probing and external-service timeouts documented in the QA report.
 
-5. **Persistence and upgrade behavior is only partially proven.** Original 1.21.1 respawn-owner UUIDs, the interim 26.1.2 string UUID format, legacy location-list/entity-ID keys, canonical respawn re-encoding, and malformed-entry rejection now have unit coverage. Dog state, talents, accessories, beds/bowls, pack-puppy contents, tracker data, and full save/restart/reload still need assertions. Remaining silent exception handlers in persistence paths must log enough context to diagnose partial data loss.
+5. **Persistence and upgrade behavior is only partially proven.** Original 1.21.1 respawn-owner UUIDs, the interim 26.1.2 string UUID format, legacy location-list/entity-ID keys, canonical respawn re-encoding, and malformed-entry rejection have unit coverage. A loader-aware GameTest now proves that a real `Dog` round-trips UUID, owner/tame/name, gender, mode, hunger, incapacitation value, normal/kami levels, behavior flags, and bed/bowl locations through the 26.1 `ValueInput`/`ValueOutput` entity bridge. Talents, accessories, item/inventory state, tracker data, frozen 1.21.1 fixtures, and a process restart still need assertions. Remaining silent exception handlers in persistence paths must log enough context to diagnose partial data loss.
 
 ### P1 — user-visible parity regressions
 
@@ -122,6 +122,8 @@ The stacked network-hardening branch enables NeoForge's JUnit environment and ad
 The stacked render-state branch restores puppy head scaling from `LivingEntityRenderState.isBaby`, propagates it to copied dog and synchronized accessory models, and covers adult, puppy, custom-model opt-out, and accessory propagation behavior. Client visual acceptance remains required.
 
 The persistence compatibility branch restores the original UUID NBT contract for dead-dog owners while continuing to read the interim string format emitted by the 26.1.2 draft. It also restores component-preserving custom-name storage, rejects malformed location/respawn records before constructing data objects, and freezes the original location keys in tests. Five persistence compatibility tests and the 30-test suite pass; full-world restart coverage remains open.
+
+The dog-core persistence branch adds the NeoForge `gameTestServer` run and stable GameTest `SAVE-01` subgate `doggytalents:save_01_dog_core_round_trip`. The test constructs a registered `Dog`, saves it with Minecraft's 26.1 entity serializer, loads a second registered `Dog`, and asserts vanilla identity plus core DTN state and location maps. The dedicated GameTest server passed all one required tests. This proves the in-process core round trip only; the broader `SAVE-01` fixture, inventory, talent/accessory, block-entity, and restart requirements remain open.
 
 The production-server gate installs the official checksum-verified NeoForge `26.1.2.101` server into a clean disposable directory, copies only the freshly built production JAR into `mods/`, and reaches `Done`. The strict Modmaker artifact validator also passes with zero findings. This closes dedicated-server packaging/classloading acceptance; it does not substitute for client or save-restart testing.
 
