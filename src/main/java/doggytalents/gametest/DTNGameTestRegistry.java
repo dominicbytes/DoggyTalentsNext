@@ -20,6 +20,8 @@ public final class DTNGameTestRegistry {
         TESTS.register("save_01_dog_core_round_trip", () -> DTNGameTests::save01DogCoreRoundTrip);
     private static final DeferredHolder<Consumer<GameTestHelper>, Consumer<GameTestHelper>> SAVE_01_EXTENDED =
         TESTS.register("save_01_dog_extended_round_trip", () -> DTNGameTests::save01DogExtendedRoundTrip);
+    private static final DeferredHolder<Consumer<GameTestHelper>, Consumer<GameTestHelper>> SAVE_01_BLOCK_ENTITIES =
+        TESTS.register("save_01_block_entity_round_trip", () -> DTNGameTests::save01BlockEntityRoundTrip);
 
     private DTNGameTestRegistry() {
     }
@@ -35,6 +37,8 @@ public final class DTNGameTestRegistry {
             SAVE_01_CORE.getKey(), new TestData<>(environment, Identifier.withDefaultNamespace("empty"), 100, 0, true)));
         event.registerTest(id("save_01_dog_extended_round_trip"), new FunctionGameTestInstance(
             SAVE_01_EXTENDED.getKey(), new TestData<>(environment, Identifier.withDefaultNamespace("empty"), 100, 0, true)));
+        event.registerTest(id("save_01_block_entity_round_trip"), new FunctionGameTestInstance(
+            SAVE_01_BLOCK_ENTITIES.getKey(), new TestData<>(environment, Identifier.withDefaultNamespace("empty"), 100, 0, true)));
     }
 
     private static Identifier id(String path) {

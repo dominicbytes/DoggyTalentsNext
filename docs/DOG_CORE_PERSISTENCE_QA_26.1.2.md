@@ -1,19 +1,20 @@
 # Dog Core Persistence QA — NeoForge 26.1.2
 
 Date: 2026-09-03  
-Contract: `SAVE-01` core and nested-state subgates
+Contract: `SAVE-01` core, nested-state, and block-entity subgates
 Minecraft: 26.1.2  
 NeoForge: 26.1.2.101  
 Java: 25
 
 ## Result
 
-`PASS` — the NeoForge GameTest server ran both DTN tests in the `doggytalents:default` batch and reported `All 3 required tests passed`, including Minecraft's built-in control test.
+`PASS` — the NeoForge GameTest server ran three DTN tests in the `doggytalents:default` batch and reported `All 4 required tests passed`, including Minecraft's built-in control test.
 
 Test IDs:
 
 - `doggytalents:save_01_dog_core_round_trip`
 - `doggytalents:save_01_dog_extended_round_trip`
+- `doggytalents:save_01_block_entity_round_trip`
 
 Command:
 
@@ -38,11 +39,13 @@ The following state survived the round trip:
 - a dyeable collar's type and RGB color;
 - the Feathered Mantle artifact.
 
+The block-entity test also reconstructs production block entities through `BlockEntity.saveWithFullMetadata(...)` and `BlockEntity.loadStatic(...)`. It preserves food-bowl inventory and placer UUID; dog-bed casing, bedding, owner UUID, bed name, and cached owner name; and rice-mill input, bowl, and output inventory. Rice-mill processing progress is not asserted by this test.
+
 The registry now creates explicit 26.1 `GameTestInstance`s through NeoForge's `RegisterGameTestsEvent`. Registering only entries in Minecraft's test-function registry does not make those functions runnable tests in the 1.21.5+ GameTest architecture.
 
 ## Evidence boundary
 
-This result validates the 26.1 `ValueInput`/`ValueOutput` bridge for identity, core dog state, representative talents, accessories, artifacts, and dog-owned inventories in a loader-aware server. It does not yet prove a process restart, frozen 1.21.1 fixture upgrade, tracker data, or block-entity persistence. Those remain separate `SAVE-01` subgates.
+This result validates the 26.1 `ValueInput`/`ValueOutput` bridge for identity, core dog state, representative talents, accessories, artifacts, dog-owned inventories, and the established state of three DTN block entities in a loader-aware server. It does not yet prove a process restart, frozen 1.21.1 fixture upgrade, tracker data, or rice-mill processing-progress persistence. Those remain separate `SAVE-01` subgates.
 
 Raw log: `run/logs/latest.log`
 
@@ -50,7 +53,7 @@ Raw log: `run/logs/latest.log`
 
 - Fresh `gradlew.bat clean build`: PASS, 30 tests, zero failures/errors.
 - Strict Modmaker project/artifact validation: PASS, zero findings.
-- Production JAR SHA-256: `f4c54fe3f68e282e8800f9e70d5c117a6fd6a417ad0751f87997126dab51b534`.
-- Clean official NeoForge 26.1.2.101 server: PASS; the exact JAR loaded from `mods/` and reached `Done (0.389s)` before a clean `stop`.
+- Production JAR SHA-256: `7989657c3ff63a554f2fde983ac537417b8fd29d6766c0d911cd26c7eaf95a0a`.
+- Clean official NeoForge 26.1.2.101 server: PASS; the exact JAR loaded from `mods/` and reached `Done (0.329s)` before a clean `stop`.
 
 Production-server raw log: `bytecraftpack/qa-work/doggy-talents-save01-server/logs/latest.log`

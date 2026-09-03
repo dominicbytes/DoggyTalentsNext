@@ -1,12 +1,17 @@
 package doggytalents.gametest;
 
 import doggytalents.DoggyAccessories;
+import doggytalents.DoggyBlocks;
 import doggytalents.DoggyEntityTypes;
 import doggytalents.DoggyItems;
 import doggytalents.DoggyTalents;
 import doggytalents.api.feature.DogGender;
 import doggytalents.api.feature.DogLevel;
 import doggytalents.api.feature.DogMode;
+import doggytalents.common.block.DogBedMaterialManager;
+import doggytalents.common.block.tileentity.DogBedTileEntity;
+import doggytalents.common.block.tileentity.FoodBowlTileEntity;
+import doggytalents.common.block.tileentity.RiceMillBlockEntity;
 import doggytalents.common.entity.Dog;
 import doggytalents.common.talent.PackPuppyTalent;
 import doggytalents.common.talent.doggy_tools.DoggyToolsTalent;
@@ -15,17 +20,21 @@ import java.util.UUID;
 import net.minecraft.core.BlockPos;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.ProblemReporter;
 import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.storage.TagValueInput;
 import net.minecraft.world.level.storage.TagValueOutput;
 
 public final class DTNGameTests {
     private static final UUID DOG_UUID = UUID.fromString("81b99c9b-ecfa-4c3c-8e6a-2f986814c731");
     private static final UUID OWNER_UUID = UUID.fromString("41f54ff5-d7c2-44b2-bf31-f43ce49800ca");
+    private static final UUID BLOCK_ENTITY_DOG_UUID =
+        UUID.fromString("296a1a85-f0ce-4d21-87ce-ccf2bfaac896");
 
     private DTNGameTests() {
     }
@@ -159,6 +168,69 @@ public final class DTNGameTests {
         helper.succeed();
     }
 
+    /** SAVE-01: stateful DTN block entities retain their established data through 26.1 serialization. */
+    public static void save01BlockEntityRoundTrip(GameTestHelper helper) {
+        var level = helper.getLevel();
+        Dog dog = createDog(helper);
+        dog.setUUID(BLOCK_ENTITY_DOG_UUID);
+        dog.setDogCustomName(Component.literal("Block Entity Dog"));
+
+        BlockPos bowlPos = new BlockPos(1, 1, 1);
+        helper.setBlock(bowlPos, DoggyBlocks.FOOD_BOWL.get());
+        FoodBowlTileEntity bowl = helper.getBlockEntity(bowlPos, FoodBowlTileEntity.class);
+        bowl.setPlacer(dog);
+        bowl.getInventory().setStackInSlot(0, new ItemStack(Items.COOKED_BEEF, 11));
+        bowl.getInventory().setStackInSlot(4, new ItemStack(Items.COOKED_CHICKEN, 2));
+
+        FoodBowlTileEntity loadedBowl = roundTripBlockEntity(helper, bowl, FoodBowlTileEntity.class);
+        require(helper, BLOCK_ENTITY_DOG_UUID.equals(loadedBowl.getPlacerId()),
+            "food bowl placer UUID was not preserved");
+        requireStack(helper, loadedBowl.getInventory().getStackInSlot(0), Items.COOKED_BEEF, 11,
+            "food bowl slot 0");
+        requireStack(helper, loadedBowl.getInventory().getStackInSlot(4), Items.COOKED_CHICKEN, 2,
+            "food bowl slot 4");
+
+        Identifier casingId = Identifier.withDefaultNamespace("oak_planks");
+        Identifier beddingId = Identifier.withDefaultNamespace("red_wool");
+        BlockPos bedPos = new BlockPos(3, 1, 1);
+        helper.setBlock(bedPos, DoggyBlocks.DOG_BED.get());
+        DogBedTileEntity bed = helper.getBlockEntity(bedPos, DogBedTileEntity.class);
+        bed.setCasing(DogBedMaterialManager.getCasing(casingId));
+        bed.setBedding(DogBedMaterialManager.getBedding(beddingId));
+        bed.setOwner(dog);
+        bed.setBedName(Component.literal("Porch Bed"));
+
+        DogBedTileEntity loadedBed = roundTripBlockEntity(helper, bed, DogBedTileEntity.class);
+        loadedBed.setLevel(level);
+        require(helper, casingId.equals(DogBedMaterialManager.getKey(loadedBed.getCasing())),
+            "dog bed casing ID was not preserved");
+        require(helper, beddingId.equals(DogBedMaterialManager.getKey(loadedBed.getBedding())),
+            "dog bed bedding ID was not preserved");
+        require(helper, BLOCK_ENTITY_DOG_UUID.equals(loadedBed.getOwnerUUID()),
+            "dog bed owner UUID was not preserved");
+        require(helper, loadedBed.getBedName() != null
+            && "Porch Bed".equals(loadedBed.getBedName().getString()), "dog bed name was not preserved");
+        require(helper, loadedBed.getOwnerName() != null
+            && "Block Entity Dog".equals(loadedBed.getOwnerName().getString()),
+            "dog bed cached owner name was not preserved");
+
+        BlockPos millPos = new BlockPos(5, 1, 1);
+        helper.setBlock(millPos, DoggyBlocks.RICE_MILL.get());
+        RiceMillBlockEntity mill = helper.getBlockEntity(millPos, RiceMillBlockEntity.class);
+        mill.getWorldlyContainer().setItem(0, new ItemStack(DoggyItems.RICE_GRAINS.get(), 9));
+        mill.getWorldlyContainer().setItem(1, new ItemStack(Items.BOWL, 3));
+        mill.getWorldlyContainer().setItem(2, new ItemStack(DoggyItems.UNCOOKED_RICE_BOWL.get(), 2));
+
+        RiceMillBlockEntity loadedMill = roundTripBlockEntity(helper, mill, RiceMillBlockEntity.class);
+        requireStack(helper, loadedMill.getWorldlyContainer().getItem(0), DoggyItems.RICE_GRAINS.get(), 9,
+            "rice mill input slot");
+        requireStack(helper, loadedMill.getWorldlyContainer().getItem(1), Items.BOWL, 3,
+            "rice mill bowl slot");
+        requireStack(helper, loadedMill.getWorldlyContainer().getItem(2),
+            DoggyItems.UNCOOKED_RICE_BOWL.get(), 2, "rice mill output slot");
+        helper.succeed();
+    }
+
     private static Dog roundTrip(GameTestHelper helper, Dog source) {
         var output = TagValueOutput.createWithoutContext(ProblemReporter.DISCARDING);
         source.saveWithoutId(output);
@@ -166,6 +238,16 @@ public final class DTNGameTests {
         loaded.load(TagValueInput.create(
             ProblemReporter.DISCARDING, helper.getLevel().registryAccess(), output.buildResult()));
         return loaded;
+    }
+
+    private static <T extends BlockEntity> T roundTripBlockEntity(
+            GameTestHelper helper, T source, Class<T> type) {
+        var level = helper.getLevel();
+        var tag = source.saveWithFullMetadata(level.registryAccess());
+        BlockEntity loaded = BlockEntity.loadStatic(
+            source.getBlockPos(), source.getBlockState(), tag, level.registryAccess());
+        require(helper, type.isInstance(loaded), type.getSimpleName() + " could not be reconstructed");
+        return type.cast(loaded);
     }
 
     private static void requireStack(GameTestHelper helper, ItemStack stack, Item item, int count, String description) {
