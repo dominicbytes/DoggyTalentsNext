@@ -7,9 +7,9 @@ Result: **PASS**
 ## Artifact
 
 - File: `DoggyTalentsNext-26.1.2-26.1.2.24.jar`
-- Size: `11,357,167` bytes
-- SHA-256: `388b4de5a1551cc8fd53b0e53eab002020afff3381130aa738aa859e2d3ff187`
-- SHA-512: `bb6edeb9dc26b35860a5faeba94a15d95fc297aabdd818620e931050e4d1f87c907e04f9b1c5ac6edd02583126c03f9614856a68dacefb9eb5b4689b6e2ee34b`
+- Size: `11,362,181` bytes
+- SHA-256: `f01182592f29fdabc5e5d084f4af46d1ef410eec2df15d9f55f12e7645612004`
+- SHA-512: `bda81763ad888e94b196eef9d077272ac35a03b1c8e4af1e45aca57abf00f680fc9b28cd75d8810ca2d7a0ae1a97dab387acf005c9ed223857d3704316298930`
 - Build: Java 25, `gradlew.bat clean build`
 - Automated tests: 30 passed
 - Strict Modmaker artifact validation: PASS, zero findings
@@ -42,7 +42,7 @@ NeoForge 26.1.2.101 (neoforge)
 The server completed new-world initialization:
 
 ```text
-Done (1.561s)! For help, type "help"
+Done (1.752s)! For help, type "help"
 ```
 
 No Doggy Talents Next client-class resolution, mixin, registration, or mod-loading failure occurred.

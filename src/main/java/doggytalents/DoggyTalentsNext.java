@@ -33,6 +33,7 @@ import doggytalents.common.item.itemgroup.DTNItemCategory;
 import doggytalents.common.lib.Constants;
 import doggytalents.common.network.DTNNetworkHandler;
 import doggytalents.common.network.PacketHandler;
+import doggytalents.gametest.DTNGameTestRegistry;
 import doggytalents.common.talent.HappyEaterTalent;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.fml.ModLoadingContext;
@@ -82,6 +83,7 @@ public class DoggyTalentsNext {
         DoggyEffects.EFFECTS.register(modEventBus);
         DoggyAdvancementTriggers.TRIGGERS.register(modEventBus);
         DoggyEntitySubPredicates.ENTITY_SUB_PREDICATES.register(modEventBus);
+        DTNGameTestRegistry.register(modEventBus);
 
         DTLootModifierProvider.CODEC.register(modEventBus);
 

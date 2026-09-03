@@ -61,6 +61,11 @@ neoForge {
             }
         }
 
+        gameTestServer {
+            type = 'gameTestServer'
+            systemProperty 'neoforge.enabledGameTestNamespaces', 'doggytalents'
+        }
+
         data {
             data()
             // Modern data gen arguments are often handled automatically, 
