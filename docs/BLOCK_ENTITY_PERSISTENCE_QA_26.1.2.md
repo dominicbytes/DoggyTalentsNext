@@ -16,7 +16,7 @@ The round trip preserves:
 
 The registered `doggytalents:save_01_rice_mill_progress_round_trip` test additionally loads the oracle's canonical nonzero `grindingTime` fixture through production block-entity deserialization, then serializes and reconstructs that mill again. The unfinished progress value remains `23` through both paths without exposing or mutating private production state.
 
-The NeoForge GameTest server ran five DTN tests plus Minecraft's control test and reported `All 6 required tests passed`.
+The NeoForge GameTest server ran six DTN tests plus Minecraft's control test and reported `All 7 required tests passed`.
 
 ## Aggregate gates
 
@@ -27,7 +27,7 @@ The NeoForge GameTest server ran five DTN tests plus Minecraft's control test an
 
 ## Evidence boundary
 
-This closes the established food-bowl, dog-bed, rice-mill inventory, and nonzero rice-mill progress portions of `SAVE-01`. Tracker data is now covered by its own GameTest; broad frozen 1.21.1 fixtures and persistence across a server process restart remain open.
+This closes the established food-bowl, dog-bed, rice-mill inventory, and nonzero rice-mill progress portions of `SAVE-01`. Tracker data and a frozen 1.21.1 dog payload are covered by their own GameTests; persistence across a server process restart remains open.
 
 Raw GameTest log: `run/logs/latest.log`  
 Production-server raw log: `bytecraftpack/qa-work/doggy-talents-save01-server/logs/latest.log`

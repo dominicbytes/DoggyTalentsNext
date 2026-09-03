@@ -8,20 +8,27 @@ import doggytalents.DoggyTalents;
 import doggytalents.api.feature.DogGender;
 import doggytalents.api.feature.DogLevel;
 import doggytalents.api.feature.DogMode;
+import doggytalents.api.feature.DogSize;
 import doggytalents.common.block.DogBedMaterialManager;
 import doggytalents.common.block.tileentity.DogBedTileEntity;
 import doggytalents.common.block.tileentity.FoodBowlTileEntity;
 import doggytalents.common.block.tileentity.RiceMillBlockEntity;
 import doggytalents.common.entity.Dog;
+import doggytalents.common.entity.DogGroupsManager;
 import doggytalents.common.entity.stats.StatsTracker;
+import doggytalents.common.entity.texture.DogSkinData;
 import doggytalents.common.talent.PackPuppyTalent;
 import doggytalents.common.talent.doggy_tools.DoggyToolsTalent;
 import doggytalents.common.util.ItemUtil;
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.util.HexFormat;
 import java.util.UUID;
 import net.minecraft.core.BlockPos;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.TagParser;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.ProblemReporter;
@@ -39,6 +46,10 @@ public final class DTNGameTests {
     private static final UUID OWNER_UUID = UUID.fromString("41f54ff5-d7c2-44b2-bf31-f43ce49800ca");
     private static final UUID BLOCK_ENTITY_DOG_UUID =
         UUID.fromString("296a1a85-f0ce-4d21-87ce-ccf2bfaac896");
+    private static final String LEGACY_DOG_FIXTURE =
+        "/data/doggytalents/gametest/fixtures/dog-1.21.1-oracle.snbt";
+    private static final String LEGACY_DOG_FIXTURE_SHA256 =
+        "da18b522d67f6fe1bee143ae833f3f4d7a14f7f3b521d44cfcab83741180d88b";
 
     private DTNGameTests() {
     }
@@ -325,6 +336,92 @@ public final class DTNGameTests {
         require(helper, replacementStats.getAllKillCount().isEmpty(),
             "unknown entity type created an invalid kill entry");
         helper.succeed();
+    }
+
+    /** SAVE-01: a frozen payload matching the 1.21.1 persistence contract loads in 26.1. */
+    public static void save01LegacyDogFixtureUpgrade(GameTestHelper helper) {
+        CompoundTag fixture = loadLegacyDogFixture(helper);
+        Dog loaded = createDog(helper);
+        loaded.readDTNAdditionalSavedData(fixture);
+        var level = helper.getLevel();
+
+        require(helper, loaded.getGender() == DogGender.FEMALE, "legacy gender was not loaded");
+        require(helper, loaded.getMode() == DogMode.PATROL, "legacy mode was not loaded");
+        require(helper, Float.compare(loaded.getDogHunger(), 43.5F) == 0, "legacy hunger was not loaded");
+        require(helper, loaded.getDogIncapValue() == 117, "legacy incapacitated value was not loaded");
+        require(helper, loaded.getOwnersName().filter(name -> "Legacy Owner".equals(name.getString())).isPresent(),
+            "legacy owner name was not loaded");
+        require(helper, loaded.getSkinData().getVersion() == DogSkinData.Version.VERSION_0
+            && "legacy-skin-hash".equals(loaded.getSkinData().getHash()),
+            "legacy custom-skin hash was not upgraded");
+        require(helper, loaded.getDogLevel().getLevel(DogLevel.Type.NORMAL) == 37,
+            "legacy normal level was not loaded");
+        require(helper, loaded.getDogLevel().getLevel(DogLevel.Type.KAMI) == 9,
+            "legacy dire level was not upgraded to kami level");
+        require(helper, loaded.getDogSize() == DogSize.FORTE, "legacy dog size was not loaded");
+        require(helper, loaded.getLowHealthStrategy() == Dog.LowHealthStrategy.STICK_TO_OWNER,
+            "legacy low-health strategy was not loaded");
+        require(helper, loaded.getCombatReturnStrategy() == Dog.CombatReturnStrategy.FAR,
+            "legacy combat-return strategy was not loaded");
+        require(helper, loaded.willObeyOthers() && loaded.canOwnerAttack() && loaded.regardTeamPlayers()
+            && loaded.forceSit() && loaded.dogAutoMount() && loaded.crossOriginTp()
+            && loaded.patrolTargetLock() && loaded.hideArmor() && loaded.dogOnDuty(),
+            "one or more legacy behavior flags were not loaded");
+        require(helper, loaded.getDogLevel(DoggyTalents.HAPPY_EATER.get()) == 3,
+            "legacy talent was not loaded");
+        require(helper, loaded.getAccessory(DoggyAccessories.DYEABLE_COLLAR.get()).isPresent(),
+            "legacy accessory was not loaded");
+        ItemStack collar = loaded.getAccessories().getFirst().getReturnItem();
+        require(helper, (ItemUtil.getDyeColorForStack(collar) & 0xffffff) == 0x2468ac,
+            "legacy accessory color was not loaded");
+        require(helper, loaded.getArtifactsList().size() == 1
+            && loaded.getArtifactsList().getFirst() == DoggyItems.FEATHERED_MANTLE.get(),
+            "legacy artifact was not loaded");
+        require(helper, loaded.getBedPos(level.dimension()).filter(new BlockPos(4, 2, 6)::equals).isPresent(),
+            "legacy bed location was not loaded");
+        require(helper, loaded.getBowlPos(level.dimension()).filter(new BlockPos(7, 2, 3)::equals).isPresent(),
+            "legacy bowl location was not loaded");
+
+        var stats = loaded.getStatTracker();
+        require(helper, stats.getKillCountFor(EntityType.ZOMBIE) == 2
+            && stats.getKillCountFor(EntityType.SKELETON) == 1 && stats.getTotalKillCount() == 3,
+            "legacy entity kills were not loaded");
+        require(helper, Float.compare(stats.getDamageDealt(), 12.75F) == 0
+            && stats.getDistanceOnWater() == 11 && stats.getDistanceInWater() == 22
+            && stats.getDistanceSprint() == 33 && stats.getDistanceSneaking() == 44
+            && stats.getDistanceWalk() == 55 && stats.getDistanceRidden() == 66,
+            "legacy aggregate statistics were not loaded");
+        require(helper, loaded.getGroups().getGroupsReadOnly().contains(
+            new DogGroupsManager.DogGroup("Legacy Pack", 0x2468ac)), "legacy dog group was not loaded");
+        require(helper, loaded.hasHome() && new BlockPos(12, 3, -8).equals(loaded.getHomePosition())
+            && loaded.getHomeRadius() == 19, "legacy wander center was not loaded");
+
+        var canonical = new CompoundTag();
+        loaded.addDTNAdditionalSavedData(canonical);
+        require(helper, canonical.getIntOr("level_kami", 0) == 9 && !canonical.contains("level_dire"),
+            "legacy dire level was not rewritten canonically");
+        require(helper, canonical.contains("doggytalents_dog_skin") && !canonical.contains("customSkinHash"),
+            "legacy custom skin was not rewritten canonically");
+        require(helper, canonical.getCompoundOrEmpty("ownerDistanceManager")
+            .getLongOr("lastWithOwnerTime", 0L) == 24000L,
+            "legacy owner-distance state was not preserved");
+        require(helper, canonical.getCompoundOrEmpty("dogPettingManager")
+            .getLongOr("dog_last_pet_time", 0L) == 12000L,
+            "legacy petting state was not preserved");
+        helper.succeed();
+    }
+
+    private static CompoundTag loadLegacyDogFixture(GameTestHelper helper) {
+        try (var stream = DTNGameTests.class.getResourceAsStream(LEGACY_DOG_FIXTURE)) {
+            require(helper, stream != null, "legacy dog fixture resource was not packaged");
+            byte[] bytes = stream.readAllBytes();
+            String actualHash = HexFormat.of().formatHex(MessageDigest.getInstance("SHA-256").digest(bytes));
+            require(helper, LEGACY_DOG_FIXTURE_SHA256.equals(actualHash),
+                "legacy dog fixture changed without an explicit compatibility review");
+            return TagParser.parseCompoundFully(new String(bytes, StandardCharsets.UTF_8));
+        } catch (Exception e) {
+            throw new IllegalStateException("Failed to load frozen 1.21.1 dog fixture", e);
+        }
     }
 
     private static Dog roundTrip(GameTestHelper helper, Dog source) {

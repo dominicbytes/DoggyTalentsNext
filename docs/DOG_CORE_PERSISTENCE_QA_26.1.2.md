@@ -8,7 +8,7 @@ Java: 25
 
 ## Result
 
-`PASS` — the NeoForge GameTest server ran five DTN tests in the `doggytalents:default` batch and reported `All 6 required tests passed`, including Minecraft's built-in control test.
+`PASS` — the NeoForge GameTest server ran six DTN tests in the `doggytalents:default` batch and reported `All 7 required tests passed`, including Minecraft's built-in control test.
 
 Test IDs:
 
@@ -17,6 +17,7 @@ Test IDs:
 - `doggytalents:save_01_block_entity_round_trip`
 - `doggytalents:save_01_rice_mill_progress_round_trip`
 - `doggytalents:save_01_stats_tracker_round_trip`
+- `doggytalents:save_01_legacy_dog_fixture_upgrade`
 
 Command:
 
@@ -49,7 +50,7 @@ The registry now creates explicit 26.1 `GameTestInstance`s through NeoForge's `R
 
 ## Evidence boundary
 
-This result validates the 26.1 `ValueInput`/`ValueOutput` bridge for identity, core dog state, representative talents, accessories, artifacts, dog-owned inventories, statistics, and the established state of three DTN block entities in a loader-aware server. It does not yet prove a process restart or broad frozen 1.21.1 fixture upgrade. Those remain separate `SAVE-01` subgates.
+This result validates the 26.1 `ValueInput`/`ValueOutput` bridge for identity, core dog state, representative talents, accessories, artifacts, dog-owned inventories, statistics, and the established state of three DTN block entities in a loader-aware server. It also proves a checksum-locked, oracle-derived 1.21.1 dog payload loads and rewrites legacy fields canonically. It does not yet prove persistence across a server process restart.
 
 Raw log: `run/logs/latest.log`
 

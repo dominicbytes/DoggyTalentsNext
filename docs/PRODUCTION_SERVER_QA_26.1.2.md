@@ -7,9 +7,9 @@ Result: **PASS**
 ## Artifact
 
 - File: `DoggyTalentsNext-26.1.2-26.1.2.24.jar`
-- Size: `11,370,242` bytes
-- SHA-256: `da39b1f838e4fe0b9b01909778317a94f218a0ac62b24122c0e118e6d3b98cef`
-- SHA-512: `1fdcee8a617b63011bf4a350b329dae91245f8c579c30ca98bfcaca2fabc9354042ed4f3a512da8538d780b62ca845d5d2d4dce3582aaaa12f17c257ba83de74`
+- Size: `11,374,476` bytes
+- SHA-256: `df14ae8bb8960cdd652ee52dc81aa8f63755ffb1499f13d23edc89e818af8f99`
+- SHA-512: `436b8ad393969e0a882e774b45cd287bb4d765d1c4c8f6bd3eb58966727e923d6f662dff5177707d7d64a70488df5ca1457f46fa291a0f756a041a9074dee230`
 - Build: Java 25, `gradlew.bat clean build`
 - Automated tests: 30 passed
 - Strict Modmaker validation: PASS; project audit had zero errors and two shared-namespace warnings, while the artifact audit had zero findings
@@ -42,7 +42,7 @@ NeoForge 26.1.2.101 (neoforge)
 The server completed world initialization:
 
 ```text
-Done (0.271s)! For help, type "help"
+Done (0.287s)! For help, type "help"
 ```
 
 No Doggy Talents Next client-class resolution, mixin, registration, or mod-loading failure occurred.
@@ -53,4 +53,4 @@ The Windows run logged one OSHI warning for an invalid local PerfOS registry val
 
 ## Evidence boundary
 
-This proves clean production-JAR installation and dedicated-server classloading. It does not prove client rendering, client startup, multiplayer behavior, or save compatibility across a restart. Multiplayer is explicitly waived for the dominicbytes fork.
+This proves clean production-JAR installation and dedicated-server classloading. The loader-aware suite separately proves the frozen 1.21.1 dog-payload upgrade. This does not prove client rendering, client startup, multiplayer behavior, or save persistence across a stopped-process restart. Multiplayer is explicitly waived for the dominicbytes fork.
