@@ -27,7 +27,7 @@ The NeoForge GameTest server ran six DTN tests plus Minecraft's control test and
 
 ## Evidence boundary
 
-This closes the established food-bowl, dog-bed, rice-mill inventory, and nonzero rice-mill progress portions of `SAVE-01`. Tracker data and a frozen 1.21.1 dog payload are covered by their own GameTests; persistence across a server process restart remains open.
+This closes the established food-bowl, dog-bed, rice-mill inventory, and nonzero rice-mill progress portions of `SAVE-01`. Tracker data and a frozen 1.21.1 dog payload are covered by their own GameTests; the separate `SAVE-01-RESTART` gate proves broad dog state survives a stopped-process restart.
 
 Raw GameTest log: `run/logs/latest.log`  
 Production-server raw log: `bytecraftpack/qa-work/doggy-talents-save01-server/logs/latest.log`
