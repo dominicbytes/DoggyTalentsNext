@@ -447,14 +447,13 @@ public class Dog extends AbstractDog {
         return dogMood.getDeathSound();
     }
 
-    protected @Nullable SoundEvent getHowlSound() {
-        return null;
+    protected SoundEvent getHowlSound() {
+        return LangUtil.getRandomItem(this.getRandom(),
+            List.of(DogSounds.CLASSIC_HOWL1, DogSounds.CLASSIC_HOWL2)).orElseThrow().get();
     }
 
     public void howl() {
-        var howlSound = this.getHowlSound();
-        if (howlSound == null) return;
-        this.playSound(howlSound, 1, this.getVoicePitch());
+        this.playSound(this.getHowlSound(), 1, this.getVoicePitch());
     }
 
     public boolean isDogSoaked() {
