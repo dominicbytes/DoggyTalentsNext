@@ -4,16 +4,16 @@ import javax.annotation.Nonnull;
 
 import doggytalents.DoggyTags;
 import doggytalents.api.feature.FoodHandler;
+import doggytalents.api.inferface.DTNItemStackHandler;
 import doggytalents.common.item.TreatBagItem;
 import doggytalents.common.util.ItemUtil;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.neoforged.neoforge.items.ItemStackHandler;
 
 import javax.annotation.Nonnull;
 
-public class TreatBagItemHandler extends ItemStackHandler {
+public class TreatBagItemHandler extends DTNItemStackHandler {
 
     private ItemStack bag;
 

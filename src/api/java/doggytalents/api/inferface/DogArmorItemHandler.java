@@ -2,9 +2,8 @@ package doggytalents.api.inferface;
 
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
-import net.neoforged.neoforge.items.ItemStackHandler;
 
-public abstract class DogArmorItemHandler extends ItemStackHandler {
+public abstract class DogArmorItemHandler extends DTNItemStackHandler {
 
     protected final AbstractDog dog;
 

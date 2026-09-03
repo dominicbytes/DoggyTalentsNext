@@ -30,8 +30,6 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.component.ItemContainerContents;
 import net.minecraft.world.level.Level;
-import net.neoforged.neoforge.items.IItemHandler;
-import net.neoforged.neoforge.items.IItemHandlerModifiable;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -112,7 +110,7 @@ public class TreatBagItem extends Item implements IDogFoodHandler {
         player.level().addFreshEntity(dogGunpowderProj);
     }
 
-    private int findThrowableInItemHandler(IItemHandler itemHandler) {
+    private int findThrowableInItemHandler(TreatBagItemHandler itemHandler) {
         for (int i = 0; i < itemHandler.getSlots(); ++i) {
             var stack = itemHandler.getStackInSlot(i);
             if (stack.isEmpty())
@@ -202,7 +200,7 @@ public class TreatBagItem extends Item implements IDogFoodHandler {
         if (dogIn.level().isClientSide())
             return InteractionResult.SUCCESS;
 
-        IItemHandlerModifiable treatBag = new TreatBagItemHandler(stackIn);
+        TreatBagItemHandler treatBag = new TreatBagItemHandler(stackIn);
         return DogFoodUtil.tryFeedAny(dogIn, entityIn, treatBag);
     }
 }

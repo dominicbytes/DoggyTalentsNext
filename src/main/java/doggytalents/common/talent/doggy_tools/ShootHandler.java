@@ -9,6 +9,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import doggytalents.DoggyTalents;
 import doggytalents.api.impl.IDogRangedAttackManager.UsingWeaponContext;
 import doggytalents.api.inferface.AbstractDog;
+import doggytalents.api.inferface.DTNItemStackHandler;
 import doggytalents.common.config.ConfigHandler;
 import doggytalents.common.entity.Dog;
 import doggytalents.common.entity.misc.DogArrow;
@@ -32,7 +33,6 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.item.component.ChargedProjectiles;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.item.enchantment.Enchantments;
-import net.neoforged.neoforge.items.ItemStackHandler;
 
 public interface ShootHandler {
 
@@ -114,7 +114,7 @@ public interface ShootHandler {
             }
             
             var arrowInvOptional = DoggyToolsRangedAttack.findArrowsInInventory(dog);
-            ItemStackHandler inv = null;
+            DTNItemStackHandler inv = null;
             int id = -1;
             if (arrowInvOptional.isPresent()) {
                 inv = arrowInvOptional.get().getLeft();
@@ -294,7 +294,7 @@ public interface ShootHandler {
         }
 
         private void updateChargeCrossbow(DoggyToolsRangedAttack ranged_manager, AbstractDog dog,
-            ItemStack crossbow_stack, Pair<ItemStackHandler, Integer> arrow_getter, UsingWeaponContext ctx) {
+            ItemStack crossbow_stack, Pair<DTNItemStackHandler, Integer> arrow_getter, UsingWeaponContext ctx) {
             ranged_manager.setDelayedCrossbowAttack(10);
             
             if (!dog.isUsingItem()) {
@@ -318,8 +318,8 @@ public interface ShootHandler {
 
         }
 
-        private void chargeCrossbowAndConsumeArrow(AbstractDog dog, ItemStack crossbow_stack, Pair<ItemStackHandler, Integer> arrow_getter) {
-            ItemStackHandler inv = null;
+        private void chargeCrossbowAndConsumeArrow(AbstractDog dog, ItemStack crossbow_stack, Pair<DTNItemStackHandler, Integer> arrow_getter) {
+            DTNItemStackHandler inv = null;
             int id = -1;
             inv = arrow_getter.getLeft();
             id = arrow_getter.getRight();

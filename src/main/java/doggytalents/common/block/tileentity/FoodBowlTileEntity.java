@@ -2,6 +2,7 @@ package doggytalents.common.block.tileentity;
 
 import doggytalents.DoggyTileEntityTypes;
 import doggytalents.api.feature.FoodHandler;
+import doggytalents.api.inferface.DTNItemStackHandler;
 import doggytalents.common.entity.Dog;
 import doggytalents.common.entity.ai.triggerable.TriggerableAction;
 import doggytalents.common.inventory.container.FoodBowlContainer;
@@ -26,7 +27,6 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
-import net.neoforged.neoforge.items.ItemStackHandler;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -35,7 +35,7 @@ import java.util.UUID;
 
 public class FoodBowlTileEntity extends PlacedTileEntity implements MenuProvider {
 
-    private final ItemStackHandler inventory = new ItemStackHandler(5) {
+    private final DTNItemStackHandler inventory = new DTNItemStackHandler(5) {
         @Override
         protected void onContentsChanged(int slot) {
             // When contents change mark needs save to disc
@@ -117,7 +117,7 @@ public class FoodBowlTileEntity extends PlacedTileEntity implements MenuProvider
         return DogFoodUtil.dogFindFoodInInv(dog, false, this.getInventory()) >= 0;
     }
 
-    public ItemStackHandler getInventory() {
+    public DTNItemStackHandler getInventory() {
         return this.inventory;
     }
 

@@ -47,7 +47,9 @@ import net.minecraft.world.level.block.entity.SmokerBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
-import net.neoforged.neoforge.items.wrapper.InvWrapper;
+import net.neoforged.neoforge.transfer.ResourceHandler;
+import net.neoforged.neoforge.transfer.item.ItemResource;
+import net.neoforged.neoforge.transfer.item.VanillaContainerWrapper;
 
 public class RiceMillBlockEntity extends BlockEntity { 
     
@@ -57,7 +59,7 @@ public class RiceMillBlockEntity extends BlockEntity {
     public static final int[] INPUT_SLOT = {0, 1};
     public static final int[] OUTPUT_SLOT = {2};
     private RiceMillContainer container = new RiceMillContainer(this);
-    private InvWrapper containerWrapper = new InvWrapper(container);
+    private ResourceHandler<ItemResource> containerWrapper = VanillaContainerWrapper.of(container);
 
     public static final int TOTOAL_DATA_SLOT = 2;
     public static final int GRINDING_TIME_ID = 0;
@@ -381,7 +383,8 @@ public class RiceMillBlockEntity extends BlockEntity {
         var resultStack = currentRecipe.produce();
         if (resultStack == ItemStack.EMPTY)
             return;
-        mill.containerWrapper.insertItem(OUTPUT_SLOT[0], resultStack, false);
+        net.neoforged.neoforge.transfer.item.ItemUtil.insertItemReturnRemaining(
+            mill.containerWrapper, OUTPUT_SLOT[0], resultStack, false, null);
     }
 
     private boolean isInputMaterialForSlotId(ItemStack stack, int slotId) {
