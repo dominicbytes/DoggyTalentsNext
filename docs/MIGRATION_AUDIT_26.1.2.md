@@ -1,0 +1,119 @@
+# Doggy Talents Next 26.1.2 completion audit
+
+Date: 2026-09-03  
+Target: Minecraft Java 26.1.2, NeoForge 26.1.2  
+Canonical implementation fork: <https://github.com/dominicbytes/DoggyTalentsNext>  
+Working branch: `dominicbytes/26.1.2-parity`
+
+## Verdict
+
+MiiRaGe's `26.1.2` branch is the correct implementation base, but it is not at feature parity and is not release-ready. It compiles and packages successfully, including against the current stable NeoForge 26.1.2 loader, but multiple 1.21.1 behaviors were replaced by explicit stubs, disabled registrations, or incomplete render-state/network migrations. There are no automated tests, no GameTests, and no runtime evidence broad enough to support the branch's "GUI / client rendering done" claim.
+
+The `26.1.2-beta` branch should not be continued. It is an older, separately developed migration line. The stable branch contains 32 post-forkpoint commits and more than 100 later fixes relative to beta. Keep beta for archaeology only.
+
+Use DashieDev commit `87532faf2ab3696bc6d57c4502ec2dc22bbe6ea2` as the immutable 1.21.1 behavior oracle. Newer DashieDev branches may supply fixes or migration patterns, but they are not the authority for scope. Do not wait for upstream merge activity.
+
+## Immutable refs examined
+
+| Ref | SHA | Role |
+|---|---|---|
+| DashieDev fork point | `87532faf2ab3696bc6d57c4502ec2dc22bbe6ea2` | 1.21.1 parity oracle |
+| MiiRaGe `26.1.2` | `dc93249f12e79f0c494cece04b08674ed4a1a41d` | implementation base / tag `v26.1.2.24` |
+| MiiRaGe `26.1.2-beta` | `c123cb668cad873172487e76e505cda7db314b11` | obsolete migration line |
+| DashieDev `1.21-master` inspected tip | `061ab865` | optional fix source |
+| DashieDev `1.21.11-master` inspected tip | `b3fa9a52` | optional render/data migration reference |
+
+DashieDev PR #184 is open, non-draft, merge-conflicted (`mergeable_state: dirty`), has no reviews, and reports only server boot/world initialization as testing. It contains the MiiRaGe stable SHA and does not establish talent, GUI, persistence, multiplayer, or rendering parity: <https://github.com/DashieDev/DoggyTalentsNext/pull/184>.
+
+## Verified baseline
+
+- Fresh `clean build` succeeds on MiiRaGe stable with Java 25 and an 8 GiB Gradle heap.
+- The original four-GiB setting fails during a clean NeoForm/Vineflower decompile with an out-of-memory error.
+- The original project hard-codes a Linux-only `org.gradle.java.home`, making ordinary Windows builds fail without a command-line override.
+- The original source has conflicting NeoForge declarations: `.29-beta` in `gradle.properties` and `.70-beta` in `build.gradle`.
+- NeoForge's official Maven metadata identifies `26.1.2.101` as the current stable release. The parity branch builds successfully against it.
+- `test` reports `NO-SOURCE`; no `src/test` or CI workflow exists.
+- Static artifact audit reports zero errors. The two namespace warnings (`data/minecraft` and `data/neoforge`) require intent review but are not automatic defects.
+- All 149 generated item-definition JSON files resolve to existing model JSON files. The apparent missing `rice_crop` and `soy_crop` item definitions are crops without registered block items, so they are not gaps.
+- The branch still produces 72 Java warnings against `.101`, dominated by NeoForge item-handler APIs marked for removal. These are maintenance debt, not immediate 26.1.2 blockers.
+
+Evidence boundary: `COMPILES` and static packaging are proven. Dedicated-server, client, multiplayer, restart/persistence, visual parity, and production-artifact installation are not yet proven.
+
+## Confirmed parity gaps
+
+### P0 — release and multiplayer safety
+
+1. **No test harness or acceptance evidence.** Add a small JUnit layer for pure codecs/state and NeoForge GameTests for registration, dog lifecycle, talent mutation, inventory, and persistence. Add checked-in CI for Java 25 `clean build` and tests.
+
+2. **Legacy generic network tunnel remains direction-unsafe.** Every message is multiplexed through one `playBidirectional` payload and integer discriminator. `DogPacket` assumes a serverbound sender without first checking direction, while client-only handlers share the same registry. A packet delivered on the wrong flow can dereference a null sender or resolve client classes on the wrong side. Replace it with typed, explicitly directional payload registrations or add strict direction metadata while migrating incrementally.
+
+3. **Several packet decoders trust peer-controlled collection sizes.** `CanineTrackerPackets`, `ConductingBonePackets`, `DogGroupPackets`, `HeelByGroupPackets`, and `DogSyncDataPacket` allocate lists from an unbounded signed `readInt`; two name decoders also use unbounded `readUtf()`. Add non-negative maximum counts, bounded strings, remaining-byte checks, rejection/disconnect behavior, and hostile-input tests.
+
+4. **Dedicated-server classloading is unproven.** Common packet classes directly import `net.minecraft.client` and `doggytalents.client` types. Run the production JAR on a clean dedicated NeoForge server and separate client-only payload handlers if class resolution fails or remains ambiguous.
+
+5. **Persistence and upgrade behavior is unproven.** The ValueInput/ValueOutput conversion compiles, but dog state, talents, accessories, beds/bowls, respawn data, pack-puppy contents, tracker data, and legacy 1.21.1 saves need save/restart/reload assertions. Silent exception handlers in persistence paths must log enough context to diagnose partial data loss.
+
+### P1 — user-visible parity regressions
+
+6. **Dynamic item and block tinting is disabled.** The client listeners are commented out with an explicit migration note. Dyeable accessories, double-dye accessories, dog plushie, ceremonial garb, MIDI keyboard, dog bath item, and biome-water dog bath block need 26.1 `ItemTintSource` / `BlockTintSource` implementations and generated model tint arrays. DashieDev's newer line contains reusable custom tint codecs and data-generation patterns.
+
+7. **Dog-bed inventory rendering lost component-driven variants.** `DogBedItemOverride` is an empty stub, and the generated item definition points to one plain dog-bed model. Inventory/held/ground/fixed views therefore need a 26.1 special item model that resolves casing and bedding components. The newer DashieDev line contains a partial `SpecialModelRenderer` reference implementation.
+
+8. **Alternative helmet rendering is disabled.** `DogArmorHelmetAltModel.getModel()` and `getDummy()` return null, and the third-party armor hook is explicitly skipped. Restore the default player-helmet projection and the supported NeoForge client-extension hook, or retire the two corresponding config options with an explicit compatibility decision.
+
+9. **Armor trims were dropped.** The 1.21.1 renderer submitted trim sprites for equipped armor; the 26.1.2 renderer only draws the base mapped texture and glint. Port trim rendering through equipment assets/material sprites and add visual checks.
+
+10. **Puppy head scaling is disabled.** `DogModel.doScaleBabyHead()` is hardcoded to false even though the render state already carries entity context. Feed the inherited baby state/entity state into the model and accessory render contexts; verify default and custom models.
+
+11. **Howling is silent.** `Dog.getHowlSound()` changed from `SoundEvents.WOLF_HOWL` to null, and `howl()` now exits. Resolve the 26.1 wolf sound variant/holder correctly and add a server-visible trigger plus manual audio check.
+
+12. **Custom dog nameplates were removed.** The old renderer supplied owner-sensitive name visibility, through-wall behavior, mode/hunger/gender details, duty indication, health-on-sneak, and nearby owner text. The port retains helper methods but never submits them. Four config options are now declaration-only: `BLOCK_THIRD_PARTY_NAMETAG`, `DONT_RENDER_DIFFOWNER_NAME`, `RENDER_DIFFOWNER_NAME_DIFFERENT`, and `SHOW_DOG_NAME_THRU_WALL`. Rebuild this on the 26.1 name-tag submit pipeline and test each config branch.
+
+13. **MultiLineFlatButton right-side drawing remains empty.** Determine whether any live screen uses the right-aligned branch; either implement it with a visual test or remove the unreachable API and prove no parity loss.
+
+### P2 — completion and maintenance debt
+
+14. **Item custom data is only partially migrated.** Most legacy item NBT is now wrapped in `DataComponents.CUSTOM_DATA`; this is functional compatibility, not a typed data-component migration. Inventory-like items already use native container/equippable components. Introduce typed components only where they add validation, networking, or persistence value, with old-key migration tests. Do not rewrite entity save NBT merely to satisfy the README wording.
+
+15. **Deprecated NeoForge item-handler surface.** Migrate the 72 warnings after parity-critical work so the change does not obscure behavior fixes. Cover transfer, slot validation, Pack Puppy, Treat Bag, food bowl, rice mill, armor, and dog-tool inventory semantics first.
+
+16. **README status is inaccurate.** It labels GUI/client rendering done and references an old beta loader. Update it only after the corresponding acceptance scenarios pass.
+
+17. **Publication metadata still targets DashieDev.** Keep original authorship and license attribution, but point issue/update links at the canonical release repository when a dominicbytes release is actually ready. Do not claim public-release readiness until the repository's LGPL files and README's narrower all-rights-reserved asset/code statement have been reconciled for redistribution.
+
+## PR-sized implementation sequence
+
+1. **Build/release foundation** — portable Java 25 discovery, one stable NeoForge property, deterministic JAR, Java 25 CI, basic validation. Verify two clean builds and identical artifact hashes.
+2. **Network hardening** — explicit directions, stable typed IDs/codecs, bounded decode, authority checks, dedicated-server separation, hostile-input tests.
+3. **Persistence contract** — freeze 1.21.1 fixtures; round-trip dog/talent/accessory/inventory/location/respawn state; log partial failures; verify restart and upgrade.
+4. **Tint and item-model restoration** — custom tint codecs, block tint source, generated tint arrays, dog-bed special item renderer; visual matrix.
+5. **Dog render-state parity** — puppy head/accessory scaling, custom nameplates/configs, armor helmets/trims, render-side isolation.
+6. **Audio/UI cleanup** — howl sound and the live MultiLineFlatButton branch; targeted manual checks.
+7. **Gameplay parity sweep** — representative tests for every talent category, commands, interactions, food/crops/recipes, dog beds/baths, trackers/whistles, mounting, incapacitation/respawn, accessories, and custom skins.
+8. **Release acceptance** — clean client and dedicated server, two-player authority/reconnect, save restart, clean production-JAR install, log audit, artifact hash, documentation, and independent review.
+
+Each PR should start from a failing test or fixed reproduction, make the smallest relevant change, and rerun `clean build`, the narrow regression test, and the applicable runtime gate.
+
+## Acceptance test IDs
+
+| ID | Blocking scenario | Evidence |
+|---|---|---|
+| BUILD-01 | Clean Java 25 build on Windows and Linux without machine-specific paths | CI + local wrapper logs |
+| BUILD-02 | Two clean builds produce the same JAR hash | artifact hashes |
+| NET-01 | Wrong-direction, unknown, negative, oversized, duplicate, and truncated payloads are rejected safely | unit/loader tests |
+| NET-02 | Non-owner cannot mutate another player's dog; owner can | two-client GameTest/manual |
+| SERVER-01 | Production JAR starts on a clean dedicated NeoForge server without client class resolution | server log |
+| SAVE-01 | 1.21.1 fixture upgrades with dog identity, talents, accessories, inventories, locations, and respawn state intact | restart integration test |
+| RENDER-01 | Adult/puppy, default/custom skin, armor/trim/helmet, wet/incapacitated, and accessory matrix matches oracle | fixed captures + manual approval |
+| RENDER-02 | Every nameplate config changes only its documented behavior | client test/manual captures |
+| ITEM-01 | Every registered item has a definition/model; dye colors and dog-bed material variants survive save/reload | datagen validation + client captures |
+| GAME-01 | Representative happy, boundary, invalid, authority, and persistence case for every talent family passes | GameTests + manual gaps |
+| RELEASE-01 | Exact production JAR passes clean client/server install, restart, multiplayer, log, license, and metadata gates | release QA report |
+
+## Current implementation change
+
+The parity branch removes the Linux-only Java path, raises the clean-build heap to 8 GiB, makes `neoforge_version` the single source of truth, updates it to stable `26.1.2.101`, and configures deterministic archive ordering/timestamps while removing the wall-clock manifest timestamp. A fresh `clean build` succeeds on Java 25; deterministic double-build verification and CI are still pending.
+
+## Bytecraft state
+
+This audit intentionally does not mutate the Bytecraft registry. The subject remains `individual_test_pending`, owned by Modtester under the current protocol. This document is an implementation audit under the user's explicit override to continue the fork, not a formal Modplanner READY transition.
