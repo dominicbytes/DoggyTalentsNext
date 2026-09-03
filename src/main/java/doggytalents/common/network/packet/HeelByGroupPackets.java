@@ -12,6 +12,7 @@ import doggytalents.common.entity.Dog;
 import doggytalents.common.entity.DogGroupsManager;
 import doggytalents.common.entity.DogGroupsManager.DogGroup;
 import doggytalents.common.network.IPacket;
+import doggytalents.common.network.NetworkDecodeUtil;
 import doggytalents.common.network.PacketHandler;
 import doggytalents.common.network.packet.data.HeelByGroupData;
 import doggytalents.common.util.DogUtil;
@@ -80,7 +81,7 @@ public class HeelByGroupPackets {
         public void encode(HeelByGroupData.RESPONSE_GROUP_LIST data,
                 FriendlyByteBuf buf) {
             int size = data.groups.size();
-            buf.writeInt(size);
+            NetworkDecodeUtil.writeCollectionSize(buf, size, NetworkDecodeUtil.MAX_GROUPS, "heel groups");
             for (int i = 0; i < size; ++i) {
                 var group = data.groups.get(i);
                 buf.writeInt(group.color);
@@ -90,7 +91,7 @@ public class HeelByGroupPackets {
 
         @Override
         public HeelByGroupData.RESPONSE_GROUP_LIST decode(FriendlyByteBuf buf) {
-            int size = buf.readInt();
+            int size = NetworkDecodeUtil.readCollectionSize(buf, NetworkDecodeUtil.MAX_GROUPS, "heel groups");
             var groups = new ArrayList<DogGroup>(size);
             for (int i = 0; i < size; ++i) {
                 int color = buf.readInt();

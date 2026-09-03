@@ -49,7 +49,7 @@ Evidence boundary: `COMPILES`, static packaging, and a development-classpath ded
 
 2. **Legacy generic network tunnel remains direction-unsafe.** Every message is multiplexed through one `playBidirectional` payload and integer discriminator. `DogPacket` assumes a serverbound sender without first checking direction, while client-only handlers share the same registry. A packet delivered on the wrong flow can dereference a null sender or resolve client classes on the wrong side. Replace it with typed, explicitly directional payload registrations or add strict direction metadata while migrating incrementally.
 
-3. **Several packet decoders trust peer-controlled collection sizes.** `CanineTrackerPackets`, `ConductingBonePackets`, `DogGroupPackets`, `HeelByGroupPackets`, and `DogSyncDataPacket` allocate lists from an unbounded signed `readInt`; two name decoders also use unbounded `readUtf()`. Add non-negative maximum counts, bounded strings, remaining-byte checks, rejection/disconnect behavior, and hostile-input tests.
+3. **Packet decode hardening is only partially complete.** The stacked network branch adds non-negative maximum counts to `CanineTrackerPackets`, `ConductingBonePackets`, `DogGroupPackets`, `HeelByGroupPackets`, `DogSyncDataPacket`, `DoggyArtifactsSerializer`, and `Dim2BlockPosSerializer`, bounds tracker names, validates dog-sync state IDs, and exercises those paths with hostile-input tests. Remaining work is explicit per-message size budgeting, truncated/trailing-byte policy, and verified disconnect/reporting behavior at the channel boundary.
 
 4. **Production-JAR dedicated-server classloading remains unproven.** The development-classpath server now reaches `Done`, but common packet classes still directly import `net.minecraft.client` and `doggytalents.client` types. Run the packaged JAR on a clean dedicated NeoForge server and separate client-only payload handlers if production class resolution fails or remains ambiguous.
 
@@ -65,7 +65,7 @@ Evidence boundary: `COMPILES`, static packaging, and a development-classpath ded
 
 9. **Armor trims were dropped.** The 1.21.1 renderer submitted trim sprites for equipped armor; the 26.1.2 renderer only draws the base mapped texture and glint. Port trim rendering through equipment assets/material sprites and add visual checks.
 
-10. **Puppy head scaling is disabled.** `DogModel.doScaleBabyHead()` is hardcoded to false even though the render state already carries entity context. Feed the inherited baby state/entity state into the model and accessory render contexts; verify default and custom models.
+10. **Puppy head scaling needs visual acceptance.** The stacked render-state branch now feeds inherited `isBaby` state into dog, accessory, and head-item render contexts while preserving custom-model opt-out behavior. Unit coverage passes; default/custom model and accessory combinations still need fixed client captures.
 
 11. **Howling is silent.** `Dog.getHowlSound()` changed from `SoundEvents.WOLF_HOWL` to null, and `howl()` now exits. Resolve the 26.1 wolf sound variant/holder correctly and add a server-visible trigger plus manual audio check.
 
@@ -115,6 +115,10 @@ Each PR should start from a failing test or fixed reproduction, make the smalles
 ## Current implementation change
 
 The parity branch removes the Linux-only Java path, raises the clean-build heap to 8 GiB, makes `neoforge_version` the single source of truth, updates it to stable `26.1.2.101`, and configures deterministic archive ordering/timestamps while removing the wall-clock manifest timestamp. Two fresh Java 25 builds produced the same SHA-256 (`b7bc05bd7d32b5a65619c400ab3fd64b388409cbf4d1c14978e22512e7cdb286`), GitHub Actions passed, and the isolated development server reached `Done`. The server run configuration honors the modmaker runtime directory and leased port when those environment variables are present.
+
+The stacked network-hardening branch enables NeoForge's JUnit environment and adds bounded collection decoding/encoding for tracker, conducting-bone, group, dog-sync, artifact, and dimension-position payloads. It also bounds transmitted dog names and rejects unknown dog-sync state IDs. Eight hostile/boundary tests and a clean build pass. Explicit packet directions and client/server handler separation remain open work.
+
+The stacked render-state branch restores puppy head scaling from `LivingEntityRenderState.isBaby`, propagates it to copied dog and synchronized accessory models, and covers adult, puppy, custom-model opt-out, and accessory propagation behavior. Client visual acceptance remains required.
 
 ## Bytecraft state
 

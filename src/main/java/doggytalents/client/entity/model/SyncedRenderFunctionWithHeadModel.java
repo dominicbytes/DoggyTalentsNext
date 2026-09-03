@@ -69,7 +69,7 @@ public class SyncedRenderFunctionWithHeadModel extends SyncedAccessoryModel {
             (stack, part_ctx) -> {
                 this.startRenderItemFromHead(stack, actualRendering);
             };
-        return new DogModel.DogModelRenderContext(this.root(), this.pivot, SyncedAccessoryModel.getDogModelBabyHead(head, false), Optional.empty(), Optional.of(additional_head_renderer));
+        return new DogModel.DogModelRenderContext(this.root(), this.pivot, SyncedAccessoryModel.getDogModelBabyHead(head, this.isBaby()), Optional.empty(), Optional.of(additional_head_renderer));
     }
 
     public void startRenderItemFromHead(PoseStack matrixStack, Renderer renderer) {

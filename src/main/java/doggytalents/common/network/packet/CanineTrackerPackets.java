@@ -14,6 +14,7 @@ import doggytalents.client.screen.ConductingBoneScreen;
 import doggytalents.client.screen.CanineTrackerScreen;
 import doggytalents.common.item.CanineTrackerItem;
 import doggytalents.common.network.IPacket;
+import doggytalents.common.network.NetworkDecodeUtil;
 import doggytalents.common.network.PacketHandler;
 import doggytalents.common.network.packet.data.CanineTrackerData.RequestDogsData;
 import doggytalents.common.network.packet.data.CanineTrackerData.RequestPosUpdateData;
@@ -87,7 +88,7 @@ public class CanineTrackerPackets {
         @Override
         public void encode(ResponseDogsData data, FriendlyByteBuf buf) {
             int size = data.entries.size();
-            buf.writeInt(size);
+            NetworkDecodeUtil.writeCollectionSize(buf, size, NetworkDecodeUtil.MAX_TRACKED_DOGS, "canine tracker dogs");
             for (int i = 0; i < size; ++i) {
                 var payload = data.entries.get(i);
                 var uuid = payload.getLeft();
@@ -97,7 +98,7 @@ public class CanineTrackerPackets {
                 if (name == null) name = "noname";
                 if (pos == null) pos = BlockPos.ZERO;
                 buf.writeUUID(uuid);
-                buf.writeUtf(name);
+                buf.writeUtf(name, NetworkDecodeUtil.MAX_DOG_NAME_LENGTH);
                 buf.writeBlockPos(pos);
             }
             
@@ -105,11 +106,11 @@ public class CanineTrackerPackets {
 
         @Override
         public ResponseDogsData decode(FriendlyByteBuf buf) {
-            int size = buf.readInt();
+            int size = NetworkDecodeUtil.readCollectionSize(buf, NetworkDecodeUtil.MAX_TRACKED_DOGS, "canine tracker dogs");
             var newDogsLs = new ArrayList<Triple<UUID, String, BlockPos>>(size);
             for (int i = 0; i < size; ++i) {
                 UUID id = buf.readUUID();
-                String name = buf.readUtf();
+                String name = buf.readUtf(NetworkDecodeUtil.MAX_DOG_NAME_LENGTH);
                 BlockPos pos = buf.readBlockPos();
                 var payload = Triple.of(id, name, pos);
                 newDogsLs.add(payload);
