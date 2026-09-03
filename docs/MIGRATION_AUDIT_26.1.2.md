@@ -39,7 +39,7 @@ DashieDev PR #184 is open, non-draft, merge-conflicted (`mergeable_state: dirty`
 - All 149 generated item-definition JSON files resolve to existing model JSON files. The apparent missing `rice_crop` and `soy_crop` item definitions are crops without registered block items, so they are not gaps.
 - The branch still produces 72 Java warnings against `.101`, dominated by NeoForge item-handler APIs marked for removal. These are maintenance debt, not immediate 26.1.2 blockers.
 
-Evidence boundary: `COMPILES`, static packaging, and a development-classpath dedicated-server/new-world smoke test are proven. Production-JAR server installation, client, multiplayer, restart/persistence, and visual parity are not yet proven.
+Evidence boundary: `COMPILES`, static packaging, 30 unit tests, and a development-classpath dedicated-server/new-world smoke test are proven. Production-JAR server installation, client, restart/persistence integration, and visual parity are not yet proven. Multiplayer acceptance is explicitly waived for the dominicbytes fork and remains upstream work.
 
 ## Confirmed parity gaps
 
@@ -53,7 +53,7 @@ Evidence boundary: `COMPILES`, static packaging, and a development-classpath ded
 
 4. **Production-JAR dedicated-server classloading remains unproven.** The development-classpath server now reaches `Done`, but common packet classes still directly import `net.minecraft.client` and `doggytalents.client` types. Run the packaged JAR on a clean dedicated NeoForge server and separate client-only payload handlers if production class resolution fails or remains ambiguous.
 
-5. **Persistence and upgrade behavior is unproven.** The ValueInput/ValueOutput conversion compiles, but dog state, talents, accessories, beds/bowls, respawn data, pack-puppy contents, tracker data, and legacy 1.21.1 saves need save/restart/reload assertions. Silent exception handlers in persistence paths must log enough context to diagnose partial data loss.
+5. **Persistence and upgrade behavior is only partially proven.** Original 1.21.1 respawn-owner UUIDs, the interim 26.1.2 string UUID format, legacy location-list/entity-ID keys, canonical respawn re-encoding, and malformed-entry rejection now have unit coverage. Dog state, talents, accessories, beds/bowls, pack-puppy contents, tracker data, and full save/restart/reload still need assertions. Remaining silent exception handlers in persistence paths must log enough context to diagnose partial data loss.
 
 ### P1 — user-visible parity regressions
 
@@ -92,7 +92,7 @@ Evidence boundary: `COMPILES`, static packaging, and a development-classpath ded
 5. **Dog render-state parity** — puppy head/accessory scaling, custom nameplates/configs, armor helmets/trims, render-side isolation.
 6. **Audio/UI cleanup** — howl sound and the live MultiLineFlatButton branch; targeted manual checks.
 7. **Gameplay parity sweep** — representative tests for every talent category, commands, interactions, food/crops/recipes, dog beds/baths, trackers/whistles, mounting, incapacitation/respawn, accessories, and custom skins.
-8. **Release acceptance** — clean client and dedicated server, two-player authority/reconnect, save restart, clean production-JAR install, log audit, artifact hash, documentation, and independent review.
+8. **Release acceptance** — clean client and dedicated server, save restart, clean production-JAR install, log audit, artifact hash, documentation, and independent review. Multiplayer acceptance is waived for this fork and left to upstream.
 
 Each PR should start from a failing test or fixed reproduction, make the smallest relevant change, and rerun `clean build`, the narrow regression test, and the applicable runtime gate.
 
@@ -110,7 +110,7 @@ Each PR should start from a failing test or fixed reproduction, make the smalles
 | RENDER-02 | Every nameplate config changes only its documented behavior | client test/manual captures |
 | ITEM-01 | Every registered item has a definition/model; dye colors and dog-bed material variants survive save/reload | datagen validation + client captures |
 | GAME-01 | Representative happy, boundary, invalid, authority, and persistence case for every talent family passes | GameTests + manual gaps |
-| RELEASE-01 | Exact production JAR passes clean client/server install, restart, multiplayer, log, license, and metadata gates | release QA report |
+| RELEASE-01 | Exact production JAR passes clean client/server install, restart, log, license, and metadata gates | release QA report; multiplayer waived for this fork |
 
 ## Current implementation change
 
@@ -119,6 +119,8 @@ The parity branch removes the Linux-only Java path, raises the clean-build heap 
 The stacked network-hardening branch enables NeoForge's JUnit environment and adds bounded collection decoding/encoding for tracker, conducting-bone, group, dog-sync, artifact, and dimension-position payloads. It also bounds transmitted dog names and rejects unknown dog-sync state IDs. Eight hostile/boundary tests and a clean build pass. Explicit packet directions and client/server handler separation remain open work.
 
 The stacked render-state branch restores puppy head scaling from `LivingEntityRenderState.isBaby`, propagates it to copied dog and synchronized accessory models, and covers adult, puppy, custom-model opt-out, and accessory propagation behavior. Client visual acceptance remains required.
+
+The persistence compatibility branch restores the original UUID NBT contract for dead-dog owners while continuing to read the interim string format emitted by the 26.1.2 draft. It also restores component-preserving custom-name storage, rejects malformed location/respawn records before constructing data objects, and freezes the original location keys in tests. Five persistence compatibility tests and the 30-test suite pass; full-world restart coverage remains open.
 
 ## Bytecraft state
 

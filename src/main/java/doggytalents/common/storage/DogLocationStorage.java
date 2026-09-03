@@ -158,14 +158,13 @@ public class DogLocationStorage extends SavedData {
                 uuid = NBTUtil.getUniqueId(locationCompound, "entityId");
             }
 
-            DogLocationData locationData = new DogLocationData(store, uuid);
-            locationData.read(locationCompound);
-
             if (uuid == null) {
-                DoggyTalentsNext.LOGGER.info("Failed to load dog location data. Please report to mod author...");
-                DoggyTalentsNext.LOGGER.info(locationData);
+                DoggyTalentsNext.LOGGER.warn("Skipping dog location data at index {} because it has no valid UUID", i);
                 continue;
             }
+
+            DogLocationData locationData = new DogLocationData(store, uuid);
+            locationData.read(locationCompound);
 
             store.locationDataMap.put(uuid, locationData);
         }
