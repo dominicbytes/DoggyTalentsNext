@@ -21,8 +21,14 @@ public abstract class DogPacket<T extends DogData> implements IPacket<T> {
 
     @Override
     public final void handle(T data, Supplier<Context> ctx) {
-        ctx.get().enqueueWork(() -> {
-            Entity target = ctx.get().getSender().level().getEntity(data.entityId);
+        var context = ctx.get();
+        if (!context.isServerRecipent()) {
+            context.setPacketHandled(true);
+            return;
+        }
+
+        context.enqueueWork(() -> {
+            Entity target = context.getSender().level().getEntity(data.entityId);
 
             if (!(target instanceof Dog)) {
                 return;
@@ -31,7 +37,7 @@ public abstract class DogPacket<T extends DogData> implements IPacket<T> {
             this.handleDog((Dog) target, data, ctx);
         });
 
-        ctx.get().setPacketHandled(true);
+        context.setPacketHandled(true);
     }
 
     public abstract void handleDog(Dog dogIn, T data, Supplier<Context> ctx);

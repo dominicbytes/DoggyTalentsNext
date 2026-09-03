@@ -75,6 +75,11 @@ neoForge {
             sourceSet sourceSets.api
         }
     }
+
+    unitTest {
+        enable()
+        testedMod = mods.doggytalents
+    }
 }
 
 // Keep your generated resources linked
@@ -83,6 +88,12 @@ sourceSets.main.resources { srcDir 'src/generated/resources' }
 dependencies {
     // In ModDev 2.0, you generally DON'T need 'implementation "net.neoforged:neoforge:..."' 
     // The 'neoForge { version = "..." }' block handles it for you!
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.11.4'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
+
+test {
+    useJUnitPlatform()
 }
 
 // --- PUBLISHING & JAR LOGIC ---

@@ -8,8 +8,10 @@ import doggytalents.api.registry.AccessoryInstance;
 import doggytalents.api.registry.TalentInstance;
 import doggytalents.client.event.ClientEventHandler;
 import doggytalents.common.network.IPacket;
+import doggytalents.common.network.NetworkDecodeUtil;
 import doggytalents.common.network.packet.data.DogSyncData;
 import doggytalents.common.util.NetworkUtil;
+import io.netty.handler.codec.DecoderException;
 import net.minecraft.network.FriendlyByteBuf;
 import doggytalents.common.network.DTNNetworkHandler.NetworkEvent.Context;
 
@@ -37,7 +39,7 @@ public class DogSyncDataPacket implements IPacket<DogSyncData> {
     }
 
     private void writeTalents(ArrayList<TalentInstance> talents, FriendlyByteBuf buf) {
-        buf.writeInt(talents.size());
+        NetworkDecodeUtil.writeCollectionSize(buf, talents.size(), NetworkDecodeUtil.MAX_DOG_SYNC_ENTRIES, "dog talents");
 
         for (TalentInstance inst : talents) {
             NetworkUtil.writeTalentToBuf(buf, inst.getTalent());
@@ -46,7 +48,7 @@ public class DogSyncDataPacket implements IPacket<DogSyncData> {
     }
 
     private void writeAccessories(ArrayList<AccessoryInstance> value, FriendlyByteBuf buf) {
-        buf.writeInt(value.size());
+        NetworkDecodeUtil.writeCollectionSize(buf, value.size(), NetworkDecodeUtil.MAX_DOG_SYNC_ENTRIES, "dog accessories");
 
         for (AccessoryInstance inst : value) {
             NetworkUtil.writeAccessoryToBuf(buf, inst.getAccessory());
@@ -76,7 +78,7 @@ public class DogSyncDataPacket implements IPacket<DogSyncData> {
     }
 
     private ArrayList<TalentInstance> readTalents(FriendlyByteBuf buf) {
-        int size = buf.readInt();
+        int size = NetworkDecodeUtil.readCollectionSize(buf, NetworkDecodeUtil.MAX_DOG_SYNC_ENTRIES, "dog talents");
         var newInst = new ArrayList<TalentInstance>(size);
         for (int i = 0; i < size; i++) {
             var inst = NetworkUtil.readTalentFromBuf(buf).getDefault();
@@ -87,7 +89,7 @@ public class DogSyncDataPacket implements IPacket<DogSyncData> {
     }
 
     private ArrayList<AccessoryInstance> readAccessories(FriendlyByteBuf buf) {
-        int size = buf.readInt();
+        int size = NetworkDecodeUtil.readCollectionSize(buf, NetworkDecodeUtil.MAX_DOG_SYNC_ENTRIES, "dog accessories");
         var newInst = new ArrayList<AccessoryInstance>(size);
 
         for (int i = 0; i < size; i++) {
@@ -126,6 +128,9 @@ public class DogSyncDataPacket implements IPacket<DogSyncData> {
 
         public static ReadState fromId(int id) {
             var values = ReadState.values();
+            if (id < 0 || id >= values.length) {
+                throw new DecoderException("Unknown dog sync state " + id);
+            }
             return values[id];
         }
     }

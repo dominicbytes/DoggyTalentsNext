@@ -12,6 +12,7 @@ import doggytalents.client.screen.ConductingBoneScreen;
 import doggytalents.common.config.ConfigHandler;
 import doggytalents.common.entity.Dog;
 import doggytalents.common.network.IPacket;
+import doggytalents.common.network.NetworkDecodeUtil;
 import doggytalents.common.network.PacketHandler;
 import doggytalents.common.network.packet.data.ConductingBoneData.RequestDistantTeleportDogData;
 import doggytalents.common.network.packet.data.ConductingBoneData.RequestDogsData;
@@ -82,7 +83,7 @@ public class ConductingBonePackets {
         @Override
         public void encode(ResponseDogsData data, FriendlyByteBuf buf) {
             int size = data.entries.size();
-            buf.writeInt(size);
+            NetworkDecodeUtil.writeCollectionSize(buf, size, NetworkDecodeUtil.MAX_TRACKED_DOGS, "conducting bone dogs");
             for (int i = 0; i < size; ++i) {
                 var payload = data.entries.get(i);
                 var uuid = payload.getLeft();
@@ -90,18 +91,18 @@ public class ConductingBonePackets {
                 if (uuid == null) uuid = Util.NIL_UUID; 
                 if (name == null) name = "noname"; 
                 buf.writeUUID(uuid);
-                buf.writeUtf(name);
+                buf.writeUtf(name, NetworkDecodeUtil.MAX_DOG_NAME_LENGTH);
             }
             
         }
 
         @Override
         public ResponseDogsData decode(FriendlyByteBuf buf) {
-            int size = buf.readInt();
+            int size = NetworkDecodeUtil.readCollectionSize(buf, NetworkDecodeUtil.MAX_TRACKED_DOGS, "conducting bone dogs");
             var newDogsLs = new ArrayList<Pair<UUID, String>>(size);
             for (int i = 0; i < size; ++i) {
                 UUID id = buf.readUUID();
-                String name = buf.readUtf();
+                String name = buf.readUtf(NetworkDecodeUtil.MAX_DOG_NAME_LENGTH);
                 var payload = Pair.of(id, name);
                 newDogsLs.add(payload);
             }

@@ -1,5 +1,6 @@
 package doggytalents.common.entity.serializers;
 
+import doggytalents.common.network.NetworkDecodeUtil;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.RegistryFriendlyByteBuf;
@@ -11,7 +12,7 @@ public class Dim2BlockPosSerializer extends DogSerializer<Dimension2BlockPosMap>
 
     @Override
     public void write(FriendlyByteBuf buf, Dimension2BlockPosMap value) {
-        buf.writeInt(value.size());
+        NetworkDecodeUtil.writeCollectionSize(buf, value.size(), NetworkDecodeUtil.MAX_DIMENSIONS, "dog dimension positions");
         for (var entry : value.entrySet()) {
             buf.writeIdentifier(entry.getKey().identifier());
             EntityDataSerializers.BLOCK_POS.codec().encode((RegistryFriendlyByteBuf) buf, entry.getValue());
@@ -20,7 +21,7 @@ public class Dim2BlockPosSerializer extends DogSerializer<Dimension2BlockPosMap>
 
     @Override
     public Dimension2BlockPosMap read(FriendlyByteBuf buf) {
-        int size = buf.readInt();
+        int size = NetworkDecodeUtil.readCollectionSize(buf, NetworkDecodeUtil.MAX_DIMENSIONS, "dog dimension positions");
         var value = new Dimension2BlockPosMap();
         for (int i = 0; i < size; i++) {
             var loc = buf.readIdentifier();

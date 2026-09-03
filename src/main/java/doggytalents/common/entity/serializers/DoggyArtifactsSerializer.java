@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import doggytalents.common.item.DoggyArtifactItem;
+import doggytalents.common.network.NetworkDecodeUtil;
 import doggytalents.common.util.NetworkUtil;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
@@ -14,7 +15,7 @@ public class DoggyArtifactsSerializer extends DogSerializer<List<DoggyArtifactIt
 
     @Override
     public void write(FriendlyByteBuf buf, List<DoggyArtifactItem> value) {
-        buf.writeInt(value.size());
+        NetworkDecodeUtil.writeCollectionSize(buf, value.size(), NetworkDecodeUtil.MAX_ARTIFACTS, "dog artifacts");
         for (var x : value) {
             NetworkUtil.writeRegistryId(buf, Registries.ITEM, x);
         }
@@ -22,7 +23,7 @@ public class DoggyArtifactsSerializer extends DogSerializer<List<DoggyArtifactIt
 
     @Override
     public List<DoggyArtifactItem> read(FriendlyByteBuf buf) {
-        int size = buf.readInt();
+        int size = NetworkDecodeUtil.readCollectionSize(buf, NetworkDecodeUtil.MAX_ARTIFACTS, "dog artifacts");
         var list = new ArrayList<DoggyArtifactItem>(size);
         for (int i = 0; i < size; ++i) {
             var item = NetworkUtil.readRegistryId(buf, Registries.ITEM);
