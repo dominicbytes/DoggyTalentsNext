@@ -183,6 +183,12 @@ public class DogRenderer extends MobRenderer<Dog, DogRenderState, DogModel> {
             var bank_value = -dog.dogWalkAnimation.bankValue(partialTick);
             var max_bank = dog.dogWalkAnimation.maxBankZRot();
             poseStack.mulPose(Axis.ZP.rotationDegrees(bank_value * max_bank));
+        } else if (dog != null && dog.isDogInAnimDebug()) {
+            var rotation = dog.getDogAnimDebugState().rotState();
+            if (!Mth.equal(0, rotation.banking())) {
+                float maxBank = dog.dogWalkAnimation.maxBankZRot();
+                poseStack.mulPose(Axis.ZP.rotationDegrees(rotation.banking() * maxBank));
+            }
         }
     }
 

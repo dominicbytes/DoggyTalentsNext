@@ -30,6 +30,7 @@ public class Resources {
     public static final Identifier DOG_MYSTERY = getEntity("dog", "classical/compl/wolf_missing");
     public static final Identifier OKAMI_AMATERASU = getEntity("dog", "custom/ammy_divine_mouthopen");
     public static final Identifier SOL_HOPE = getEntity("dog", "custom/sol_hope");
+    public static final Identifier WANG_WANG = getEntity("dog", "custom/wangwang");
 
     public static final Identifier COLLAR_DEFAULT = getEntity("dog", "doggy_collar");
     public static final Identifier COLLAR_THICC = getEntity("dog", "doggy_collar_thicc");

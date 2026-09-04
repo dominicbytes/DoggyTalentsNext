@@ -1,6 +1,7 @@
 package doggytalents.client.screen.widget.DoggySpin;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Random;
 import java.util.function.Supplier;
 
@@ -11,6 +12,9 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
+import com.mojang.serialization.DataResult;
+import com.mojang.serialization.Dynamic;
+import com.mojang.serialization.JsonOps;
 
 import doggytalents.DogVariants;
 import doggytalents.api.anim.DogAnimation;
@@ -19,8 +23,10 @@ import doggytalents.client.entity.model.animation.DogAnimationRegistry;
 import doggytalents.client.entity.model.animation.DogKeyframeAnimations;
 import doggytalents.client.entity.model.animation.DogKeyframeAnimations.AnimationContext;
 import doggytalents.client.entity.model.dog.DogModel;
+import doggytalents.client.entity.model.util.DTNModelCodec;
 import doggytalents.common.config.ConfigHandler;
 import doggytalents.common.lib.Resources;
+import doggytalents.common.util.ResourceUtil;
 import doggytalents.common.variant.DogVariant;
 import net.minecraft.client.animation.AnimationChannel;
 import net.minecraft.client.animation.AnimationDefinition;
@@ -28,6 +34,7 @@ import net.minecraft.client.animation.Keyframe;
 import net.minecraft.client.animation.KeyframeAnimations;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.model.geom.ModelPart;
+import net.minecraft.client.model.geom.builders.LayerDefinition;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.rendertype.RenderType;
 import net.minecraft.client.renderer.rendertype.RenderTypes;
@@ -50,7 +57,7 @@ public class DoggySpinModel {
     }
 
 
-    public static enum Style { CHOPIN, BACKFLIP, SIT, AMMY, HOPE }
+    public static enum Style { CHOPIN, BACKFLIP, SIT, AMMY, HOPE, WANG_WANG }
     private Style style = Style.CHOPIN;
     private DogVariant variant = DogVariant.PALE;
     private int collarColor = 0xffB02e26;
@@ -82,14 +89,26 @@ public class DoggySpinModel {
 
     private ModelPart rootHope;
     private ModelPart tailHope;
+
+    private ModelPart rootWangWang;
+    private ModelPart tailWangWang;
+
+    private static final String AMMY_MODEL_PATH = "doggytalents/dog_models/okami_amaterasu.json";
+    private static final String HOPE_MODEL_PATH = "doggytalents/dog_models/sol_hope.json";
+    private static final String WANG_WANG_MODEL_PATH = "doggytalents/dog_models/wangwang.json";
     
     private DoggySpinModel() {
         this.root = DogModel.createBodyLayer().bakeRoot();
-        this.rootAmmy = AmaterasuModel.createBodyLayer().bakeRoot();
-        this.rootHope = HopeModel.createBodyLayer().bakeRoot();
+        this.rootAmmy = DoggySpinModel.getLayerDefintiionFromJson(AMMY_MODEL_PATH)
+            .orElseThrow().bakeRoot();
+        this.rootHope = DoggySpinModel.getLayerDefintiionFromJson(HOPE_MODEL_PATH)
+            .orElseThrow().bakeRoot();
+        this.rootWangWang = DoggySpinModel.getLayerDefintiionFromJson(WANG_WANG_MODEL_PATH)
+            .orElseThrow().bakeRoot();
         this.tail = root.getChild("tail");
         this.tailAmmy = rootAmmy.getChild("tail");
         this.tailHope = rootHope.getChild("tail");
+        this.tailWangWang = rootWangWang.getChild("tail");
     }
 
     private ModelPart getRootForStyle() {
@@ -97,6 +116,8 @@ public class DoggySpinModel {
             return rootAmmy;
         if (this.style == Style.HOPE)
             return rootHope;
+        if (this.style == Style.WANG_WANG)
+            return rootWangWang;
         return root;
     }
 
@@ -105,6 +126,8 @@ public class DoggySpinModel {
             return tailAmmy;
         if (this.style == Style.HOPE)
             return tailHope;
+        if (this.style == Style.WANG_WANG)
+            return tailWangWang;
         return tail;
     }
 
@@ -125,19 +148,28 @@ public class DoggySpinModel {
     public void configureRandomStyle() {
         float r = random.nextFloat();
         var selected_style = Style.CHOPIN;
-        if (r >= 0.5f) {
+        if (r >= 0.7f) {
             selected_style = Style.CHOPIN;
-        } else if (r >= 0.27f) {
+        } else if (r >= 0.45f) {
             selected_style = Style.BACKFLIP;
-        } else if (r >= 0.04f) {
+        } else if (r >= 0.2f) {
             selected_style = Style.SIT;
         } else {
-            selected_style = ConfigHandler.CLIENT.AMMY_SPINNA.get() ? 
-                (r >= 0.01f ? Style.AMMY : Style.HOPE)
-            : Style.BACKFLIP;
+            if (!ConfigHandler.CLIENT.AMMY_SPINNA.get()) {
+                selected_style = Style.BACKFLIP;
+            } else {
+                if (r >= 0.11f) {
+                    selected_style = Style.WANG_WANG;
+                } else if (r >= 0.03f) {
+                    selected_style = Style.AMMY;
+                } else {
+                    selected_style = Style.HOPE;
+                }
+            }
         }
+
         this.style = selected_style;
-        if (this.style != Style.AMMY && this.style != Style.HOPE) {
+        if (this.style != Style.AMMY && this.style != Style.HOPE && this.style != Style.WANG_WANG) {
             pickCollarColor();
             pickDogVariant();
         }
@@ -161,6 +193,10 @@ public class DoggySpinModel {
         }
         if (this.style == Style.HOPE) {
             this.rootHope.getAllParts().forEach(x -> x.resetPose());
+            return;
+        }
+        if (this.style == Style.WANG_WANG) {
+            this.rootWangWang.getAllParts().forEach(x -> x.resetPose());
             return;
         }
         this.root.getAllParts().forEach(x -> x.resetPose());
@@ -187,7 +223,7 @@ public class DoggySpinModel {
                 name -> DogKeyframeAnimations.searchForPartWithName(getRootForStyle(), name),
                 this::resetPart
                 ), seq, passed_millis, 1, buf);
-        } else if (style == Style.BACKFLIP) {
+        } else if (style == Style.BACKFLIP || style == Style.WANG_WANG) {
             final var backflip = DogAnimationRegistry.getSequence(
                 DogAnimation.BACKFLIP);
             long len_millis = Mth.ceil(backflip.lengthInSeconds() * 1000);
@@ -207,7 +243,7 @@ public class DoggySpinModel {
         Quaternionf rotation;
         if (this.style == Style.CHOPIN || this.style == Style.AMMY || this.style == Style.HOPE) {
             rotation = Axis.XP.rotationDegrees(15);
-        } else if (this.style == Style.BACKFLIP) {
+        } else if (this.style == Style.BACKFLIP || style == Style.WANG_WANG) {
             rotation = Axis.XP.rotationDegrees(4).mul(Axis.YP.rotationDegrees(20));
             offset.sub(0, -0.15f, 0);
         } else {
@@ -250,6 +286,10 @@ public class DoggySpinModel {
         }
         if (this.style == Style.HOPE) {
             doRenderModelWithTexture(stack, source, true, Resources.SOL_HOPE, 0xffffffff);
+            return;
+        }
+        if (this.style == Style.WANG_WANG) {
+            doRenderModelWithTexture(stack, source, true, Resources.WANG_WANG, 0xffffffff);
             return;
         }
         doRenderModelWithTexture(stack, source, false, this.variant.texture(), 0xffffffff);
@@ -297,6 +337,13 @@ public class DoggySpinModel {
     }
 
     
+    private static Optional<LayerDefinition> getLayerDefintiionFromJson(String path) {
+        return ResourceUtil.getBundledJson(path)
+            .map(x -> new Dynamic<>(JsonOps.INSTANCE, x))
+            .map(DTNModelCodec.CODEC::parse)
+            .flatMap(DataResult::result)
+            .map(x -> DTNModelCodec.layerDefinitionFromParsed(x, Optional.empty()));
+    }
     
     public static final AnimationDefinition TAIL_CHASE_LOOP = AnimationDefinition.Builder.withLength(1.75f).looping()
         .addAnimation("head",
