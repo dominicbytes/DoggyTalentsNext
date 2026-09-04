@@ -67,5 +67,17 @@ public interface IDog {
 
     public boolean isLying();
 
+    /** @deprecated Use the classical animation state helpers. */
+    @Deprecated
+    public float getWagAngle(float limbSwing, float limbSwingAmount, float partialTickTime);
+
+    /** @deprecated Use the classical animation state helpers. */
+    @Deprecated
+    public float getShakeAngle(float partialTicks, float offset);
+
+    /** @deprecated Use the classical animation state helpers. */
+    @Deprecated
+    public float getInterestedAngle(float partialTicks);
+
     public List<IDogFoodHandler> getFoodHandlers();
 }

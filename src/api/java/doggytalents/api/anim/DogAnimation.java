@@ -228,7 +228,7 @@ public enum DogAnimation {
         public Props blendIn(int ticks) {
             this.blendIn = new BlendInConfig(DogAnimBlendInMode.BLEND, ticks);
             return this;
-        } 
+        }
 
         public Props blendInHeadRotAndChildrenOnly(int ticks) {
             this.blendIn = new BlendInConfig(DogAnimBlendInMode.HEAD_ROT_AND_CHILDREN_ONLY, ticks);
@@ -253,7 +253,7 @@ public enum DogAnimation {
         public static final BlendInConfig DEFAULT = new BlendInConfig(DogAnimBlendInMode.BLEND, 5);
 
         public boolean blendHead() {
-            return this.mode() == DogAnimBlendInMode.BLEND || this.mode() == DogAnimBlendInMode.HEAD_ROT_AND_CHILDREN_ONLY; 
+            return this.mode() == DogAnimBlendInMode.BLEND || this.mode() == DogAnimBlendInMode.HEAD_ROT_AND_CHILDREN_ONLY;
         }
 
         public boolean blendHeadRotAndChildrenOnly() {
@@ -275,6 +275,6 @@ public enum DogAnimation {
             return this.mode() == DogAnimBlendOutMode.NONE;
         }
     }
-    
+
 
 }
