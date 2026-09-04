@@ -55,6 +55,8 @@ public class DTNModelLoader extends SimplePreparableReloadListener<Map<Identifie
 
     @Override
     protected void apply(Map<Identifier, JsonElement> contents, ResourceManager resourceManager, ProfilerFiller profiler) {
+        DogModelRegistry.invalidateAllParsed();
+
         int load_count = 0;
         for (var entry : contents.entrySet()) {
             final var id = entry.getKey();
