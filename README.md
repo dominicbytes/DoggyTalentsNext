@@ -43,14 +43,14 @@ For more informations, please consult the [wiki](https://doggytalentsnext.wiki.g
 
 -----------------
 
-### NeoForge 26.1.2 Migration Status (branch: `1.21-master`)
+### NeoForge 26.1.2 Migration Status (branch: `26.1.2`)
 
 | Area | Status |
 |------|--------|
-| Build system (Gradle 9.1, ModDevGradle 2.0.141, NeoForge 26.1.2.11-beta) | ✅ Done |
+| Build system (Gradle 9.1, ModDevGradle 2.0.141, NeoForge 26.1.2.101) | ✅ Done |
 | GUI / client rendering (render state pattern, blit API, screen widgets) | ✅ Done |
 | Runtime startup errors | ✅ Fixed |
-| `@OnlyIn` annotation cleanup | ⚠️ Warnings remain (non-blocking) |
+| `@OnlyIn` annotation cleanup | ✅ Removed obsolete annotations |
 | Networking (PacketHandler/DTNNetworkHandler wrapper removal) | ✅ Implemented and direction/codec tested on 26.1.2 |
 | Data Components (replace NBT in item data) | ✅ Migrated for item custom data with legacy compatibility tests |
 
