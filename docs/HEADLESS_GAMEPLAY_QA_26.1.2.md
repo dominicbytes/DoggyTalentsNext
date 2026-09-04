@@ -46,6 +46,8 @@ No production defect was reproduced in these scenarios. Concrete diff review che
 
 ## What remains open
 
+Update, 2026-09-04: the headless work listed below is now completed by [GAMEPLAY_COMPLETION_QA_26.1.2.md](GAMEPLAY_COMPLETION_QA_26.1.2.md). Preserve this list and the original artifact evidence as historical tranche scope. Bed Finder's client-only outline remains part of visual acceptance, not headless server behavior.
+
 REVIEW-GAMEPLAY-01 remains partial, not a full 33-talent acceptance pass. These additions exercise ten talents, some only on selected branches:
 
 - Extend tested talents: full Pack Puppy inventory/food-sharing, fishing failure/rain/cooking/treasure branches, Rescue Dog low-hunger/non-owner/cooldown cases, Roaring Gale higher levels/miss/expiry, Pest Fighter range/max level, Poison Fang owner curing, Guard Dog cooldown expiry and critical-hit outcomes.

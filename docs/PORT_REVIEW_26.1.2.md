@@ -61,7 +61,7 @@ Future gameplay tests should use these accepted fork behaviors as the oracle for
 | Build/toolchain | Portable Java 25 build and production packaging; CI build history | Every future 26.x release; compatibility metadata is narrowed accordingly |
 | Network | Direction checks and selected bounded codecs/legacy formats | Comprehensive per-message budgets, malformed/trailing policy, adversarial channel behavior; multiplayer waived |
 | Persistence | Dog/block/item data, malformed inputs, original-world upgrade and production restart; see COMMAND_UPGRADE_QA_26.1.2.md | Arbitrary third-party world/pack migrations |
-| Gameplay | Earlier food/training/interaction tests plus live follow/sit/attack/fire avoidance, pickup, fishing, healing, rescue, incapacitation and selected talent boundaries; see HEADLESS_GAMEPLAY_QA_26.1.2.md | Remaining talent/action boundaries, terrain/pathfinding variants and long-duration behavior |
+| Gameplay | Headless acceptance contract completed: 49 live scenarios, plus earlier helper/persistence/command tests; see GAMEPLAY_COMPLETION_QA_26.1.2.md | Exhaustive environments/configurations and final client acceptance are not implied |
 | Talent catalog | All 33 registered port talents instantiate and serialize | All 33 are original enabled talents or work end-to-end |
 | Commands | Actual locate/revive execution and failures; server-side tracker/whistle workflows | Client screen/rendering acceptance and talent-specific whistle effects |
 | Rendering/UI | Implemented tint, bed, helmet/trim, nameplate and animation changes; helper/resource tests; user animation/health acceptance | Full adult/puppy/custom-model/accessory/item-view/config matrix on final artifact |
@@ -77,7 +77,7 @@ These appended review IDs define the next work; they do not retroactively mark o
 | ID | Work and acceptance criterion | Status |
 |---|---|---|
 | REVIEW-PARITY-01 | Decide and document inherited talent differences, retaining saved IDs; assign runtime verification to REVIEW-GAMEPLAY-01 | PASS — user chose to retain the fork differences on 2026-09-04 |
-| REVIEW-GAMEPLAY-01 | Exercise talent effects at relevant level boundaries, cooldowns/hunger, AI follow/attack/avoid/retrieve/fish, and incapacitation/recovery through actual events/ticks | PARTIAL — 11 live scenarios pass; remaining coverage listed in HEADLESS_GAMEPLAY_QA_26.1.2.md |
+| REVIEW-GAMEPLAY-01 | Exercise talent effects at relevant level boundaries, cooldowns/hunger, AI follow/attack/avoid/retrieve/fish, and incapacitation/recovery through actual events/ticks | PASS — headless contract completed; 76 aggregate GameTests pass; client-only Bed Finder appearance stays in REVIEW-VISUAL-01; see GAMEPLAY_COMPLETION_QA_26.1.2.md |
 | REVIEW-COMMAND-01 | Execute locate/revive and tracking/whistle flows; test valid, invalid, unavailable-target and permission outcomes | PASS — executable server outcomes; see COMMAND_UPGRADE_QA_26.1.2.md |
 | REVIEW-VISUAL-01 | Final-artifact captures: adult/puppy and default/custom models, skins, armor/trim/helmet/accessories, wet/incapacitated states, nameplate settings, tints and bed materials in inventory/hand/ground; menus, reload, howl/audio manual acceptance | BLOCKED — partial earlier human review only |
 | REVIEW-UPGRADE-01 | Back up an authentic 1.21 source world; upgrade a copy with dogs, inventories, beds/bowls/mills and saved data; restart and compare documented state | PASS — unmodified 1.21.1 runtime fixture, copied upgrade, process restart and semantic comparison |
@@ -85,7 +85,7 @@ These appended review IDs define the next work; they do not retroactively mark o
 | REVIEW-MP-01 | Two-client ownership, synchronization, reconnect, hostile packet/channel testing | WAIVED — user's upstream-only multiplayer scope |
 | REVIEW-PACK-01 | BytecraftPack/Passive Mobs compatibility and independent pack admission | DEFERRED — user request |
 
-Counts for these eight acceptance IDs: six required, three passed (one scope decision and two executed gates), three blocked by incomplete acceptance evidence, one waived, one deferred. Gameplay, visual and final-release acceptance remain open. These counts are not automated suite totals. The command/upgrade follow-up found and fixed tracker eligibility and authentic-index migration defects; its report records the failed reproductions and reruns.
+Counts for these eight acceptance IDs: six required, four passed (one scope decision and three executed gates), two blocked by incomplete acceptance evidence, one waived, one deferred. Visual and final-release acceptance remain open. These counts are not automated suite totals. The command/upgrade follow-up found and fixed tracker eligibility and authentic-index migration defects; the gameplay completion report records its additional fixes, failed reproductions and reruns.
 
 ## Better porting approach
 

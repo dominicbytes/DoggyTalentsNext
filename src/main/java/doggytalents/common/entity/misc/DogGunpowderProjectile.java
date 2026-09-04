@@ -67,7 +67,7 @@ public class DogGunpowderProjectile extends ThrowableProjectile {
         var aabb = new AABB(pos.add(-5, -5, -5), pos.add(5, 0, 5));
         var moveVec = this.getDeltaMovement();
         var moveVecXZ = new Vec3(moveVec.x, 0, moveVec.z).normalize();
-        if (moveVecXZ.length() < 1) {
+        if (moveVecXZ.lengthSqr() < 1.0E-7) {
             return;
         }
         var dogs = this.level().getEntitiesOfClass(Dog.class, aabb, filter_dog -> 
