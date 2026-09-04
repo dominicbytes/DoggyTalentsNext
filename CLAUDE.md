@@ -1,5 +1,7 @@
 # DoggyTalentsNext Migration Plan: Minecraft 1.21 → 26.1.2
 
+> Historical migration proposal. Its pending checklists and proposed APIs are not the current implementation contract. See [PORT_REVIEW_26.1.2.md](docs/PORT_REVIEW_26.1.2.md) for the reconciled source baseline, accepted adaptations, and remaining work. In particular, retaining the tested network adapter and `DataComponents.CUSTOM_DATA` is intentional; replacing them solely to match this proposal is unnecessary.
+
 **Status**: Mod Loading — `@OnlyIn` Cleanup Complete
 **Date**: 2026-04-25
 **Target**: NeoForge 26.1.2.x for Minecraft 26.1
