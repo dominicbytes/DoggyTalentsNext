@@ -1,0 +1,12 @@
+#wait 1500
+data get entity @e[type=doggytalents:dog,tag=dtn_upgrade,limit=1]
+data get block 6 64 4
+data get block 7 64 4
+data get block 8 64 4
+execute if entity @e[type=doggytalents:dog,tag=dtn_upgrade,nbt={level_normal:37,level_kami:9,dogGender:"female"}] run say UPGRADE_TARGET_CORE_PASS
+execute if data entity @e[type=doggytalents:dog,tag=dtn_upgrade,limit=1] talents[{type:"doggytalents:pack_puppy"}].items[{id:"minecraft:diamond",count:7}] run say UPGRADE_TARGET_INVENTORY_PASS
+execute if block 6 64 4 doggytalents:dog_bed run say UPGRADE_TARGET_BED_PASS
+execute if data block 7 64 4 Items[{id:"minecraft:cooked_beef",count:8}] run say UPGRADE_TARGET_BOWL_PASS
+execute if data block 8 64 4 MillItems[{id:"minecraft:diamond",count:3}] run say UPGRADE_TARGET_MILL_PASS
+save-all flush
+stop

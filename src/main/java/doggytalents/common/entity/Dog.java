@@ -2950,10 +2950,12 @@ public class Dog extends AbstractDog {
         this.authorizedChangingOwner = true;
         this.authorizedChangingName = true;
 
-        super.load(input);
-
-        this.authorizedChangingOwner = false;
-        this.authorizedChangingName = false;
+        try (var reporter = new net.minecraft.util.ProblemReporter.ScopedCollector(com.mojang.logging.LogUtils.getLogger())) {
+            super.load(LegacyDogAttributes.upgrade(input, this.registryAccess(), reporter));
+        } finally {
+            this.authorizedChangingOwner = false;
+            this.authorizedChangingName = false;
+        }
     }
 
     @Override
