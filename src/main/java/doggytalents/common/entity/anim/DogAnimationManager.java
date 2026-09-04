@@ -2,11 +2,18 @@ package doggytalents.common.entity.anim;
 
 import java.util.Objects;
 
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.Dynamic;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
+
 import doggytalents.api.anim.DogAnimation;
 import doggytalents.common.config.ConfigHandler;
 import doggytalents.common.entity.Dog;
+import doggytalents.common.entity.anim.DogAnimationManager.DogAnimDebugState.DogAnimDebugFreezeRot;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.Tag;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.util.Mth;
 
 public class DogAnimationManager {
@@ -219,7 +226,7 @@ public class DogAnimationManager {
         var debug_tag = new CompoundTag();
         debug_tag.putInt("anim_id", debug_state.anim().getId());
         debug_tag.putInt("timestamp", debug_state.timestamp());
-        debug_tag.putFloat("yrot", debug_state.yRot());
+        debug_tag.put("rot_state", debug_state.rotState().encode());
         tag.put("dtnDogAnimDebug", debug_tag);
     }
 
@@ -229,15 +236,22 @@ public class DogAnimationManager {
         var debug_tag = tag.getCompoundOrEmpty("dtnDogAnimDebug");
         int anim_id = debug_tag.getIntOr("anim_id", 0);
         int timestamp = debug_tag.getIntOr("timestamp", 0);
-        float yrot = debug_tag.getFloatOr("yrot", 0f);
-        var debug_state = DogAnimDebugState.of(anim_id, timestamp, yrot);
+        DogAnimDebugFreezeRot rotState;
+        if (debug_tag.contains("yrot")) {
+            rotState = DogAnimDebugFreezeRot.decodeLegacy(debug_tag);
+        } else {
+            rotState = DogAnimDebugFreezeRot.decode(debug_tag.getCompoundOrEmpty("rot_state"));
+        }
+        var debug_state = DogAnimDebugState.of(anim_id, timestamp, rotState);
         setDogAnimDebugState(debug_state);
     }
 
     private void tickDebug() {
-        dog.yBodyRot = dog.getDogAnimDebugState().yRot();
-        dog.yHeadRot = dog.yBodyRot;
+        final var rotState = dog.getDogAnimDebugState().rotState();
+        dog.yBodyRot = rotState.yRot();
+        dog.yHeadRot = Mth.rotateIfNecessary(rotState.headYRot(), dog.yBodyRot, dog.getMaxHeadYRot());
         dog.setYRot(dog.yBodyRot);
+        dog.setXRot(rotState.headXRot());
         dog.yBodyRotO = dog.yBodyRot;
         dog.yHeadRotO = dog.yHeadRot;
         dog.yRotO = dog.getYRot();
@@ -256,17 +270,17 @@ public class DogAnimationManager {
             dog.dogAi.forceStopAllGoal();
     }
 
-    public void setDebugFreezeYRot(float yrot) {
+    public void setDebugFreezeRot(DogAnimDebugFreezeRot rotation) {
         var current_state = dog.getDogAnimDebugState();
         setDogAnimDebugState(DogAnimDebugState.of(current_state.anim(), 
-            current_state.timestamp(), yrot));
+            current_state.timestamp(), rotation));
     }
 
     public DogAnimDebugState getFreezeDebugState(DogAnimation anim) {
         int timestamp = anim.getLengthTicks() - this.animationTime;
         timestamp = Mth.clamp(timestamp, 0, anim.getLengthTicks());
         var current_state = dog.getDogAnimDebugState();
-        return DogAnimDebugState.of(anim, timestamp, current_state.yRot());
+        return DogAnimDebugState.of(anim, timestamp, current_state.rotState());
     }
 
     public static record DogCapturedProceduralState(
@@ -319,29 +333,29 @@ public class DogAnimationManager {
 
         private DogAnimation anim = DogAnimation.NONE;
         private int timestamp = 0;
-        private float yrot = 0;
+        private DogAnimDebugFreezeRot rotState = DogAnimDebugFreezeRot.DEFAULT;
     
         private DogAnimDebugState() {
             this.anim = DogAnimation.NONE;
             this.timestamp = 0;
-            this.yrot = 0;
+            this.rotState = DogAnimDebugFreezeRot.DEFAULT;
         }
 
-        private DogAnimDebugState(DogAnimation anim, int timestamp, float yrot) {
+        private DogAnimDebugState(DogAnimation anim, int timestamp, DogAnimDebugFreezeRot rotation) {
             this.anim = anim;
             this.timestamp = timestamp;
-            this.yrot = yrot;
+            this.rotState = rotation;
         }
 
-        public static DogAnimDebugState of(int animId, int timestamp, float yrot) {
+        public static DogAnimDebugState of(int animId, int timestamp, DogAnimDebugFreezeRot rotation) {
             var anim = DogAnimation.byId(animId);
-            return of(anim, timestamp, yrot);
+            return of(anim, timestamp, rotation);
         }
 
-        public static DogAnimDebugState of(DogAnimation anim, int timestamp, float yrot) {
+        public static DogAnimDebugState of(DogAnimation anim, int timestamp, DogAnimDebugFreezeRot rotation) {
             if (anim == null || anim.isNone())
                 return NONE;
-            var ret = new DogAnimDebugState(anim, timestamp, yrot);
+            var ret = new DogAnimDebugState(anim, timestamp, rotation);
             if (ret.isNone())
                 return NONE;
             return ret;
@@ -361,8 +375,8 @@ public class DogAnimationManager {
             return this.timestamp;
         }
 
-        public float yRot() {
-            return this.yrot;
+        public DogAnimDebugFreezeRot rotState() {
+            return this.rotState;
         }
 
         @Override
@@ -376,12 +390,73 @@ public class DogAnimationManager {
             return
                 this.anim == other.anim
                 && this.timestamp == other.timestamp
-                && this.yrot == other.yrot;
+                && this.rotState.equals(other.rotState);
         }
 
         @Override
         public int hashCode() {
-            return Objects.hash(this.anim.getId(), this.timestamp, this.yrot);
+            return Objects.hash(this.anim.getId(), this.timestamp, this.rotState);
+        }
+
+        public static record DogAnimDebugFreezeRot(
+            float yRot, float headYRot, float headXRot, float banking, float tailXRot
+        ) {
+            public static final DogAnimDebugFreezeRot DEFAULT =
+                new DogAnimDebugFreezeRot(0, 0, 0, 0, 0);
+
+            public static final Codec<DogAnimDebugFreezeRot> CODEC = RecordCodecBuilder.create(
+                builder -> builder.group(
+                    Codec.FLOAT.optionalFieldOf("yRot", DEFAULT.yRot()).forGetter(DogAnimDebugFreezeRot::yRot),
+                    Codec.FLOAT.optionalFieldOf("headYRot", DEFAULT.headYRot()).forGetter(DogAnimDebugFreezeRot::headYRot),
+                    Codec.FLOAT.optionalFieldOf("headXRot", DEFAULT.headXRot()).forGetter(DogAnimDebugFreezeRot::headXRot),
+                    Codec.FLOAT.optionalFieldOf("banking", DEFAULT.banking()).forGetter(DogAnimDebugFreezeRot::banking),
+                    Codec.FLOAT.optionalFieldOf("tailXRot", DEFAULT.tailXRot()).forGetter(DogAnimDebugFreezeRot::tailXRot)
+                ).apply(builder, DogAnimDebugFreezeRot::new));
+
+            public DogAnimDebugFreezeRot withYRot(float value) {
+                return new DogAnimDebugFreezeRot(value, headYRot, headXRot, banking, tailXRot);
+            }
+
+            public DogAnimDebugFreezeRot withYHeadRot(float value) {
+                return new DogAnimDebugFreezeRot(yRot, value, headXRot, banking, tailXRot);
+            }
+
+            public DogAnimDebugFreezeRot withXHeadRot(float value) {
+                return new DogAnimDebugFreezeRot(yRot, headYRot, value, banking, tailXRot);
+            }
+
+            public DogAnimDebugFreezeRot withBanking(float value) {
+                return new DogAnimDebugFreezeRot(yRot, headYRot, headXRot, value, tailXRot);
+            }
+
+            public DogAnimDebugFreezeRot withTailXRot(float value) {
+                return new DogAnimDebugFreezeRot(yRot, headYRot, headXRot, banking, value);
+            }
+
+            public Tag encode() {
+                return CODEC.encodeStart(NbtOps.INSTANCE, this).result().orElseGet(CompoundTag::new);
+            }
+
+            public static DogAnimDebugFreezeRot decode(Tag tag) {
+                return CODEC.parse(new Dynamic<>(NbtOps.INSTANCE, tag)).result().orElse(DEFAULT);
+            }
+
+            public static DogAnimDebugFreezeRot decodeLegacy(CompoundTag tag) {
+                return DEFAULT.withYRot(tag.getFloatOr("yrot", 0));
+            }
+
+            public void encodeNetwork(FriendlyByteBuf buf) {
+                buf.writeFloat(yRot);
+                buf.writeFloat(headYRot);
+                buf.writeFloat(headXRot);
+                buf.writeFloat(banking);
+                buf.writeFloat(tailXRot);
+            }
+
+            public static DogAnimDebugFreezeRot decodeNetwork(FriendlyByteBuf buf) {
+                return new DogAnimDebugFreezeRot(
+                    buf.readFloat(), buf.readFloat(), buf.readFloat(), buf.readFloat(), buf.readFloat());
+            }
         }
 
     }

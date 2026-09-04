@@ -24,7 +24,8 @@ public class DogAnimDebugScreen extends StringEntrySelectScreen {
 
     private Font font;
     private List<DogAnimation> animList;
-    private ItemMode selectMode = ItemMode.ANIM;
+    private GuiItemMode selectMode = GuiItemMode.ANIM;
+    private RotationLockMode selectRotMode = RotationLockMode.YROT;
     private DogAnimation selectAnim = DogAnimation.NONE;
 
     public DogAnimDebugScreen(Player player) {
@@ -40,7 +41,9 @@ public class DogAnimDebugScreen extends StringEntrySelectScreen {
         var stack = player.getMainHandItem();
         if (stack.getItem() != DoggyItems.DOG_ANIM_DEBUG.get())
             return;
-        this.selectMode = DogAnimDebugItem.getItemMode(stack);
+        var itemMode = DogAnimDebugItem.getItemMode(stack);
+        this.selectMode = getGuiItemMode(itemMode);
+        this.selectRotMode = getRotationLockMode(itemMode);
     }
 
     private void getSelectAnimFromPlayer(Player player) {
@@ -58,16 +61,21 @@ public class DogAnimDebugScreen extends StringEntrySelectScreen {
     @Override
     public void init() {
         super.init();
-        initEntries();
+        reInitEntries();
         addModeButton();
     }
 
     @Override
     protected void onEntrySelected(int id) {
-        var anim_selected = this.animList.get(id);
-        PacketHandler.send(PacketDistributor.SERVER.noArg(),
-            new UpdateItemSettingsData(anim_selected, this.selectMode)
-        );
+        if (isAnimEntries()) {
+            var animSelected = this.animList.get(id);
+            PacketHandler.send(PacketDistributor.SERVER.noArg(),
+                new UpdateItemSettingsData(animSelected, getItemMode(selectMode, selectRotMode)));
+        } else {
+            var rotationMode = RotationLockMode.values()[id];
+            PacketHandler.send(PacketDistributor.SERVER.noArg(),
+                new UpdateItemSettingsData(selectAnim, getItemMode(selectMode, rotationMode)));
+        }
         this.minecraft.setScreen(null);
     }
 
@@ -89,7 +97,8 @@ public class DogAnimDebugScreen extends StringEntrySelectScreen {
                 sendItemChangeRequest();
                 if (!help_render_below_view) {
                     b.setTooltip(Tooltip.create(getModeHelp(selectMode)));
-                } 
+                }
+                reInitEntries();
             }    
         );
         if (!help_render_below_view) {
@@ -100,27 +109,37 @@ public class DogAnimDebugScreen extends StringEntrySelectScreen {
 
     private void sendItemChangeRequest() {
         PacketHandler.send(PacketDistributor.SERVER.noArg(),
-            new UpdateItemSettingsData(this.selectAnim, this.selectMode)
+            new UpdateItemSettingsData(this.selectAnim, getItemMode(selectMode, selectRotMode))
         );
     }
 
-    private Component getModeTitle(ItemMode mode) {
+    private Component getModeTitle(GuiItemMode mode) {
         return Component.translatable("item.doggytalents.dog_anim_debug_stick.mode." 
-            + mode.getId());
+            + mode.id);
     }
 
-    private Component getModeHelp(ItemMode mode) {
+    private Component getModeHelp(GuiItemMode mode) {
         return Component.translatable("item.doggytalents.dog_anim_debug_stick.mode." 
-            + mode.getId() + ".help");
+            + mode.id + ".help");
     }
 
-    private void initEntries() {
-        this.updateEntries(getAnimNameList());
+    private void reInitEntries() {
+        this.updateEntries(isAnimEntries() ? getAnimNameList() : getRotationLockModeList());
+    }
+
+    private boolean isAnimEntries() {
+        return this.selectMode != GuiItemMode.ROTATION_LOCK;
     }
 
     private List<String> getAnimNameList() {
         return this.animList.stream()
             .map(x -> x.toString())
+            .collect(Collectors.toList());
+    }
+
+    private List<String> getRotationLockModeList() {
+        return Arrays.stream(RotationLockMode.values())
+            .map(Enum::toString)
             .collect(Collectors.toList());
     }
 
@@ -139,7 +158,7 @@ public class DogAnimDebugScreen extends StringEntrySelectScreen {
         return this.height > 353;
     }
 
-    private void renderHelp(GuiGraphicsExtractor graphics, ItemMode mode) {
+    private void renderHelp(GuiGraphicsExtractor graphics, GuiItemMode mode) {
         if (!shouldRenderHelpBelow())
             return;
         int mX = this.width / 2;
@@ -158,6 +177,60 @@ public class DogAnimDebugScreen extends StringEntrySelectScreen {
     @Override
     protected boolean matchIgnoreCaseSearch() {
         return true;
+    }
+
+    private static ItemMode getItemMode(GuiItemMode mode, RotationLockMode rotationMode) {
+        return switch (mode) {
+            case ANIM -> ItemMode.ANIM;
+            case TIME_SET -> ItemMode.TIME_SET;
+            case ROTATION_LOCK -> switch (rotationMode) {
+                case YROT -> ItemMode.YROT;
+                case HEAD_YROT -> ItemMode.HEAD_YROT;
+                case HEAD_XROT -> ItemMode.HEAD_XROT;
+                case BANKING -> ItemMode.BANKING;
+                case TAIL_XROT -> ItemMode.TAIL_XROT;
+            };
+        };
+    }
+
+    private static GuiItemMode getGuiItemMode(ItemMode mode) {
+        return switch (mode) {
+            case ANIM -> GuiItemMode.ANIM;
+            case TIME_SET -> GuiItemMode.TIME_SET;
+            default -> GuiItemMode.ROTATION_LOCK;
+        };
+    }
+
+    private static RotationLockMode getRotationLockMode(ItemMode mode) {
+        return switch (mode) {
+            case HEAD_YROT -> RotationLockMode.HEAD_YROT;
+            case HEAD_XROT -> RotationLockMode.HEAD_XROT;
+            case BANKING -> RotationLockMode.BANKING;
+            case TAIL_XROT -> RotationLockMode.TAIL_XROT;
+            default -> RotationLockMode.YROT;
+        };
+    }
+
+    private enum GuiItemMode {
+        ANIM(0), TIME_SET(1), ROTATION_LOCK(2);
+
+        private final int id;
+
+        GuiItemMode(int id) {
+            this.id = id;
+        }
+
+        private GuiItemMode cycleMode() {
+            return switch (this) {
+                case ANIM -> TIME_SET;
+                case TIME_SET -> ROTATION_LOCK;
+                case ROTATION_LOCK -> ANIM;
+            };
+        }
+    }
+
+    private enum RotationLockMode {
+        YROT, HEAD_YROT, HEAD_XROT, BANKING, TAIL_XROT
     }
 
 }
