@@ -36,11 +36,11 @@ public class BoostingFoodHandler implements IDogFoodHandler  {
             if (props == null) return InteractionResult.FAIL;
 
             int heal = props.nutrition() * 5;
+            var consumable = stack.get(net.minecraft.core.component.DataComponents.CONSUMABLE);
 
             dog.addHunger(heal);
             dog.consumeItemFromStack(entityIn, stack);
 
-            var consumable = stack.get(net.minecraft.core.component.DataComponents.CONSUMABLE);
             if (consumable != null) {
                 for (var effect : consumable.onConsumeEffects()) {
                     effect.apply(dog.level(), stack, (net.minecraft.world.entity.LivingEntity) dog);

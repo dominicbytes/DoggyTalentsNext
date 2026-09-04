@@ -14,10 +14,13 @@ import doggytalents.common.block.DogBedMaterialManager;
 import doggytalents.common.block.tileentity.DogBedTileEntity;
 import doggytalents.common.block.tileentity.FoodBowlTileEntity;
 import doggytalents.common.block.tileentity.RiceMillBlockEntity;
+import doggytalents.common.entity.BoostingFoodHandler;
 import doggytalents.common.entity.Dog;
 import doggytalents.common.entity.DogGroupsManager;
+import doggytalents.common.entity.MeatFoodHandler;
 import doggytalents.common.entity.stats.StatsTracker;
 import doggytalents.common.entity.texture.DogSkinData;
+import doggytalents.common.event.EventHandler;
 import doggytalents.common.inventory.TreatBagItemHandler;
 import doggytalents.common.item.TreatBagItem;
 import doggytalents.common.item.WhistleItem;
@@ -37,11 +40,16 @@ import net.minecraft.nbt.TagParser;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.ProblemReporter;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.animal.wolf.Wolf;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.storage.TagValueInput;
 import net.minecraft.world.level.storage.TagValueOutput;
@@ -60,6 +68,80 @@ public final class DTNGameTests {
         "da18b522d67f6fe1bee143ae833f3f4d7a14f7f3b521d44cfcab83741180d88b";
 
     private DTNGameTests() {
+    }
+
+    /** GAMEPLAY-FOOD-01: registered vanilla foods preserve hunger, effects, and stack rules. */
+    public static void gameplayFood01Consumption(GameTestHelper helper) {
+        Dog dog = createDog(helper);
+        helper.getLevel().addFreshEntity(dog);
+        dog.setDogHunger(20);
+
+        var beef = new ItemStack(Items.COOKED_BEEF, 2);
+        var meatHandler = new MeatFoodHandler();
+        require(helper, meatHandler.canConsume(dog, beef, null),
+            "cooked beef was not accepted as dog food");
+        require(helper, meatHandler.consume(dog, beef, null).consumesAction(),
+            "cooked beef consumption did not succeed");
+        require(helper, Float.compare(dog.getDogHunger(), 60) == 0,
+            "cooked beef did not add five times its nutrition to hunger");
+        require(helper, beef.getCount() == 1, "cooked beef was not consumed exactly once");
+
+        dog.setDogHunger(dog.getMaxHunger());
+        var rejectedBeef = new ItemStack(Items.COOKED_BEEF);
+        require(helper, !meatHandler.consume(dog, rejectedBeef, null).consumesAction(),
+            "a full dog consumed ordinary meat");
+        require(helper, rejectedBeef.getCount() == 1, "rejected meat was still consumed");
+
+        dog.setDogHunger(20);
+        require(helper, dog.addEffect(new MobEffectInstance(MobEffects.REGENERATION, 1)),
+            "a normal dog rejected a directly applied beneficial effect");
+        dog.removeEffect(MobEffects.REGENERATION);
+        var goldenApple = new ItemStack(Items.GOLDEN_APPLE);
+        require(helper, new BoostingFoodHandler().consume(dog, goldenApple, null).consumesAction(),
+            "golden apple consumption did not succeed");
+        require(helper, Float.compare(dog.getDogHunger(), 40) == 0,
+            "golden apple nutrition was not converted to dog hunger");
+        require(helper, goldenApple.isEmpty(), "golden apple was not consumed exactly once");
+        require(helper, dog.hasEffect(MobEffects.REGENERATION),
+            "golden apple regeneration effect was not applied");
+        require(helper, dog.hasEffect(MobEffects.ABSORPTION),
+            "golden apple absorption effect was not applied");
+        helper.succeed();
+    }
+
+    /** GAMEPLAY-TRAINING-01: a training treat converts an owned wolf without losing identity. */
+    public static void gameplayTraining01WolfConversion(GameTestHelper helper) {
+        var level = helper.getLevel();
+        var trainer = helper.makeMockPlayer(GameType.SURVIVAL);
+        var treatStack = new ItemStack(DoggyItems.TRAINING_TREAT.get(), 2);
+        trainer.setItemInHand(InteractionHand.MAIN_HAND, treatStack);
+
+        Wolf wolf = EntityType.WOLF.create(level, EntitySpawnReason.BREEDING);
+        require(helper, wolf != null, "vanilla wolf creation failed");
+        var wolfPos = helper.absolutePos(BlockPos.ZERO);
+        wolf.setPos(wolfPos.getX() + 0.5, wolfPos.getY(), wolfPos.getZ() + 0.5);
+        wolf.tame(trainer);
+        wolf.setCustomName(Component.literal("Training One"));
+        var wolfId = wolf.getUUID();
+        level.addFreshEntity(wolf);
+
+        require(helper, wolf.isOwnedBy(trainer), "test wolf was not owned by the trainer");
+        require(helper, trainer.getMainHandItem().is(DoggyItems.TRAINING_TREAT.get()),
+            "trainer was not holding the training treat");
+        EventHandler.checkAndTrainWolf(trainer, wolf, 35, 50);
+
+        require(helper, treatStack.getCount() == 1, "training did not consume exactly one treat");
+        require(helper, !wolf.isAlive(), "the converted vanilla wolf remained alive");
+        var dogs = helper.getEntities(DoggyEntityTypes.DOG.get());
+        require(helper, dogs.size() == 1, "training did not create exactly one DTN dog");
+        var trainedDog = dogs.getFirst();
+        require(helper, wolfId.equals(trainedDog.getUUID()), "training did not preserve the wolf UUID");
+        require(helper, trainer.getUUID().equals(trainedDog.getOwnerUUID()),
+            "training did not preserve ownership");
+        require(helper, trainedDog.getCustomName() != null
+            && "Training One".equals(trainedDog.getCustomName().getString()),
+            "training did not preserve the wolf name");
+        helper.succeed();
     }
 
     /** GAMEPLAY-WHISTLE-01: legacy custom data resolves valid modes and safely defaults corrupt values. */

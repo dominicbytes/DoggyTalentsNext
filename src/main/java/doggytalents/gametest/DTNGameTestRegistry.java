@@ -33,6 +33,10 @@ public final class DTNGameTestRegistry {
     private static final DeferredHolder<Consumer<GameTestHelper>, Consumer<GameTestHelper>> GAMEPLAY_WHISTLE_01 =
         TESTS.register("gameplay_whistle_01_custom_data_compatibility",
             () -> DTNGameTests::gameplayWhistle01CustomDataCompatibility);
+    private static final DeferredHolder<Consumer<GameTestHelper>, Consumer<GameTestHelper>> GAMEPLAY_FOOD_01 =
+        TESTS.register("gameplay_food_01_consumption", () -> DTNGameTests::gameplayFood01Consumption);
+    private static final DeferredHolder<Consumer<GameTestHelper>, Consumer<GameTestHelper>> GAMEPLAY_TRAINING_01 =
+        TESTS.register("gameplay_training_01_wolf_conversion", () -> DTNGameTests::gameplayTraining01WolfConversion);
 
     private DTNGameTestRegistry() {
     }
@@ -60,6 +64,12 @@ public final class DTNGameTestRegistry {
             ITEM_HANDLER_01.getKey(), new TestData<>(environment, Identifier.withDefaultNamespace("empty"), 100, 0, true)));
         event.registerTest(id("gameplay_whistle_01_custom_data_compatibility"), new FunctionGameTestInstance(
             GAMEPLAY_WHISTLE_01.getKey(),
+            new TestData<>(environment, Identifier.withDefaultNamespace("empty"), 100, 0, true)));
+        event.registerTest(id("gameplay_food_01_consumption"), new FunctionGameTestInstance(
+            GAMEPLAY_FOOD_01.getKey(),
+            new TestData<>(environment, Identifier.withDefaultNamespace("empty"), 100, 0, true)));
+        event.registerTest(id("gameplay_training_01_wolf_conversion"), new FunctionGameTestInstance(
+            GAMEPLAY_TRAINING_01.getKey(),
             new TestData<>(environment, Identifier.withDefaultNamespace("empty"), 100, 0, true)));
     }
 
