@@ -75,6 +75,18 @@ public final class DTNGameTestRegistry {
         TESTS.register("review_command_whistle", () -> CommandWorkflowGameTests::whistle);
     private static final DeferredHolder<Consumer<GameTestHelper>, Consumer<GameTestHelper>> UPGRADE_INDEX =
         TESTS.register("review_upgrade_index", () -> doggytalents.common.storage.LegacyDogSavedDataGameTests::originalWorldIndexes);
+    private static final java.util.List<DeferredHolder<Consumer<GameTestHelper>, Consumer<GameTestHelper>>> LIVE_GAMEPLAY = java.util.List.of(
+        TESTS.register("gameplay_live_follow", () -> LiveGameplayGameTests::follow),
+        TESTS.register("gameplay_live_combat", () -> LiveGameplayGameTests::combat),
+        TESTS.register("gameplay_live_fire", () -> LiveGameplayGameTests::fireAvoidance),
+        TESTS.register("gameplay_live_pack", () -> LiveGameplayGameTests::packPickup),
+        TESTS.register("gameplay_live_fish", () -> LiveGameplayGameTests::fishing),
+        TESTS.register("gameplay_live_heal", () -> LiveGameplayGameTests::healing),
+        TESTS.register("gameplay_live_rescue", () -> LiveGameplayGameTests::rescue),
+        TESTS.register("gameplay_live_pest", () -> LiveGameplayGameTests::pest),
+        TESTS.register("gameplay_live_roar", () -> LiveGameplayGameTests::roar),
+        TESTS.register("gameplay_live_incap", () -> LiveGameplayGameTests::incapacitation),
+        TESTS.register("gameplay_live_boundaries", () -> LiveGameplayGameTests::talentBoundaries));
 
     private DTNGameTestRegistry() {
     }
@@ -86,6 +98,10 @@ public final class DTNGameTestRegistry {
 
     private static void registerTests(RegisterGameTestsEvent event) {
         var environment = event.registerEnvironment(id("default"), new TestEnvironmentDefinition.AllOf());
+        for (var test : LIVE_GAMEPLAY) {
+            event.registerTest(test.getId(), new FunctionGameTestInstance(test.getKey(),
+                new TestData<>(environment, id("gameplay_arena"), 400, 0, true)));
+        }
         for (var test : java.util.List.of(COMMAND_LOCATE, COMMAND_REVIVE, COMMAND_TRACKER, COMMAND_WHISTLE, UPGRADE_INDEX)) {
             event.registerTest(test.getId(), new FunctionGameTestInstance(test.getKey(),
                 new TestData<>(environment, Identifier.withDefaultNamespace("empty"), 100, 0, true)));
