@@ -189,7 +189,8 @@ public class DogSleepOnManager {
             return Optional.empty();
         if (!(entity instanceof Player player))
             return Optional.empty();
-        return Optional.ofNullable(sleepingOnPairs.get(player.getUUID()).dog());
+        var pair = sleepingOnPairs.get(player.getUUID());
+        return pair == null ? Optional.empty() : Optional.ofNullable(pair.dog());
     }
 
     public void stopPlayerSleepOn(Dog dog) {

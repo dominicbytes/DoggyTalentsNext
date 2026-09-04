@@ -36,7 +36,7 @@ public final class LiveGameplayGameTests {
     public static void follow(GameTestHelper helper) {
         var arena = new Arena(helper);
         var owner = arena.owner(14, 8);
-        var dog = arena.dog(owner, 2, 8, true);
+        var dog = arena.dog(owner, 3, 8, true);
         helper.startSequence().thenIdle(100).thenExecute(() -> {
             require(helper, dog.distanceToSqr(owner) < 16, "dog did not follow owner: " + dog.position());
             dog.setOrderedToSit(true);
@@ -120,19 +120,13 @@ public final class LiveGameplayGameTests {
         var owner = arena.owner(8, 8);
         var dogs = new ArrayList<Dog>();
         for (int x : new int[]{3, 6, 9, 12}) {
-            var dog = arena.dog(owner, x, 4, true);
+            var dog = arena.fishingDog(owner, x, 4, 0, 0.5F);
             dog.setOrderedToSit(true);
             dog.setTalentLevel(DoggyTalents.FISHER_DOG.get(), 5);
             dog.getRandom().setSeed(x);
             helper.setBlock(new BlockPos(x, 1, 4), Blocks.WATER);
             dogs.add(dog);
         }
-        // Pin only the random success branch near shake completion; physics and dispatch remain live.
-        helper.onEachTick(() -> {
-            for (var dog : dogs) {
-                if (dog.getDogClassicalShakeAnim(0) >= 1.8F) dog.getRandom().setSeed(0);
-            }
-        });
         helper.startSequence().thenIdle(10).thenExecute(() -> {
             for (var dog : dogs) {
                 require(helper, dog.isInWater(), "fishing fixture did not wet dog");
@@ -142,7 +136,7 @@ public final class LiveGameplayGameTests {
         }).thenWaitUntil(() -> {
             var loot = helper.getLevel().getEntitiesOfClass(ItemEntity.class, helper.getBounds());
             require(helper, loot.stream().anyMatch(e -> e.getItem().is(net.minecraft.tags.ItemTags.FISHES)),
-                "water shakes produced no fish: " + dogs.stream().map(d -> "ticks=" + d.tickCount + ",pose=" + d.getDogPose() + ",shake=" + d.getDogClassicalShakeAnim(0)).toList());
+                "water shakes produced no fish: " + dogs.stream().map(d -> "ticks=" + d.tickCount + ",pose=" + d.getDogPose() + ",shake=" + d.getDogClassicalShakeAnim(0) + ",wet=" + d.isDogSoaked() + ",water=" + d.isInWater() + ",ground=" + d.onGround() + ",pos=" + d.position()).toList());
         }).thenExecute(() -> {
             helper.getLevel().getEntitiesOfClass(ItemEntity.class, helper.getBounds()).forEach(Entity::discard);
             arena.close();
@@ -289,30 +283,50 @@ public final class LiveGameplayGameTests {
         return count;
     }
 
-    private static void require(GameTestHelper helper, boolean condition, String message) {
+    static void require(GameTestHelper helper, boolean condition, String message) {
         if (!condition) helper.fail(message);
     }
 
-    private static final class Arena {
+    static final class Arena {
         private final GameTestHelper helper;
         private final List<Entity> entities = new ArrayList<>();
         private Vec3 position;
 
-        private Arena(GameTestHelper helper) { this.helper = helper; }
+        Arena(GameTestHelper helper) { this.helper = helper; }
 
-        private Vec3 pos(int x, int z) { return Vec3.atBottomCenterOf(helper.absolutePos(new BlockPos(x, 1, z))); }
+        Vec3 pos(int x, int z) { return Vec3.atBottomCenterOf(helper.absolutePos(new BlockPos(x, 1, z))); }
 
-        private FakePlayer owner(int x, int z) {
+        FakePlayer owner(int x, int z) {
             var player = new FakePlayer(helper.getLevel(), new GameProfile(UUID.randomUUID(), "GameplayOwner"));
             player.setPos(pos(x, z));
+            player.setOnGround(true);
             helper.getLevel().addNewPlayer(player);
             entities.add(player);
             return player;
         }
 
-        private Dog dog(FakePlayer owner, int x, int z, boolean ai) {
+        Dog dog(net.minecraft.server.level.ServerPlayer owner, int x, int z, boolean ai) {
             var dog = DoggyEntityTypes.DOG.get().create(helper.getLevel(), EntitySpawnReason.LOAD);
+            return prepareDog(dog, owner, x, z, ai);
+        }
+
+        Dog fishingDog(net.minecraft.server.level.ServerPlayer owner, int x, int z, int roll, float treasure) {
+            // Control only the talent's random branches; real wet/dry ticks still dispatch the hook.
+            var branchRandom = new net.minecraft.world.level.levelgen.LegacyRandomSource(0) {
+                @Override public int nextInt(int bound) { return bound == 15 ? roll : super.nextInt(bound); }
+                @Override public float nextFloat() { return treasure; }
+            };
+            var dog = new Dog(DoggyEntityTypes.DOG.get(), helper.getLevel()) {
+                @Override public net.minecraft.util.RandomSource getRandom() {
+                    return getDogClassicalShakeAnim(0) >= 1.8F ? branchRandom : super.getRandom();
+                }
+            };
+            return prepareDog(dog, owner, x, z, true);
+        }
+
+        Dog prepareDog(Dog dog, net.minecraft.server.level.ServerPlayer owner, int x, int z, boolean ai) {
             dog.tame(owner);
+            dog.setHealth(dog.getMaxHealth());
             dog.setMode(DogMode.DOCILE);
             dog.setOrderedToSit(false);
             dog.setDogHunger(100);
@@ -323,9 +337,25 @@ public final class LiveGameplayGameTests {
             return dog;
         }
 
-        private void spawn(Entity entity) { helper.getLevel().addFreshEntity(entity); entities.add(entity); }
+        void spawn(Entity entity) { helper.getLevel().addFreshEntity(entity); entities.add(entity); }
 
-        private ItemEntity item(int x, int z, ItemStack stack, boolean delayed) {
+        net.minecraft.server.level.ServerPlayer rider(int x, int z) {
+            // A normal ServerPlayer mount implementation, with the existing offline packet sink.
+            // Do not call placeNewPlayer: that requires DTN's real client handshake.
+            var profile = new GameProfile(UUID.randomUUID(), "GameplayRider");
+            var player = new net.minecraft.server.level.ServerPlayer(helper.getLevel().getServer(),
+                helper.getLevel(), profile, net.minecraft.server.level.ClientInformation.createDefault()) {
+                @Override public boolean isFakePlayer() { return true; }
+            };
+            player.connection = new FakePlayer(helper.getLevel(), profile).connection;
+            player.setPos(pos(x, z));
+            player.setOnGround(true);
+            helper.getLevel().addNewPlayer(player);
+            entities.add(player);
+            return player;
+        }
+
+        ItemEntity item(int x, int z, ItemStack stack, boolean delayed) {
             var pos = pos(x, z);
             var item = new ItemEntity(helper.getLevel(), pos.x, pos.y, pos.z, stack);
             item.setDeltaMovement(Vec3.ZERO);
@@ -334,7 +364,7 @@ public final class LiveGameplayGameTests {
             return item;
         }
 
-        private void close() {
+        void close() {
             for (var entity : entities) {
                 entity.discard();
                 if (entity instanceof Dog) {
