@@ -46,6 +46,22 @@ public final class DTNGameTestRegistry {
     private static final DeferredHolder<Consumer<GameTestHelper>, Consumer<GameTestHelper>> ANIMATION_BLEND_01_COMPLETION =
         TESTS.register("animation_blend_01_normal_completion",
             () -> DTNGameTests::animationBlend01NormalCompletion);
+    private static final DeferredHolder<Consumer<GameTestHelper>, Consumer<GameTestHelper>> GAME_01_TALENT_CATALOG =
+        TESTS.register("game_01_talent_catalog", () -> GameplayParityGameTests::talentCatalog);
+    private static final DeferredHolder<Consumer<GameTestHelper>, Consumer<GameTestHelper>> GAME_01_COMBAT =
+        TESTS.register("game_01_combat_talents", () -> GameplayParityGameTests::combatTalents);
+    private static final DeferredHolder<Consumer<GameTestHelper>, Consumer<GameTestHelper>> GAME_01_MOVEMENT_MOUNT =
+        TESTS.register("game_01_movement_mount", () -> GameplayParityGameTests::movementAndMount);
+    private static final DeferredHolder<Consumer<GameTestHelper>, Consumer<GameTestHelper>> GAME_01_CARE =
+        TESTS.register("game_01_care_talents", () -> GameplayParityGameTests::careTalents);
+    private static final DeferredHolder<Consumer<GameTestHelper>, Consumer<GameTestHelper>> GAME_01_COMMANDS =
+        TESTS.register("game_01_command_tree", () -> GameplayParityGameTests::commandTree);
+    private static final DeferredHolder<Consumer<GameTestHelper>, Consumer<GameTestHelper>> GAME_01_INCAP_RESPAWN =
+        TESTS.register("game_01_incapacitation_respawn",
+            () -> GameplayParityGameTests::incapacitationAndRespawn);
+    private static final DeferredHolder<Consumer<GameTestHelper>, Consumer<GameTestHelper>> GAME_01_INTERACTIONS =
+        TESTS.register("game_01_accessories_tracker_bath",
+            () -> GameplayParityGameTests::accessoriesTrackerAndBath);
 
     private DTNGameTestRegistry() {
     }
@@ -89,6 +105,27 @@ public final class DTNGameTestRegistry {
         event.registerTest(id("animation_blend_01_normal_completion"), new FunctionGameTestInstance(
             ANIMATION_BLEND_01_COMPLETION.getKey(),
             new TestData<>(environment, Identifier.withDefaultNamespace("empty"), 120, 0, true)));
+        event.registerTest(id("game_01_talent_catalog"), new FunctionGameTestInstance(
+            GAME_01_TALENT_CATALOG.getKey(),
+            new TestData<>(environment, Identifier.withDefaultNamespace("empty"), 100, 0, true)));
+        event.registerTest(id("game_01_combat_talents"), new FunctionGameTestInstance(
+            GAME_01_COMBAT.getKey(),
+            new TestData<>(environment, Identifier.withDefaultNamespace("empty"), 100, 0, true)));
+        event.registerTest(id("game_01_movement_mount"), new FunctionGameTestInstance(
+            GAME_01_MOVEMENT_MOUNT.getKey(),
+            new TestData<>(environment, Identifier.withDefaultNamespace("empty"), 100, 0, true)));
+        event.registerTest(id("game_01_care_talents"), new FunctionGameTestInstance(
+            GAME_01_CARE.getKey(),
+            new TestData<>(environment, Identifier.withDefaultNamespace("empty"), 100, 0, true)));
+        event.registerTest(id("game_01_command_tree"), new FunctionGameTestInstance(
+            GAME_01_COMMANDS.getKey(),
+            new TestData<>(environment, Identifier.withDefaultNamespace("empty"), 100, 0, true)));
+        event.registerTest(id("game_01_incapacitation_respawn"), new FunctionGameTestInstance(
+            GAME_01_INCAP_RESPAWN.getKey(),
+            new TestData<>(environment, Identifier.withDefaultNamespace("empty"), 100, 0, true)));
+        event.registerTest(id("game_01_accessories_tracker_bath"), new FunctionGameTestInstance(
+            GAME_01_INTERACTIONS.getKey(),
+            new TestData<>(environment, Identifier.withDefaultNamespace("empty"), 100, 0, true)));
     }
 
     private static Identifier id(String path) {
