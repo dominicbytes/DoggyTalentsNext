@@ -91,20 +91,67 @@ public final class DTNGameTestRegistry {
     private DTNGameTestRegistry() {
     }
 
+    private static final java.util.List<DeferredHolder<Consumer<GameTestHelper>, Consumer<GameTestHelper>>> COMPLETION = java.util.List.of(
+        TESTS.register("complete_explosion", () -> DefenseCompletionGameTests::explosion),
+        TESTS.register("complete_fish_miss", () -> h -> FishingCompletionGameTests.fishing(h, false, false, false)),
+        TESTS.register("complete_fish_treasure", () -> h -> FishingCompletionGameTests.fishing(h, true, true, false)),
+        TESTS.register("complete_fish_cook", () -> h -> FishingCompletionGameTests.fishing(h, true, false, true)),
+        TESTS.register("complete_fish_rain", () -> FishingCompletionGameTests::rain),
+        TESTS.register("complete_rescue_budget", () -> CareCompletionGameTests::rescueBudget),
+        TESTS.register("complete_submerged", () -> WaterCompletionGameTests::submerged),
+        TESTS.register("complete_terrain_follow", () -> WaterCompletionGameTests::terrainFollow),
+        TESTS.register("complete_ookami", () -> CombatCompletionGameTests::ookami),
+        TESTS.register("complete_bed", () -> WorkCompletionGameTests::bed),
+        TESTS.register("complete_sniffer", () -> WorkCompletionGameTests::sniffer),
+        TESTS.register("complete_bandages", () -> RecoveryCompletionGameTests::bandages),
+        TESTS.register("complete_wagyu", () -> RecoveryCompletionGameTests::wagyu),
+        TESTS.register("complete_soak", () -> RecoveryCompletionGameTests::soak),
+        TESTS.register("complete_critical_loot", () -> CombatCompletionGameTests::criticalAndLoot),
+        TESTS.register("complete_guard_pest", () -> CombatCompletionGameTests::guardAndPest),
+        TESTS.register("complete_roar_1", () -> h -> CombatCompletionGameTests.roar(h, 1)),
+        TESTS.register("complete_roar_2", () -> h -> CombatCompletionGameTests.roar(h, 2)),
+        TESTS.register("complete_roar_3", () -> h -> CombatCompletionGameTests.roar(h, 3)),
+        TESTS.register("complete_roar_4", () -> h -> CombatCompletionGameTests.roar(h, 4)),
+        TESTS.register("complete_roar_5", () -> h -> CombatCompletionGameTests.roar(h, 5)),
+        TESTS.register("complete_food_cure", () -> CareCompletionGameTests::foodAndCure),
+        TESTS.register("complete_chemi", () -> CareCompletionGameTests::chemi),
+        TESTS.register("complete_water_holder", () -> CareCompletionGameTests::waterHolder),
+        TESTS.register("complete_puppy_eyes", () -> CareCompletionGameTests::puppyEyes),
+        TESTS.register("complete_fire_drill", () -> CareCompletionGameTests::fireDrill),
+        TESTS.register("complete_fall_shock", () -> DefenseCompletionGameTests::fallAndShock),
+        TESTS.register("complete_hell_creeper", () -> DefenseCompletionGameTests::hellAndCreeper),
+        TESTS.register("complete_retrieve", () -> TravelCompletionGameTests::retrieve),
+        TESTS.register("complete_mount", () -> TravelCompletionGameTests::mount),
+        TESTS.register("complete_flying", () -> TravelCompletionGameTests::flying),
+        TESTS.register("complete_shepherd", () -> TravelCompletionGameTests::shepherd),
+        TESTS.register("complete_gate", () -> TravelCompletionGameTests::gate),
+        TESTS.register("complete_pack_overflow", () -> SuppliesCompletionGameTests::packOverflow),
+        TESTS.register("complete_pack_sharing", () -> SuppliesCompletionGameTests::packSharing),
+        TESTS.register("complete_torch", () -> SuppliesCompletionGameTests::torch),
+        TESTS.register("complete_armor", () -> SuppliesCompletionGameTests::armor),
+        TESTS.register("complete_farming", () -> SuppliesCompletionGameTests::farming));
+
     public static void register(IEventBus modBus) {
         TESTS.register(modBus);
         modBus.addListener(DTNGameTestRegistry::registerTests);
     }
 
     private static void registerTests(RegisterGameTestsEvent event) {
+        for (var test : COMPLETION) {
+            var isolated = event.registerEnvironment(test.getId(), new TestEnvironmentDefinition.AllOf());
+            event.registerTest(test.getId(), new FunctionGameTestInstance(test.getKey(),
+                new TestData<>(isolated, id("gameplay_arena"), test.getId().getPath().equals("complete_soak") ? 6500 : 2000, 0, true)));
+        }
         var environment = event.registerEnvironment(id("default"), new TestEnvironmentDefinition.AllOf());
         for (var test : LIVE_GAMEPLAY) {
+            var isolated = event.registerEnvironment(test.getId(), new TestEnvironmentDefinition.AllOf());
             event.registerTest(test.getId(), new FunctionGameTestInstance(test.getKey(),
-                new TestData<>(environment, id("gameplay_arena"), 400, 0, true)));
+                new TestData<>(isolated, id("gameplay_arena"), 400, 0, true)));
         }
         for (var test : java.util.List.of(COMMAND_LOCATE, COMMAND_REVIVE, COMMAND_TRACKER, COMMAND_WHISTLE, UPGRADE_INDEX)) {
+            var isolated = event.registerEnvironment(test.getId(), new TestEnvironmentDefinition.AllOf());
             event.registerTest(test.getId(), new FunctionGameTestInstance(test.getKey(),
-                new TestData<>(environment, Identifier.withDefaultNamespace("empty"), 100, 0, true)));
+                new TestData<>(isolated, id("gameplay_arena"), 100, 0, true)));
         }
         event.registerTest(id("save_01_dog_core_round_trip"), new FunctionGameTestInstance(
             SAVE_01_CORE.getKey(), new TestData<>(environment, Identifier.withDefaultNamespace("empty"), 100, 0, true)));

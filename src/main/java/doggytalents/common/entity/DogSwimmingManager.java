@@ -67,7 +67,7 @@ public class DogSwimmingManager {
 
     private void updateNotSwimming(Dog dog) {
         if (
-            dog.isInWater()
+            dog.isUnderWater()
             && !dog.isDefeated()
             && readyToBeginSwimming(dog)
             && !hasNonControllingNonWaterBreathingPassenger(dog)
