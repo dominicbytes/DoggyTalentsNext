@@ -4,7 +4,6 @@ import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.food.FoodProperties;
@@ -100,7 +99,7 @@ public class ItemUtil {
 
     public static CompoundTag getTagElement(ItemStack stack, String id) {
         var tag = getTag(stack);
-        if (!tag.contains(id))
+        if (!(tag.get(id) instanceof CompoundTag))
             return null;
         return tag.getCompoundOrEmpty(id);
     }
