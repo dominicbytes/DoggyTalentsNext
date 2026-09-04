@@ -133,8 +133,7 @@ publishMods {
     type = STABLE
     modLoaders.add("neoforge")
     
-    // Updated for 26.1.x
-    final def dtnMcVersions = ["26.1", "26.1.1", "26.1.2"]
+    final def dtnMcVersions = [project.target_mc_version]
 
     curseforge {
         accessToken = providers.gradleProperty("DTN_CURSEFORGE_TOKEN")

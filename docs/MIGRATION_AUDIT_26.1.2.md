@@ -1,5 +1,7 @@
 # Doggy Talents Next 26.1.2 completion audit
 
+> Historical audit from earlier implementation slices. Counts, open defects, scope, and readiness statements below are snapshots, not current status. [PORT_REVIEW_26.1.2.md](PORT_REVIEW_26.1.2.md) supersedes them and records the accepted DashieDev updates beyond the original fork point.
+
 Date: 2026-09-03  
 Target: Minecraft Java 26.1.2, NeoForge 26.1.2  
 Canonical implementation fork: <https://github.com/dominicbytes/DoggyTalentsNext>  

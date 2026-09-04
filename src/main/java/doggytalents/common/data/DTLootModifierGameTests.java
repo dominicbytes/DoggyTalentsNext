@@ -2,14 +2,16 @@ package doggytalents.common.data;
 
 import doggytalents.DoggyEntityTypes;
 import doggytalents.DoggyItems;
-import doggytalents.common.entity.Dog;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import java.util.Optional;
 import net.minecraft.core.BlockPos;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.storage.loot.LootContext;
 import net.minecraft.world.level.storage.loot.LootParams;
@@ -26,24 +28,36 @@ public final class DTLootModifierGameTests {
 
     /** LOOT-01: registered global modifiers produce both progression ingredients. */
     public static void riceAndSoyDrops(GameTestHelper helper) {
-        require(helper, producesRice(helper),
+        require(helper, producesRice(helper, Blocks.SHORT_GRASS, ItemStack.EMPTY),
             "short grass never produced rice through the registered global loot modifier");
-        require(helper, producesSoy(helper),
-            "a dog-killed zombie never produced soy through the registered global loot modifier");
+        for (var type : new EntityType<?>[] {
+                EntityType.ZOMBIE, EntityType.CREEPER, EntityType.SKELETON, EntityType.SPIDER }) {
+            require(helper, producesSoy(helper, type, true),
+                "a dog-killed " + type + " never produced soy through the registered global loot modifier");
+        }
+        // LOOT-02: modifiers must not leak into excluded tools, tables, victims, or attackers.
+        require(helper, !producesRice(helper, Blocks.SHORT_GRASS, new ItemStack(Items.SHEARS)),
+            "sheared grass incorrectly produced rice");
+        require(helper, !producesRice(helper, Blocks.STONE, ItemStack.EMPTY),
+            "a different block loot table incorrectly produced rice");
+        require(helper, !producesSoy(helper, EntityType.COW, true),
+            "a dog-killed passive mob incorrectly produced soy");
+        require(helper, !producesSoy(helper, EntityType.ZOMBIE, false),
+            "a non-dog kill incorrectly produced soy");
         helper.succeed();
     }
 
-    private static boolean producesRice(GameTestHelper helper) {
+    private static boolean producesRice(GameTestHelper helper, Block block, ItemStack tool) {
         var level = helper.getLevel();
         var params = new LootParams.Builder(level)
-            .withParameter(LootContextParams.BLOCK_STATE, Blocks.SHORT_GRASS.defaultBlockState())
+            .withParameter(LootContextParams.BLOCK_STATE, block.defaultBlockState())
             .withParameter(LootContextParams.ORIGIN, Vec3.atCenterOf(helper.absolutePos(BlockPos.ZERO)))
-            .withParameter(LootContextParams.TOOL, ItemStack.EMPTY)
+            .withParameter(LootContextParams.TOOL, tool)
             .create(LootContextParamSets.BLOCK);
         var context = new LootContext.Builder(params)
             .withOptionalRandomSeed(0xD06L)
             .create(Optional.empty());
-        var lootTable = Blocks.SHORT_GRASS.getLootTable().orElseThrow().identifier();
+        var lootTable = block.getLootTable().orElseThrow().identifier();
 
         for (int i = 0; i < ATTEMPTS; ++i) {
             var drops = CommonHooks.modifyLoot(lootTable, new ObjectArrayList<>(), context);
@@ -54,22 +68,24 @@ public final class DTLootModifierGameTests {
         return false;
     }
 
-    private static boolean producesSoy(GameTestHelper helper) {
+    private static boolean producesSoy(GameTestHelper helper, EntityType<?> victimType, boolean dogKill) {
         var level = helper.getLevel();
-        Dog dog = DoggyEntityTypes.DOG.get().create(level, EntitySpawnReason.LOAD);
-        var zombie = EntityType.ZOMBIE.create(level, EntitySpawnReason.LOAD);
-        require(helper, dog != null && zombie != null, "loot test entities could not be created");
+        LivingEntity attacker = dogKill
+            ? DoggyEntityTypes.DOG.get().create(level, EntitySpawnReason.LOAD)
+            : EntityType.COW.create(level, EntitySpawnReason.LOAD);
+        var victim = victimType.create(level, EntitySpawnReason.LOAD);
+        require(helper, attacker != null && victim != null, "loot test entities could not be created");
         var params = new LootParams.Builder(level)
-            .withParameter(LootContextParams.THIS_ENTITY, zombie)
-            .withParameter(LootContextParams.ORIGIN, zombie.position())
-            .withParameter(LootContextParams.DAMAGE_SOURCE, level.damageSources().mobAttack(dog))
-            .withParameter(LootContextParams.ATTACKING_ENTITY, dog)
-            .withParameter(LootContextParams.DIRECT_ATTACKING_ENTITY, dog)
+            .withParameter(LootContextParams.THIS_ENTITY, victim)
+            .withParameter(LootContextParams.ORIGIN, victim.position())
+            .withParameter(LootContextParams.DAMAGE_SOURCE, level.damageSources().mobAttack(attacker))
+            .withParameter(LootContextParams.ATTACKING_ENTITY, attacker)
+            .withParameter(LootContextParams.DIRECT_ATTACKING_ENTITY, attacker)
             .create(LootContextParamSets.ENTITY);
         var context = new LootContext.Builder(params)
             .withOptionalRandomSeed(0x501L)
             .create(Optional.empty());
-        var lootTable = EntityType.ZOMBIE.getDefaultLootTable().orElseThrow().identifier();
+        var lootTable = victimType.getDefaultLootTable().orElseThrow().identifier();
 
         for (int i = 0; i < ATTEMPTS; ++i) {
             var drops = CommonHooks.modifyLoot(lootTable, new ObjectArrayList<>(), context);
