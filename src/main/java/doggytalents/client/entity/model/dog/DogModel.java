@@ -20,11 +20,9 @@ import doggytalents.api.anim.DogAnimation;
 import doggytalents.api.inferface.AbstractDog;
 import doggytalents.api.registry.Accessory;
 import doggytalents.api.registry.AccessoryInstance;
-import doggytalents.client.entity.model.animation.DTNAnimationLoader;
 import doggytalents.client.entity.model.SyncedAccessoryModel;
 import doggytalents.client.entity.model.animation.DogAnimationRegistry;
 import doggytalents.client.entity.model.animation.DogKeyframeAnimations;
-import doggytalents.client.entity.model.animation.DTNAnimationLoader.DogAnimationHolder;
 import doggytalents.client.entity.model.animation.DogKeyframeAnimations.AnimationContext;
 import doggytalents.client.entity.model.util.DogModelRenderType;
 import doggytalents.client.entity.render.DogRenderState;
@@ -190,9 +188,9 @@ public class DogModel extends EntityModel<DogRenderState> {
     }
 
     public void animateWalkAndRun(Dog dog, float limbSwing, float limbSwingAmount, float partialTickTime) {        
-        final var slow_trot_anim = DogAnimationRegistry.getSlowTrot();
-        final var gallop_anim = DogAnimationRegistry.getGallop();
-        
+        final var slow_trot_anim = DogAnimationRegistry.getSequence(DogAnimation.SLOW_TROT);
+        final var gallop_anim = DogAnimationRegistry.getSequence(DogAnimation.GALLOP);
+
         final var pose_1 = this.animSnapshot1;
         final var pose_2 = this.animSnapshot2;
 

@@ -103,7 +103,7 @@ public enum DogAnimation {
     LIE_SIDEWAY_END(93, 80),
     SLOW_TROT(94, 20, p -> p.freeHead()), // placeholder
     GALLOP(95, 10, p -> p.freeHead()); // placeholder
-    
+
 
     private final int id;
     private final int lengthTicks;
