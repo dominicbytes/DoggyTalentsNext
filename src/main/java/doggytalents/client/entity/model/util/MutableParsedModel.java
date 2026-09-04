@@ -1,7 +1,7 @@
 package doggytalents.client.entity.model.util;
 
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -11,7 +11,7 @@ import doggytalents.client.entity.model.util.DTNModelCodec.ParsedPart;
 
 public class MutableParsedModel {
 
-    private final Map<String, Node> roots = new HashMap<>();
+    private final Map<String, Node> roots = new LinkedHashMap<>();
 
     private MutableParsedModel() {}
 
@@ -26,7 +26,7 @@ public class MutableParsedModel {
     public void addPath(ParsedModelPath path) {
         final var components = path.chain();
         Map<String, Node> p_childrens = roots;
-        
+
         for (var component : components) {
             final var node = p_childrens
                 .computeIfAbsent(component.id(), k -> new Node(component));
@@ -52,13 +52,13 @@ public class MutableParsedModel {
     }
 
     public ParsedPart buildHeadlessCopyNode(Node node) {
-        // I think we should return the part with its subtree intact 
+        // I think we should return the part with its subtree intact
         // since currently in DTNModelCodec::addParsedPartToDefinition we cut of
         // parsing the part to the main LayerDefinition immediately when it is a translucent part.
         // Therefore currently this translucent props automatically propagate its effect down its sub-tree
         if (node.part.props().translucent()) {
             //Because we are not making any copy here, I think it is safe to reuse the old one since this one is record
-            return node.part; 
+            return node.part;
         }
         var children = node.children.values().stream()
             .map(this::buildHeadlessCopyNode)
@@ -72,7 +72,7 @@ public class MutableParsedModel {
 
         public Node(ParsedPart part) {
             this.part = part;
-            this.children = new HashMap<>();
+            this.children = new LinkedHashMap<>();
         }
     }
 

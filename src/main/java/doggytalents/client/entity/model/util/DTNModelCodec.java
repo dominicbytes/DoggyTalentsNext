@@ -201,13 +201,13 @@ public class DTNModelCodec {
             var encoded_child = encodePart(child, global_pos);
             children.add(encoded_child);
         }
-        return new ParsedPart(id, encoded_pivot, 
+        return new ParsedPart(id, encoded_pivot,
             encoded_rotation, cubes, children, ParsedPartProps.DEFAULT);
     }
 
-    public static LayerDefinition layerDefinitionFromParsed(ParsedModelResult result, 
+    public static LayerDefinition layerDefinitionFromParsed(ParsedModelResult result,
         Optional<MutableParsedModel> translucentPartTracker) {
-        
+
         final int tex_x = result.textureX();
         final int tex_y = result.textureY();
         
@@ -217,8 +217,8 @@ public class DTNModelCodec {
         final var current_path_tracker = ParsedModelPath.mutable();
         for (var part : result.parts()) {
             current_path_tracker.push(part);
-            addParsedPartToDefinition(root, part, null, 
-                new AddParsedPartToDefinition_RecurState(translucentPartTracker, 
+            addParsedPartToDefinition(root, part, null,
+                new AddParsedPartToDefinition_RecurState(translucentPartTracker,
                     current_path_tracker, false));
             current_path_tracker.pop();
         }
@@ -226,7 +226,7 @@ public class DTNModelCodec {
     }
 
     private static record AddParsedPartToDefinition_RecurState(
-        Optional<MutableParsedModel> translucentPartTracker, 
+        Optional<MutableParsedModel> translucentPartTracker,
         MutableParsedModelPath currentPathTracker,
         boolean headlessBranch
     ) {
@@ -241,14 +241,14 @@ public class DTNModelCodec {
         }
     }
 
-    private static void addParsedPartToDefinition(PartDefinition targetParent, 
-        ParsedPart part, @Nullable ParsedPart parent, 
+    private static void addParsedPartToDefinition(PartDefinition targetParent,
+        ParsedPart part, @Nullable ParsedPart parent,
         AddParsedPartToDefinition_RecurState rstate) {
-    
-        final boolean is_translucent_part = 
+
+        final boolean is_translucent_part =
             part.props().translucent() && rstate.translucentPartTracker.isPresent();
 
-        final boolean start_translucent_branch = 
+        final boolean start_translucent_branch =
             is_translucent_part && !rstate.headlessBranch();
 
         if (start_translucent_branch) {
@@ -262,10 +262,9 @@ public class DTNModelCodec {
         final var id = part.id();
 
         final var part_pose = parsePartPose(
-            Optional.ofNullable(parent).map(x -> x.pivot()), 
+            Optional.ofNullable(parent).map(x -> x.pivot()),
             part.pivot(), part.rotation());
 
-        
         var cube_list_builder = CubeListBuilder.create();
 
         if (!headless_self_and_child) {
@@ -278,7 +277,7 @@ public class DTNModelCodec {
         
         for (var child : part.children) {
             rstate.currentPathTracker.push(child);
-            addParsedPartToDefinition(added_part_def, child, part, 
+            addParsedPartToDefinition(added_part_def, child, part,
                 rstate.withHeadlessBranch(headless_self_and_child));
             rstate.currentPathTracker.pop();
         }

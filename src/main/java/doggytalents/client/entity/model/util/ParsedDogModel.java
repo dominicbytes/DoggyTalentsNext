@@ -34,7 +34,7 @@ public class ParsedDogModel {
     }
     
     public static DogModel normal(ParsedModelResult result, DogModelProps props) {
-        
+
         final var translucent_model_tracker = MutableParsedModel.create();
         var layer = DTNModelCodec.layerDefinitionFromParsed(result, Optional.of(translucent_model_tracker));
         final var translucent_model = translucent_model_tracker.buildHeadlessCopyFrom(result)

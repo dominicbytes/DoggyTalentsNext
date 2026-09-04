@@ -7,7 +7,7 @@ import java.util.stream.Stream;
 import doggytalents.client.entity.model.util.DTNModelCodec.ParsedPart;
 
 public class ParsedModelPath {
-    
+
     private final List<ParsedPart> chain;
 
     private ParsedModelPath(List<ParsedPart> chain) {
@@ -16,7 +16,7 @@ public class ParsedModelPath {
 
     public static MutableParsedModelPath mutable() {
         return new MutableParsedModelPath();
-    } 
+    }
 
     public ParsedPart target() {
         return chain.getLast();
@@ -29,7 +29,7 @@ public class ParsedModelPath {
     public static class MutableParsedModelPath {
 
         private final ArrayDeque<ParsedPart> entries;
-        
+
         private MutableParsedModelPath() {
             this.entries = new ArrayDeque<>(3);
         }
