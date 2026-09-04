@@ -26,22 +26,29 @@ The focused contract was added before implementation and initially failed compil
 - default and special-case blend configuration;
 - blend direction classification and duration selection;
 - shortest-arc rotation interpolation with radians at the model boundary.
+- normal `BACKFLIP` and `SCRATCHIE` completion returns to the procedural pose outside animation-debug mode;
+- summon data without `dogHunger` preserves the initialized hunger value instead of starting the dog at zero hunger;
+- a newly summoned dog remains alive at unchanged health and hunger during the regression window.
+
+During visual review, repeated activation of the animation-debug stick was initially reported as a freeze. This is intentional frame-inspection behavior: the second activation captures the current timestamp and pauses the selected animation, while sneak-use exits debug mode. It is not a normal animation-completion failure.
+
+The visual run also exposed a separate summon-path regression. Missing `dogHunger` data was interpreted as explicit zero hunger, so a freshly summoned dog starved until animation-debug mode paused hunger processing. The loader now preserves the entity's initialized hunger unless the serialized field is present. This behavior is covered by `ANIMATION-BLEND-01-SPAWN-HEALTH`.
 
 ## Automated verification
 
 - Clean unit build: **48/48 passed** across 20 test classes.
-- GameTest server: **12/12 required tests passed** (11 DTN tests plus the vanilla test).
+- GameTest server: **14/14 required tests passed** (13 DTN tests plus the vanilla test).
 - Strict release validator: **0 errors**.
   - Project warnings: 2 known shared-namespace warnings.
   - Built artifact: 0 errors, 0 warnings.
 - Exact tested artifact: `DoggyTalentsNext-26.1.2-26.1.2.24.jar`
-- SHA-256: `86bcaf8a473c3e9e2d2ae6d256a96bab0379bc0e6d95f8be3ac97307b3fe5cf2`
-- Production-style dedicated server reached `Done (0.378s)!` with the exact tested artifact, then stopped cleanly with all dimensions saved.
+- SHA-256: `95f5fb441d034f25569ab6f4d5bc7ea1721364f3a05901ec14f5e90d59cf51b8`
+- Production-style dedicated server reached `Done (0.336s)!` with the exact tested artifact, then stopped cleanly with all dimensions saved.
 
 ## Manual gate
 
-`ANIMATION-BLEND-01-VISUAL` was not run. An in-client check must still confirm smooth pose transitions for blend-in, animation-to-animation, and blend-out, including the special `STAND_UP`, `STAND_QUICK`, and `BACKFLIP` settings.
+`ANIMATION-BLEND-01-VISUAL` passed human review in the isolated NeoForge 26.1.2 client with master volume muted. All selected animations rendered and completed when normally activated. Debug-stick pause/resume and exit behavior matched its documented controls. After the summon-path fix, a newly summoned dog remained at `8.0f` health across two readings without entering debug mode or displaying repeated damage.
 
 ## Verdict
 
-**PROTOTYPE_ONLY** until `ANIMATION-BLEND-01-VISUAL` passes. This slice is not marked `PUBLIC_RELEASE_READY` solely because the visual client gate remains manual.
+**PUBLIC_RELEASE_READY** for the `ANIMATION-BLEND-01` slice. All applicable automated, artifact, production-server, and human visual gates passed; multiplayer remains outside the user-approved scope.
