@@ -51,8 +51,8 @@ For more informations, please consult the [wiki](https://doggytalentsnext.wiki.g
 | GUI / client rendering (render state pattern, blit API, screen widgets) | ✅ Done |
 | Runtime startup errors | ✅ Fixed |
 | `@OnlyIn` annotation cleanup | ⚠️ Warnings remain (non-blocking) |
-| Networking (PacketHandler/DTNNetworkHandler wrapper removal) | Pending |
-| Data Components (replace NBT in item data) | Pending |
+| Networking (PacketHandler/DTNNetworkHandler wrapper removal) | ✅ Implemented and direction/codec tested on 26.1.2 |
+| Data Components (replace NBT in item data) | ✅ Migrated for item custom data with legacy compatibility tests |
 
 -----------------
 

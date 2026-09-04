@@ -1,5 +1,6 @@
 package doggytalents.gametest;
 
+import doggytalents.common.data.DTLootModifierGameTests;
 import doggytalents.common.lib.Constants;
 import java.util.function.Consumer;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -62,6 +63,8 @@ public final class DTNGameTestRegistry {
     private static final DeferredHolder<Consumer<GameTestHelper>, Consumer<GameTestHelper>> GAME_01_INTERACTIONS =
         TESTS.register("game_01_accessories_tracker_bath",
             () -> GameplayParityGameTests::accessoriesTrackerAndBath);
+    private static final DeferredHolder<Consumer<GameTestHelper>, Consumer<GameTestHelper>> LOOT_01_RICE_SOY =
+        TESTS.register("loot_01_rice_soy_drops", () -> DTLootModifierGameTests::riceAndSoyDrops);
 
     private DTNGameTestRegistry() {
     }
@@ -125,6 +128,9 @@ public final class DTNGameTestRegistry {
             new TestData<>(environment, Identifier.withDefaultNamespace("empty"), 100, 0, true)));
         event.registerTest(id("game_01_accessories_tracker_bath"), new FunctionGameTestInstance(
             GAME_01_INTERACTIONS.getKey(),
+            new TestData<>(environment, Identifier.withDefaultNamespace("empty"), 100, 0, true)));
+        event.registerTest(id("loot_01_rice_soy_drops"), new FunctionGameTestInstance(
+            LOOT_01_RICE_SOY.getKey(),
             new TestData<>(environment, Identifier.withDefaultNamespace("empty"), 100, 0, true)));
     }
 
