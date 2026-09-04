@@ -20,11 +20,9 @@ import doggytalents.api.anim.DogAnimation;
 import doggytalents.api.inferface.AbstractDog;
 import doggytalents.api.registry.Accessory;
 import doggytalents.api.registry.AccessoryInstance;
-import doggytalents.client.entity.model.animation.DTNAnimationLoader;
 import doggytalents.client.entity.model.SyncedAccessoryModel;
 import doggytalents.client.entity.model.animation.DogAnimationRegistry;
 import doggytalents.client.entity.model.animation.DogKeyframeAnimations;
-import doggytalents.client.entity.model.animation.DTNAnimationLoader.DogAnimationHolder;
 import doggytalents.client.entity.model.animation.DogKeyframeAnimations.AnimationContext;
 import doggytalents.client.entity.model.util.DogModelRenderType;
 import doggytalents.client.entity.render.DogRenderState;
@@ -74,9 +72,6 @@ public class DogModel extends EntityModel<DogRenderState> {
     private final AnimSnapshot animSnapshot1 = new AnimSnapshot();
     private final AnimSnapshot animSnapshot2 = new AnimSnapshot();
     private boolean baby;
-
-    private final DogAnimationHolder WALK_SLOW_TROT = DTNAnimationLoader.INSTANCE.getAnim("slow_trot");
-    private final DogAnimationHolder WALK_GALLOP = DTNAnimationLoader.INSTANCE.getAnim("gallop");
 
     public DogModel(ModelPart box) {
         this(box, DogModelRenderType.CUTOUT);
@@ -193,6 +188,9 @@ public class DogModel extends EntityModel<DogRenderState> {
     }
 
     public void animateWalkAndRun(Dog dog, float limbSwing, float limbSwingAmount, float partialTickTime) {        
+        final var slow_trot_anim = DogAnimationRegistry.getSequence(DogAnimation.SLOW_TROT);
+        final var gallop_anim = DogAnimationRegistry.getSequence(DogAnimation.GALLOP);
+
         final var pose_1 = this.animSnapshot1;
         final var pose_2 = this.animSnapshot2;
 
@@ -209,14 +207,14 @@ public class DogModel extends EntityModel<DogRenderState> {
         
         this.resetAllPose();
         if (anim_swing > Mth.EPSILON) {
-            DogKeyframeAnimations.keyframeAnimate(anim_context, WALK_SLOW_TROT.get(), time, anim_swing, vecObj);
+            DogKeyframeAnimations.keyframeAnimate(anim_context, slow_trot_anim, time, anim_swing, vecObj);
         }
         
         var anim_blend = dog.dogWalkAnimation.runningBlend(partialTickTime);
         if (anim_blend > Mth.EPSILON) {
             pose_1.store(this);
             this.resetAllPose();
-            DogKeyframeAnimations.keyframeAnimate(anim_context, WALK_GALLOP.get(), time / 2, 1, vecObj);
+            DogKeyframeAnimations.keyframeAnimate(anim_context, gallop_anim, time / 2, 1, vecObj);
             pose_2.store(this);
             AnimSnapshot.blendAndApply(anim_blend, pose_1, pose_2, this);
         }
