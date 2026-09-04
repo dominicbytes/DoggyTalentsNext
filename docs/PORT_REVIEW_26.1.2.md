@@ -60,12 +60,12 @@ Future gameplay tests should use these accepted fork behaviors as the oracle for
 |---|---|---|
 | Build/toolchain | Portable Java 25 build and production packaging; CI build history | Every future 26.x release; compatibility metadata is narrowed accordingly |
 | Network | Direction checks and selected bounded codecs/legacy formats | Comprehensive per-message budgets, malformed/trailing policy, adversarial channel behavior; multiplayer waived |
-| Persistence | Dog/block/item data, legacy payload fixture, malformed inputs, historical two-process production save/restart | Authentic original-world upgrade; latest production artifact restart |
-| Gameplay | Food consumption/effects, wolf conversion, representative interactions and combat/care helpers, registered loot hooks | Full level-by-level talent outcomes, sustained AI behavior, command execution/permission results |
+| Persistence | Dog/block/item data, malformed inputs, original-world upgrade and production restart; see COMMAND_UPGRADE_QA_26.1.2.md | Arbitrary third-party world/pack migrations |
+| Gameplay | Food consumption/effects, wolf conversion, representative interactions and combat/care helpers, registered loot hooks, command/permission outcomes | Full level-by-level talent outcomes, sustained AI behavior |
 | Talent catalog | All 33 registered port talents instantiate and serialize | All 33 are original enabled talents or work end-to-end |
-| Commands | `/dog locate` and `/dog revive` nodes exist | Commands successfully locate/revive with correct constraints and messages |
+| Commands | Actual locate/revive execution and failures; server-side tracker/whistle workflows | Client screen/rendering acceptance and talent-specific whistle effects |
 | Rendering/UI | Implemented tint, bed, helmet/trim, nameplate and animation changes; helper/resource tests; user animation/health acceptance | Full adult/puppy/custom-model/accessory/item-view/config matrix on final artifact |
-| Legacy fixture | Checksum-locked payload reconstructed from immutable original serializer | A payload/world captured from a running original release |
+| Legacy fixture | Reconstructed serializer fixture plus checksum-locked indexes and world captured in unmodified original runtime | Every historic mod version and third-party integration |
 | Resource/content | Item definitions, curated skin catalog and accepted upstream content changes | Visual fidelity, sound, every recipe/use path, reload in a final clean client |
 
 Historical evidence: [save/restart](SAVE_RESTART_QA_26.1.2.md), [legacy fixture](LEGACY_SAVE_FIXTURE_QA_26.1.2.md), [production server](PRODUCTION_SERVER_QA_26.1.2.md), [food/training](GAMEPLAY_FOOD_TRAINING_QA_26.1.2.md), [animation](ANIMATION_BLEND_QA_26.1.2.md), [skin catalog](SKIN_CATALOG_QA_26.1.2.md). Consult each report's artifact and scope; none is a universal pass.
@@ -78,14 +78,14 @@ These appended review IDs define the next work; they do not retroactively mark o
 |---|---|---|
 | REVIEW-PARITY-01 | Decide and document inherited talent differences, retaining saved IDs; assign runtime verification to REVIEW-GAMEPLAY-01 | PASS — user chose to retain the fork differences on 2026-09-04 |
 | REVIEW-GAMEPLAY-01 | Exercise talent effects at relevant level boundaries, cooldowns/hunger, AI follow/attack/avoid/retrieve/fish, and incapacitation/recovery through actual events/ticks | BLOCKED — coverage incomplete |
-| REVIEW-COMMAND-01 | Execute locate/revive and tracking/whistle flows; test valid, invalid, unavailable-target and permission outcomes | BLOCKED — current command test is registration only |
+| REVIEW-COMMAND-01 | Execute locate/revive and tracking/whistle flows; test valid, invalid, unavailable-target and permission outcomes | PASS — executable server outcomes; see COMMAND_UPGRADE_QA_26.1.2.md |
 | REVIEW-VISUAL-01 | Final-artifact captures: adult/puppy and default/custom models, skins, armor/trim/helmet/accessories, wet/incapacitated states, nameplate settings, tints and bed materials in inventory/hand/ground; menus, reload, howl/audio manual acceptance | BLOCKED — partial earlier human review only |
-| REVIEW-UPGRADE-01 | Back up an authentic 1.21 source world; upgrade a copy with dogs, inventories, beds/bowls/mills and saved data; restart and compare documented state | BLOCKED — authentic fixture unavailable; alternatively explicitly limit the upgrade claim |
+| REVIEW-UPGRADE-01 | Back up an authentic 1.21 source world; upgrade a copy with dogs, inventories, beds/bowls/mills and saved data; restart and compare documented state | PASS — unmodified 1.21.1 runtime fixture, copied upgrade, process restart and semantic comparison |
 | REVIEW-RELEASE-01 | Final candidate clean client install/play/save/restart and server startup; log review; unique version/changelog, fork issue/update destinations, checksums and GitHub release approval | BLOCKED — final artifact/metadata acceptance pending |
 | REVIEW-MP-01 | Two-client ownership, synchronization, reconnect, hostile packet/channel testing | WAIVED — user's upstream-only multiplayer scope |
 | REVIEW-PACK-01 | BytecraftPack/Passive Mobs compatibility and independent pack admission | DEFERRED — user request |
 
-Counts for these eight appended acceptance IDs: six required, one passed by explicit scope decision, five blocked by incomplete acceptance evidence, zero demonstrated failing acceptance runs, one waived, one deferred. None of the five runtime/release gates has complete execution evidence; portions are already implemented/tested as described above. Visual and authentic-upgrade gates require manual evidence; these counts are not the automated suite totals.
+Counts for these eight acceptance IDs: six required, three passed (one scope decision and two executed gates), three blocked by incomplete acceptance evidence, one waived, one deferred. Gameplay, visual and final-release acceptance remain open. These counts are not automated suite totals. The command/upgrade follow-up found and fixed tracker eligibility and authentic-index migration defects; its report records the failed reproductions and reruns.
 
 ## Better porting approach
 

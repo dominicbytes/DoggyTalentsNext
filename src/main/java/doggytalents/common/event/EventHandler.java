@@ -526,6 +526,9 @@ public class EventHandler {
         if (level != level_overworld)
             return;
         DogLocationStorageMigration.checkAndMigrate(level_overworld);
+        // Import the original root-level files before entity ticks can create empty indexes.
+        DogLocationStorage.get(level_overworld);
+        DogRespawnStorage.get(level_overworld);
     }
 
     @SubscribeEvent

@@ -1,0 +1,14 @@
+forceload add 0 0 31 31
+fill 0 63 0 15 63 15 minecraft:stone
+summon doggytalents:dog 4 64 4 {UUID:[I;286331153,286331153,286331153,286331153],Owner:[I;572662306,572662306,572662306,572662306],CustomName:'{"text":"Upgrade Pup"}',Tags:["dtn_upgrade"],NoAI:1b,Invulnerable:1b,PersistenceRequired:1b,mode:"docile",dogHunger:80.0f,dogGender:"female",level_normal:37,level_kami:9,talents:[{type:"doggytalents:pack_puppy",level:3,items:[{Slot:0b,id:"minecraft:diamond",count:7}],renderChest:1b,pickupNearby:0b},{type:"doggytalents:happy_eater",level:3}],accessories:[{type:"doggytalents:dyeable_collar",color:2386092}],doggy_artifacts:[{type:"doggytalents:feathered_mantle"}],beds:[{dim:"minecraft:overworld",pos:{x:6,y:64,z:4}}],bowls:[{dim:"minecraft:overworld",pos:{x:7,y:64,z:4}}],doggy_groups:[{group_name:"Upgrade Pack",group_color:2386092}],distanceWalking:55,damageDealt:12.75d,entityKills:[{type:"minecraft:zombie",count:2}]}
+setblock 6 64 4 doggytalents:dog_bed{casingId:"minecraft:oak_planks",beddingId:"minecraft:red_wool",ownerId:[I;286331153,286331153,286331153,286331153],placerId:[I;572662306,572662306,572662306,572662306],name:'{"text":"Upgrade Bed"}',ownerName:'{"text":"Upgrade Pup"}'}
+setblock 7 64 4 doggytalents:food_bowl{Items:[{Slot:0,id:"minecraft:cooked_beef",count:8}],Size:5,placerId:[I;572662306,572662306,572662306,572662306]}
+setblock 8 64 4 doggytalents:rice_mill{MillItems:[{Slot:0b,id:"minecraft:diamond",count:3}],grindingTime:23}
+data get entity @e[type=doggytalents:dog,tag=dtn_upgrade,limit=1]
+data get block 6 64 4
+data get block 7 64 4
+data get block 8 64 4
+execute if entity @e[type=doggytalents:dog,tag=dtn_upgrade,nbt={level_normal:37,level_kami:9}] run say UPGRADE_ORIGINAL_CORE_PASS
+execute if data entity @e[type=doggytalents:dog,tag=dtn_upgrade,limit=1] talents[{type:"doggytalents:pack_puppy"}].items[{id:"minecraft:diamond",count:7}] run say UPGRADE_ORIGINAL_INVENTORY_PASS
+save-all flush
+stop

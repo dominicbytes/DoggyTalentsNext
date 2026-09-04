@@ -46,12 +46,12 @@ public class DogRespawnStorage extends SavedData {
             throw new IllegalStateException("DogRespawnStorage is being accessed from the Client Side. Please report to the DTN Team.");
         }
         ServerLevel overworld = world.getServer().getLevel(Level.OVERWORLD);
-        return overworld.getDataStorage().computeIfAbsent(TYPE);
+        return LegacyDogSavedData.get(overworld, TYPE, "doggytalentsDeadDogs.dat");
     }
 
     public static DogRespawnStorage get(MinecraftServer server) {
         ServerLevel overworld = server.getLevel(Level.OVERWORLD);
-        return overworld.getDataStorage().computeIfAbsent(TYPE);
+        return LegacyDogSavedData.get(overworld, TYPE, "doggytalentsDeadDogs.dat");
     }
 
     public Stream<DogRespawnData> getDogs(@Nonnull UUID ownerId) {

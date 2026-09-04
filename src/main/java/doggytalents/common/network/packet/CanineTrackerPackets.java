@@ -161,6 +161,10 @@ public class CanineTrackerPackets {
                 var storage = DogLocationStorage.get(player.level());
                 var dogData = storage.getData(data.uuid);
                 if (dogData == null) return;
+                if (!player.getUUID().equals(dogData.getOwnerId())) return;
+                if (!player.level().dimension().equals(dogData.getDimension())) return;
+                if (!dogData.shouldDisplay(player.level(), player, InteractionHand.MAIN_HAND)) return;
+                if (dogData.getPos() == null) return;
                 
                 // if (!stack.hasTag()) {
                 //     stack.setTag(new CompoundTag());

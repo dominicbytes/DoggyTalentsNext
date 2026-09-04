@@ -1,0 +1,11 @@
+forceload add 1024 1024
+fill 1024 63 1024 1030 63 1030 minecraft:stone
+summon doggytalents:dog 1026 64 1026 {UUID:[I;858993459,858993459,858993459,858993459],Owner:[I;572662306,572662306,572662306,572662306],CustomName:'{"text":"Offline Pup"}',NoAI:1b,Invulnerable:1b,PersistenceRequired:1b,dogHunger:80.0f,mode:"docile",Tags:["dtn_upgrade_offline"]}
+forceload remove 1024 1024
+summon doggytalents:dog 10 64 4 {UUID:[I;1145324612,1145324612,1145324612,1145324612],Owner:[I;572662306,572662306,572662306,572662306],CustomName:'{"text":"Revive Upgrade Pup"}',NoAI:1b,PersistenceRequired:1b,dogHunger:80.0f,mode:"docile",Tags:["dtn_upgrade_dead"],level_normal:17}
+kill @e[type=doggytalents:dog,tag=dtn_upgrade_dead]
+#wait 2500
+execute unless entity @e[type=doggytalents:dog,tag=dtn_upgrade_dead] run say UPGRADE_ORIGINAL_REMOVED_PASS
+data get entity @e[type=doggytalents:dog,tag=dtn_upgrade,limit=1]
+save-all flush
+stop
