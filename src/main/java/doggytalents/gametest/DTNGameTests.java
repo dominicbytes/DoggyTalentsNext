@@ -20,6 +20,7 @@ import doggytalents.common.entity.stats.StatsTracker;
 import doggytalents.common.entity.texture.DogSkinData;
 import doggytalents.common.inventory.TreatBagItemHandler;
 import doggytalents.common.item.TreatBagItem;
+import doggytalents.common.item.WhistleItem;
 import doggytalents.common.talent.PackPuppyTalent;
 import doggytalents.common.talent.doggy_tools.DoggyToolsTalent;
 import doggytalents.common.util.InventoryUtil;
@@ -59,6 +60,36 @@ public final class DTNGameTests {
         "da18b522d67f6fe1bee143ae833f3f4d7a14f7f3b521d44cfcab83741180d88b";
 
     private DTNGameTests() {
+    }
+
+    /** GAMEPLAY-WHISTLE-01: legacy custom data resolves valid modes and safely defaults corrupt values. */
+    public static void gameplayWhistle01CustomDataCompatibility(GameTestHelper helper) {
+        var whistle = DoggyItems.WHISTLE.get();
+        var stack = new ItemStack(whistle);
+        var standDescription = whistle.getDescriptionId() + "." + WhistleItem.WhistleMode.STAND.getIndex();
+
+        require(helper, standDescription.equals(whistle.getDescriptionId(stack)),
+            "a whistle without custom data did not default to stand mode");
+
+        ItemUtil.modifyTag(stack, tag -> {
+            tag.putByte("mode", (byte) WhistleItem.WhistleMode.DUTY_WHISTLE.getIndex());
+            tag.putBoolean("dog_on_duty_only", true);
+        });
+        require(helper,
+            (whistle.getDescriptionId() + "." + WhistleItem.WhistleMode.DUTY_WHISTLE.getIndex())
+                .equals(whistle.getDescriptionId(stack)),
+            "a valid legacy whistle mode was not preserved");
+        require(helper, WhistleItem.isDogOnDutyOnly(stack),
+            "the legacy duty-only setting was not preserved");
+
+        ItemUtil.modifyTag(stack, tag -> tag.putByte("mode", (byte) -1));
+        require(helper, standDescription.equals(whistle.getDescriptionId(stack)),
+            "a negative legacy whistle mode did not safely default to stand mode");
+
+        ItemUtil.modifyTag(stack, tag -> tag.putByte("mode", Byte.MAX_VALUE));
+        require(helper, standDescription.equals(whistle.getDescriptionId(stack)),
+            "an oversized legacy whistle mode did not safely default to stand mode");
+        helper.succeed();
     }
 
     /** ITEM-HANDLER-01: modern transactions retain the mod's established stack-oriented behavior. */

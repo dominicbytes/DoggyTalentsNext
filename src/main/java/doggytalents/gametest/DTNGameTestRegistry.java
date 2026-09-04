@@ -30,6 +30,9 @@ public final class DTNGameTestRegistry {
         TESTS.register("save_01_legacy_dog_fixture_upgrade", () -> DTNGameTests::save01LegacyDogFixtureUpgrade);
     private static final DeferredHolder<Consumer<GameTestHelper>, Consumer<GameTestHelper>> ITEM_HANDLER_01 =
         TESTS.register("item_handler_01_transactional_storage", () -> DTNGameTests::itemHandler01TransactionalStorage);
+    private static final DeferredHolder<Consumer<GameTestHelper>, Consumer<GameTestHelper>> GAMEPLAY_WHISTLE_01 =
+        TESTS.register("gameplay_whistle_01_custom_data_compatibility",
+            () -> DTNGameTests::gameplayWhistle01CustomDataCompatibility);
 
     private DTNGameTestRegistry() {
     }
@@ -55,6 +58,9 @@ public final class DTNGameTestRegistry {
             SAVE_01_LEGACY_FIXTURE.getKey(), new TestData<>(environment, Identifier.withDefaultNamespace("empty"), 100, 0, true)));
         event.registerTest(id("item_handler_01_transactional_storage"), new FunctionGameTestInstance(
             ITEM_HANDLER_01.getKey(), new TestData<>(environment, Identifier.withDefaultNamespace("empty"), 100, 0, true)));
+        event.registerTest(id("gameplay_whistle_01_custom_data_compatibility"), new FunctionGameTestInstance(
+            GAMEPLAY_WHISTLE_01.getKey(),
+            new TestData<>(environment, Identifier.withDefaultNamespace("empty"), 100, 0, true)));
     }
 
     private static Identifier id(String path) {

@@ -32,7 +32,6 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
-import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
@@ -124,18 +123,23 @@ public class WhistleItem extends Item implements IDogItem {
         super(properties);
     }
 
+    static WhistleMode resolveMode(int modeIndex) {
+        if (modeIndex < 0 || modeIndex >= WhistleMode.VALUES.length) {
+            return WhistleMode.STAND;
+        }
+        return WhistleMode.VALUES[modeIndex];
+    }
+
+    private static WhistleMode getMode(ItemStack stack) {
+        var tag = ItemUtil.getTag(stack);
+        return resolveMode(tag.getByteOr("mode", (byte) WhistleMode.STAND.getIndex()));
+    }
+
     @Override
     public InteractionResult processInteract(AbstractDog dogIn, Level worldIn, Player player,
             InteractionHand hand) {
         ItemStack stack = player.getItemInHand(hand);  
-        byte id_mode = 0;
-
-        var tag = ItemUtil.getTag(stack);
-        if (tag.contains("mode")) {
-            id_mode = tag.getByteOr("mode", (byte)0);
-        }
-        if (id_mode >= WhistleMode.VALUES.length) id_mode = 0;
-        var mode = WhistleMode.VALUES[id_mode];
+        var mode = getMode(stack);
 
         return mode == WhistleMode.MOB_RETRIEVER
             || mode == WhistleMode.RIDE_WITH_ME 
@@ -156,13 +160,9 @@ public class WhistleItem extends Item implements IDogItem {
             return InteractionResult.SUCCESS; // consumed stack: stack);
         }
         else {
-            byte id_mode = 0;
             boolean on_duty_only = false;
 
             var tag = ItemUtil.getTag(stack);
-            if (tag.contains("mode")) {
-                id_mode = tag.getByteOr("mode", (byte)0);
-            }
             on_duty_only = tag.getBooleanOr("dog_on_duty_only", false);
 
             List<Dog> dogsList = world.getEntitiesOfClass(
@@ -171,8 +171,7 @@ public class WhistleItem extends Item implements IDogItem {
                 dog -> dog.isDoingFine() && dog.isOwnedBy(player)
             );
 
-            if (id_mode >= WhistleMode.VALUES.length) id_mode = 0;
-            var mode = WhistleMode.VALUES[id_mode];
+            var mode = getMode(stack);
 
             useMode(mode, on_duty_only, dogsList, world, player, hand, false);
             return InteractionResult.SUCCESS; // stack: player.getItemInHand(hand));
@@ -618,24 +617,13 @@ public class WhistleItem extends Item implements IDogItem {
         var stack = entity.getMainHandItem();
         if (!stack.is(DoggyItems.WHISTLE.get()))
             return false;
-        byte mode = 0;
-        var tag = ItemUtil.getTag(stack);
-        if (tag.contains("mode")) {
-            mode = (byte) Mth.clamp(tag.getByteOr("mode", (byte)0), 0, WhistleMode.VALUES.length - 1);
-        }
-        if (WhistleMode.VALUES[mode] != WhistleMode.DUTY_WHISTLE)
+        if (getMode(stack) != WhistleMode.DUTY_WHISTLE)
             return false;
         return true;
     }
 
     public String getDescriptionId(ItemStack stack) {
-        byte mode = 0;
-
-        var tag = ItemUtil.getTag(stack);
-        if (tag.contains("mode")) {
-            mode = tag.getByteOr("mode", (byte)0);
-        }
-        return this.getDescriptionId() + "." + mode;
+        return this.getDescriptionId() + "." + getMode(stack).getIndex();
 
     }
 
