@@ -174,6 +174,31 @@ public final class DTNGameTests {
         helper.succeed();
     }
 
+    /** ITEM-DATA-01: legacy nested item data keeps compound type checks and clear semantics. */
+    public static void itemData01CustomDataCompatibility(GameTestHelper helper) {
+        var stack = new ItemStack(Items.STICK);
+        var nested = new CompoundTag();
+        nested.putString("name", "Rin");
+        var root = new CompoundTag();
+        root.put("doggytalents", nested);
+        ItemUtil.putTag(stack, root);
+
+        require(helper, ItemUtil.hasTag(stack), "custom data was not attached to the item");
+        var decoded = ItemUtil.getTagElement(stack, "doggytalents");
+        require(helper, decoded != null && "Rin".equals(decoded.getStringOr("name", "")),
+            "nested custom data did not round-trip");
+
+        root.putString("doggytalents", "not a compound");
+        ItemUtil.putTag(stack, root);
+        require(helper, ItemUtil.getTagElement(stack, "doggytalents") == null,
+            "wrongly typed nested custom data was accepted as an empty compound");
+
+        ItemUtil.clearTag(stack);
+        require(helper, !ItemUtil.hasTag(stack), "custom data remained after clearing the item");
+        require(helper, ItemUtil.getTag(stack).isEmpty(), "cleared custom data did not read as empty");
+        helper.succeed();
+    }
+
     /** ITEM-HANDLER-01: modern transactions retain the mod's established stack-oriented behavior. */
     public static void itemHandler01TransactionalStorage(GameTestHelper helper) {
         var handler = new DTNItemStackHandler(2);
