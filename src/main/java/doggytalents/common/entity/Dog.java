@@ -40,6 +40,7 @@ import doggytalents.common.entity.ai.triggerable.DogPlayTagAction;
 import doggytalents.common.entity.ai.triggerable.TriggerableAction;
 import doggytalents.common.entity.ai.triggerable.TriggerableAction.ActionState;
 import doggytalents.common.entity.anim.DogAnimationManager;
+import doggytalents.common.entity.anim.DogClassicalAnimationState;
 import doggytalents.common.entity.anim.DogPose;
 import doggytalents.common.entity.anim.DogWalkAnimationState;
 import doggytalents.common.entity.anim.DogAnimationManager.DogAnimDebugState;
@@ -472,6 +473,24 @@ public class Dog extends AbstractDog {
         return Mth.lerp(pticks, this.headRotationCourseOld, this.headRotationCourse);
     }
 
+    @Deprecated
+    @Override
+    public float getWagAngle(float limbSwing, float limbSwingAmount, float partialTickTime) {
+        return DogClassicalAnimationState.wagAngle(limbSwing, limbSwingAmount, partialTickTime);
+    }
+
+    @Deprecated
+    @Override
+    public float getShakeAngle(float partialTicks, float offset) {
+        return DogClassicalAnimationState.shakeAngle(getDogClassicalShakeAnim(partialTicks), offset);
+    }
+
+    @Deprecated
+    @Override
+    public float getInterestedAngle(float partialTicks) {
+        return DogClassicalAnimationState.begAngle(getDogClassicalBegAnim(partialTicks));
+    }
+
     @Override
     public void handleEntityEvent(byte id) {
         // if (id == doggytalents.common.lib.Constants.EntityState.WOLF_START_SHAKING) {
@@ -651,8 +670,8 @@ public class Dog extends AbstractDog {
         this.animationManager.tick();
 
         if (this.isAlive()) {
-            
-            if (!this.level().isClientSide)
+
+            if (!this.level().isClientSide())
                 this.tickAnimAction();
         }
 

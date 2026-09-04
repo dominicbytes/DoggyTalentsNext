@@ -7,6 +7,9 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import doggytalents.api.anim.DogAnimation;
 import doggytalents.api.anim.DogAnimation.DogAnimBlendInMode;
 import doggytalents.api.anim.DogAnimation.DogAnimBlendOutMode;
+import doggytalents.client.entity.model.dog.AnimSnapshot;
+import doggytalents.client.entity.model.dog.DogModel;
+import net.minecraft.util.Mth;
 import org.junit.jupiter.api.Test;
 
 class DogAnimationBlendConfigTest {
@@ -38,5 +41,18 @@ class DogAnimationBlendConfigTest {
 
         assertFalse(DogAnimation.STAND_QUICK.blendIn().blendHeadRotAndChildrenOnly());
         assertFalse(DogAnimation.BACKFLIP.blendIn().blendHeadRotAndChildrenOnly());
+    }
+
+    @Test
+    void animationBlend01InterpolatesRotationsInRadiansAcrossTheShortestArc() {
+        var first = new AnimSnapshot();
+        var second = new AnimSnapshot();
+        first.root.xrot = 170 * Mth.DEG_TO_RAD;
+        second.root.xrot = -170 * Mth.DEG_TO_RAD;
+        var model = new DogModel(DogModel.createBodyLayer().bakeRoot());
+
+        AnimSnapshot.blendAndApply(0.5f, first, second, model);
+
+        assertEquals(Mth.PI, Math.abs(model.root.xRot), 0.0001f);
     }
 }

@@ -30,7 +30,7 @@ public class DogAnimationManager {
     private int blendDuration = 0;
     private BlendState blendState = BlendState.NONE;
     public DogCapturedProceduralState capturedProcedural = DogCapturedProceduralState.NONE;
-    public DogInterruptedAnimState capturedKeyframeAnim = DogInterruptedAnimState.NONE; 
+    public DogInterruptedAnimState capturedKeyframeAnim = DogInterruptedAnimState.NONE;
 
     private DogAnimation lastAnim = DogAnimation.NONE;
     private DogAnimation currentAnim = DogAnimation.NONE;
@@ -41,7 +41,7 @@ public class DogAnimationManager {
     public DogAnimationManager(Dog dog) { this.dog = dog; }
 
     public void onAnimationChange(DogAnimation anim) {
-        this.lastAnim = this.currentAnim; 
+        this.lastAnim = this.currentAnim;
         this.currentAnim = anim;
 
         animationTime = 0;
@@ -60,10 +60,10 @@ public class DogAnimationManager {
             this.capturedProcedural = DogCapturedProceduralState.capture(dog);
         }
         if (this.blendState.hasAnimPoseCapture()) {
-            this.capturedKeyframeAnim = 
+            this.capturedKeyframeAnim =
                 new DogInterruptedAnimState(this.lastAnim, this.animationState.getAccumulatedTimeMillis());
         }
-        
+
         if (anim != DogAnimation.NONE) {
             started = true;
             looping = anim.looping();
@@ -78,7 +78,7 @@ public class DogAnimationManager {
         }
     }
 
-    private BlendState computeBlendState(DogAnimation fromAnim, DogAnimation toAnim) {
+    static BlendState computeBlendState(DogAnimation fromAnim, DogAnimation toAnim) {
         if (fromAnim.isNone() && toAnim.hasBlendIn())
             return BlendState.BLEND_IN;
         if (fromAnim.hasBlendOut() && toAnim.isNone())
@@ -87,7 +87,8 @@ public class DogAnimationManager {
             BlendState.ANIM_TO_ANIM : BlendState.NONE;
     }
 
-    private int pickBlendDuration(DogAnimation fromAnim, DogAnimation toAnim, BlendState blendState) {
+    static int pickBlendDuration(
+        DogAnimation fromAnim, DogAnimation toAnim, BlendState blendState) {
         return blendState == BlendState.BLEND_OUT ?
             fromAnim.blendOut().blendTick()
             : toAnim.blendIn().blendTick();
@@ -136,11 +137,11 @@ public class DogAnimationManager {
     }
 
     public void onSyncTimeUpdated() {
-        if (this.dog.level().isClientSide) {
+        if (this.dog.level().isClientSide()) {
             int sync_time = this.dog.getAnimSyncTime();
             resolveLatencyIfNeeded(sync_time);
-        } 
-            
+        }
+
     }
 
     private void resolveLatencyIfNeeded(int syncTime) {
@@ -182,7 +183,7 @@ public class DogAnimationManager {
     public float getBlendOutProgress(float pticks) {
         float ret = 1 - getBlendInProgress(pticks);
         ret = Mth.clamp(ret, 0, 1);
-        return Mth.equal(ret, 0) ? 0 : ret; 
+        return Mth.equal(ret, 0) ? 0 : ret;
     }
 
     public boolean playingFullAnim(float pticks) {
@@ -200,7 +201,7 @@ public class DogAnimationManager {
             return getBlendOutProgress(pticks) > 0 ?
                 this.blendState : BlendState.NONE;
         return getBlendInProgress(pticks) < 1 ?
-            this.blendState : BlendState.NONE; 
+            this.blendState : BlendState.NONE;
     }
 
     public boolean started() {
@@ -272,7 +273,7 @@ public class DogAnimationManager {
         float headXRot, DogPose pose,
         float shakeAnim, float begAnim
     ) {
-        public static final DogCapturedProceduralState NONE = 
+        public static final DogCapturedProceduralState NONE =
             new DogCapturedProceduralState(0, DogPose.STAND, 0, 0);
 
         public static DogCapturedProceduralState capture(Dog dog) {
@@ -289,14 +290,14 @@ public class DogAnimationManager {
     }
 
     public static record DogInterruptedAnimState(DogAnimation anim, long timestampMillis) {
-        public static final DogInterruptedAnimState NONE = 
+        public static final DogInterruptedAnimState NONE =
             new DogInterruptedAnimState(DogAnimation.NONE, 0);
         public boolean isNone() {
             return this == NONE;
         }
     }
 
-    public static enum BlendState { 
+    public static enum BlendState {
         NONE, ANIM_TO_ANIM, BLEND_IN, BLEND_OUT;
 
         public boolean isNone() {

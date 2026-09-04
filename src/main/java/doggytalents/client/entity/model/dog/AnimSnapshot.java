@@ -76,7 +76,7 @@ public class AnimSnapshot {
         model_part.zRot = part.zrot;
     }
 
-    public static void blendAndApplyHeadRotAndChildrenOnly(float progress, 
+    public static void blendAndApplyHeadRotAndChildrenOnly(float progress,
         AnimSnapshot result1, AnimSnapshot result2,
         DogModel model) {
 
@@ -118,9 +118,9 @@ public class AnimSnapshot {
         model_part.zRot = interpRot(progress, part1.zrot, part2.zrot);
     }
 
-    private static void blendPartAndApplyRotOnly(float progress, 
+    private static void blendPartAndApplyRotOnly(float progress,
         Part part1, Part part2, ModelPart model_part) {
-        
+
         model_part.xRot = interpRot(progress, part1.xrot, part2.xrot);
         model_part.yRot = interpRot(progress, part1.yrot, part2.yrot);
         model_part.zRot = interpRot(progress, part1.zrot, part2.zrot);

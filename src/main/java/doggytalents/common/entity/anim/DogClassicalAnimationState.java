@@ -2,15 +2,17 @@ package doggytalents.common.entity.anim;
 
 import net.minecraft.util.Mth;
 
-public class DogClassicalAnimationState {
-    
+public final class DogClassicalAnimationState {
+
+    private DogClassicalAnimationState() {}
+
     public static float shakeAngle(float animValue, float offset) {
         float anim_time_modified = (animValue + offset) * 0.56f;
 
         anim_time_modified = Mth.clamp(anim_time_modified, 0, 1);
 
-        return Mth.sin(anim_time_modified * Mth.PI) 
-            * Mth.sin(anim_time_modified * 11f * Mth.PI) 
+        return Mth.sin(anim_time_modified * Mth.PI)
+            * Mth.sin(anim_time_modified * 11f * Mth.PI)
             * 0.15f * Mth.PI;
     }
 
