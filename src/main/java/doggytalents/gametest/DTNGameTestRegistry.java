@@ -65,6 +65,16 @@ public final class DTNGameTestRegistry {
             () -> GameplayParityGameTests::accessoriesTrackerAndBath);
     private static final DeferredHolder<Consumer<GameTestHelper>, Consumer<GameTestHelper>> LOOT_01_RICE_SOY =
         TESTS.register("loot_01_rice_soy_drops", () -> DTLootModifierGameTests::riceAndSoyDrops);
+    private static final DeferredHolder<Consumer<GameTestHelper>, Consumer<GameTestHelper>> COMMAND_LOCATE =
+        TESTS.register("review_command_locate", () -> CommandWorkflowGameTests::locate);
+    private static final DeferredHolder<Consumer<GameTestHelper>, Consumer<GameTestHelper>> COMMAND_REVIVE =
+        TESTS.register("review_command_revive", () -> CommandWorkflowGameTests::revive);
+    private static final DeferredHolder<Consumer<GameTestHelper>, Consumer<GameTestHelper>> COMMAND_TRACKER =
+        TESTS.register("review_command_tracker", () -> CommandWorkflowGameTests::tracker);
+    private static final DeferredHolder<Consumer<GameTestHelper>, Consumer<GameTestHelper>> COMMAND_WHISTLE =
+        TESTS.register("review_command_whistle", () -> CommandWorkflowGameTests::whistle);
+    private static final DeferredHolder<Consumer<GameTestHelper>, Consumer<GameTestHelper>> UPGRADE_INDEX =
+        TESTS.register("review_upgrade_index", () -> doggytalents.common.storage.LegacyDogSavedDataGameTests::originalWorldIndexes);
 
     private DTNGameTestRegistry() {
     }
@@ -76,6 +86,10 @@ public final class DTNGameTestRegistry {
 
     private static void registerTests(RegisterGameTestsEvent event) {
         var environment = event.registerEnvironment(id("default"), new TestEnvironmentDefinition.AllOf());
+        for (var test : java.util.List.of(COMMAND_LOCATE, COMMAND_REVIVE, COMMAND_TRACKER, COMMAND_WHISTLE, UPGRADE_INDEX)) {
+            event.registerTest(test.getId(), new FunctionGameTestInstance(test.getKey(),
+                new TestData<>(environment, Identifier.withDefaultNamespace("empty"), 100, 0, true)));
+        }
         event.registerTest(id("save_01_dog_core_round_trip"), new FunctionGameTestInstance(
             SAVE_01_CORE.getKey(), new TestData<>(environment, Identifier.withDefaultNamespace("empty"), 100, 0, true)));
         event.registerTest(id("save_01_dog_extended_round_trip"), new FunctionGameTestInstance(

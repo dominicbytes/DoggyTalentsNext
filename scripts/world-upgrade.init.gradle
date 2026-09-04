@@ -1,0 +1,58 @@
+// Run an installed production server under the Minecraft MCP's owned Gradle process.
+// Supply qaProfile, qaJava, qaServerArgs and qaCommands as absolute paths.
+gradle.projectsEvaluated {
+    rootProject.tasks.register('qaWorldServer', Exec) {
+        def profile = rootProject.file(rootProject.property('qaProfile'))
+        def javaExecutable = rootProject.file(rootProject.property('qaJava'))
+        def serverArgs = rootProject.file(rootProject.property('qaServerArgs'))
+        def commands = rootProject.file(rootProject.property('qaCommands'))
+        def port = System.getenv('MINECRAFT_MCP_PORT')
+        if (!port) throw new GradleException('An owned Minecraft MCP runtime is required')
+        workingDir profile
+        commandLine javaExecutable, '-Xmx2G', "@${serverArgs}", '--port', port, 'nogui'
+        doFirst {
+            if (!commands.text.trim().endsWith('stop')) {
+                throw new GradleException('The command script must finish with an orderly stop')
+            }
+            def ready = new java.util.concurrent.CountDownLatch(1)
+            standardInput = new InputStream() {
+                def lines = commands.readLines('UTF-8').iterator()
+                def current = new ByteArrayInputStream(new byte[0])
+                @Override
+                int read(byte[] bytes, int offset, int length) {
+                    if (!ready.await(120, java.util.concurrent.TimeUnit.SECONDS)) {
+                        throw new IOException('Server did not reach Done before command injection')
+                    }
+                    while (current.available() == 0 && lines.hasNext()) {
+                        def line = lines.next()
+                        if (line.startsWith('#wait ')) {
+                            int delay = Integer.parseInt(line.substring(6))
+                            if (delay < 0 || delay > 10000) throw new IOException('Wait exceeds 10 seconds')
+                            Thread.sleep(delay)
+                        } else {
+                            current = new ByteArrayInputStream((line + '\n').getBytes('UTF-8'))
+                        }
+                    }
+                    return current.read(bytes, offset, length)
+                }
+                @Override
+                int read() {
+                    byte[] one = new byte[1]
+                    return read(one, 0, 1) < 0 ? -1 : one[0] & 255
+                }
+            }
+            standardOutput = new OutputStream() {
+                String tail = ''
+                @Override
+                void write(int value) {
+                    System.out.write(value)
+                    tail = (tail + (char) value).takeRight(256)
+                    if (tail.contains('Done (')) ready.countDown()
+                }
+                @Override
+                void flush() { System.out.flush() }
+            }
+        }
+        doLast { standardInput.close() }
+    }
+}

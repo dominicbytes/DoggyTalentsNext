@@ -22,7 +22,6 @@ import net.minecraft.resources.Identifier;
 import net.minecraft.util.datafix.DataFixTypes;
 import net.minecraft.world.level.saveddata.SavedData;
 import net.minecraft.world.level.saveddata.SavedDataType;
-import net.minecraft.world.level.storage.SavedDataStorage;
 import net.neoforged.neoforge.event.server.ServerStoppedEvent;
 import net.neoforged.neoforge.event.server.ServerStoppingEvent;
 
@@ -49,15 +48,13 @@ public class DogLocationStorage extends SavedData {
 
         ServerLevel overworld = world.getServer().getLevel(Level.OVERWORLD);
 
-        SavedDataStorage storage = overworld.getDataStorage();
-        return storage.computeIfAbsent(TYPE);
+        return LegacyDogSavedData.get(overworld, TYPE, "doggytalentsDogLocations.dat");
     }
 
     public static DogLocationStorage get(MinecraftServer server) {
         ServerLevel overworld = server.getLevel(Level.OVERWORLD);
 
-        SavedDataStorage storage = overworld.getDataStorage();
-        return storage.computeIfAbsent(TYPE);
+        return LegacyDogSavedData.get(overworld, TYPE, "doggytalentsDogLocations.dat");
     }
 
     public Stream<DogLocationData> getDogs(LivingEntity owner) {
