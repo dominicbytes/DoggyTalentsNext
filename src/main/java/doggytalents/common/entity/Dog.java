@@ -3039,7 +3039,9 @@ public class Dog extends AbstractDog {
                 this.setMode(DogMode.bySaveName(compound.getStringOr("mode", "")));
             }
             
-            this.setHungerDirectly(compound.getFloatOr("dogHunger", 0f));
+            if (compound.contains("dogHunger")) {
+                this.setHungerDirectly(compound.getFloatOr("dogHunger", 0f));
+            }
             this.setDogIncapValue(compound.getIntOr("dogIncapacitatedValue", 0));
             this.setOwnersName(NBTUtil.getTextComponent(compound, "lastKnownOwnerName"));
             this.setWillObeyOthers(compound.getBooleanOr("willObey", false));
