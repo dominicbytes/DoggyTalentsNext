@@ -3,7 +3,6 @@ package doggytalents.client.screen.framework.widget;
 import java.util.List;
 
 import doggytalents.client.screen.framework.types.TextType;
-import doggytalents.client.screen.framework.types.TextType.Align;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.FormattedCharSequence;
@@ -66,10 +65,6 @@ public class MultiLineFlatButton extends FlatButton {
             graphics.text(font, line, pTX, pTY, 0xffffffff);
             pTY += font.lineHeight + LINE_SPACING; 
         }
-    }
-
-    private void drawRight() {
-        // not implemented
     }
 
 }
