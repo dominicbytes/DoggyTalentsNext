@@ -3,6 +3,7 @@ package doggytalents.client.entity.model;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.google.gson.JsonParser;
@@ -52,6 +53,14 @@ class DogSkinCatalogResourceTest {
             assertNotNull(getClass().getResource(
                 "/assets/doggytalents/textures/entity/dog/custom/wangwang_mouthclosed.png"));
             assertFalse(ids.stream().anyMatch(RETIRED_SKINS::contains));
+            assertNull(getClass().getResource(
+                "/assets/doggytalents/doggytalents/dog_models/arcanine.json"));
+            assertNull(getClass().getResource(
+                "/assets/doggytalents/doggytalents/dog_models/borzoi_long.json"));
+            assertNull(getClass().getResource(
+                "/assets/doggytalents/doggytalents/dog_models/otter.json"));
+            assertNull(getClass().getResource(
+                "/assets/doggytalents/textures/entity/dog/custom/otter.png"));
         }
     }
 }
