@@ -40,6 +40,12 @@ public final class DTNGameTestRegistry {
         TESTS.register("gameplay_food_01_consumption", () -> DTNGameTests::gameplayFood01Consumption);
     private static final DeferredHolder<Consumer<GameTestHelper>, Consumer<GameTestHelper>> GAMEPLAY_TRAINING_01 =
         TESTS.register("gameplay_training_01_wolf_conversion", () -> DTNGameTests::gameplayTraining01WolfConversion);
+    private static final DeferredHolder<Consumer<GameTestHelper>, Consumer<GameTestHelper>> ANIMATION_BLEND_01_SPAWN_HEALTH =
+        TESTS.register("animation_blend_01_spawn_health_stable",
+            () -> DTNGameTests::animationBlend01SpawnHealthStable);
+    private static final DeferredHolder<Consumer<GameTestHelper>, Consumer<GameTestHelper>> ANIMATION_BLEND_01_COMPLETION =
+        TESTS.register("animation_blend_01_normal_completion",
+            () -> DTNGameTests::animationBlend01NormalCompletion);
 
     private DTNGameTestRegistry() {
     }
@@ -77,6 +83,12 @@ public final class DTNGameTestRegistry {
         event.registerTest(id("gameplay_training_01_wolf_conversion"), new FunctionGameTestInstance(
             GAMEPLAY_TRAINING_01.getKey(),
             new TestData<>(environment, Identifier.withDefaultNamespace("empty"), 100, 0, true)));
+        event.registerTest(id("animation_blend_01_spawn_health_stable"), new FunctionGameTestInstance(
+            ANIMATION_BLEND_01_SPAWN_HEALTH.getKey(),
+            new TestData<>(environment, Identifier.withDefaultNamespace("empty"), 120, 0, true)));
+        event.registerTest(id("animation_blend_01_normal_completion"), new FunctionGameTestInstance(
+            ANIMATION_BLEND_01_COMPLETION.getKey(),
+            new TestData<>(environment, Identifier.withDefaultNamespace("empty"), 120, 0, true)));
     }
 
     private static Identifier id(String path) {

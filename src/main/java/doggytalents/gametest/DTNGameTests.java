@@ -5,6 +5,7 @@ import doggytalents.DoggyBlocks;
 import doggytalents.DoggyEntityTypes;
 import doggytalents.DoggyItems;
 import doggytalents.DoggyTalents;
+import doggytalents.api.anim.DogAnimation;
 import doggytalents.api.feature.DogGender;
 import doggytalents.api.feature.DogLevel;
 import doggytalents.api.feature.DogMode;
@@ -53,6 +54,7 @@ import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.storage.TagValueInput;
 import net.minecraft.world.level.storage.TagValueOutput;
+import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.transfer.item.ItemResource;
 import net.neoforged.neoforge.transfer.transaction.Transaction;
 import net.neoforged.neoforge.transfer.transaction.TransactionContext;
@@ -68,6 +70,49 @@ public final class DTNGameTests {
         "da18b522d67f6fe1bee143ae833f3f4d7a14f7f3b521d44cfcab83741180d88b";
 
     private DTNGameTests() {
+    }
+
+    /** ANIMATION-BLEND-01-SPAWN-HEALTH: a newly summoned dog does not lose health while idle. */
+    public static void animationBlend01SpawnHealthStable(GameTestHelper helper) {
+        Dog dog = helper.spawn(
+            DoggyEntityTypes.DOG.get(), new Vec3(1.5, 2, 1.5), EntitySpawnReason.COMMAND);
+
+        dog.readDTNAdditionalSavedData(new CompoundTag());
+        require(helper, Float.compare(dog.getDogHunger(), 60F) == 0,
+            "summon data without dogHunger replaced the initialized hunger");
+
+        float initialHealth = dog.getHealth();
+        float initialHunger = dog.getDogHunger();
+        helper.onEachTick(() -> {
+            require(helper, dog.isAlive(), "command-spawned dog died while idle");
+            require(helper, Float.compare(dog.getHealth(), initialHealth) == 0,
+                "command-spawned dog lost health while idle: health=" + dog.getHealth()
+                    + ", source=" + dog.getLastDamageSource());
+        });
+        helper.runAfterDelay(80, () -> {
+            require(helper, Float.compare(dog.getDogHunger(), initialHunger) == 0,
+                "command-spawned dog lost hunger before the normal hunger interval");
+            helper.succeed();
+        });
+    }
+
+    /** ANIMATION-BLEND-01-COMPLETION: normal animations complete without debug-frame freezing. */
+    public static void animationBlend01NormalCompletion(GameTestHelper helper) {
+        Dog dog = helper.spawn(DoggyEntityTypes.DOG.get(), new Vec3(1.5, 2, 1.5), EntitySpawnReason.LOAD);
+        dog.setAnim(DogAnimation.BACKFLIP);
+
+        helper.runAfterDelay(DogAnimation.BACKFLIP.getLengthTicks() + 10L, () -> {
+            require(helper, dog.getAnim().isNone(), "backflip did not return to the procedural pose");
+            require(helper, !dog.isDogInAnimDebug(), "normal backflip unexpectedly entered debug mode");
+            dog.setAnim(DogAnimation.SCRATCHIE);
+        });
+        helper.runAfterDelay(
+            DogAnimation.BACKFLIP.getLengthTicks() + DogAnimation.SCRATCHIE.getLengthTicks() + 20L,
+            () -> {
+                require(helper, dog.getAnim().isNone(), "scratching did not return to the procedural pose");
+                require(helper, !dog.isDogInAnimDebug(), "normal scratching unexpectedly entered debug mode");
+                helper.succeed();
+            });
     }
 
     /** GAMEPLAY-FOOD-01: registered vanilla foods preserve hunger, effects, and stack rules. */
