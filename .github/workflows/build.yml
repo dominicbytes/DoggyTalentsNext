@@ -19,3 +19,14 @@ jobs:
           cache: gradle
       - name: Build and test
         run: ./gradlew clean build --no-daemon
+      - name: Run NeoForge GameTests
+        run: ./gradlew runGameTestServer --no-daemon
+      - name: Upload test evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-evidence
+          path: |
+            build/test-results/test/
+            build/reports/tests/test/
+            run/logs/latest.log
