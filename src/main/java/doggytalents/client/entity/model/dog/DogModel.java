@@ -27,6 +27,10 @@ import doggytalents.client.entity.model.animation.DogKeyframeAnimations.Animatio
 import doggytalents.client.entity.model.util.DogModelRenderType;
 import doggytalents.client.entity.render.DogRenderState;
 import doggytalents.common.entity.Dog;
+import doggytalents.common.entity.anim.DogClassicalAnimationState;
+import doggytalents.common.entity.anim.DogPose;
+import doggytalents.common.entity.anim.DogAnimationManager.BlendState;
+import doggytalents.common.entity.anim.DogAnimationManager.DogCapturedProceduralState;
 import doggytalents.common.util.Util;
 import net.minecraft.client.animation.AnimationDefinition;
 import net.minecraft.client.animation.KeyframeAnimations;
@@ -160,27 +164,68 @@ public class DogModel extends EntityModel<DogRenderState> {
     }
     public void prepareMobModel(Dog dog, float limbSwing, float limbSwingAmount, float partialTickTime) {
 
-        this.resetAllPose();
+        // EntityModel now enters through setupAnim(DogRenderState); pose setup happens there.
+    }
+
+    private void setupProceduralPose(
+        Dog dog,
+        float limbSwing, float limbSwingAmount,
+        float relativeHeadYRot, float headPitch,
+        float pticks, float ageInTicks
+    ) {
+
+
+        final var anim = dog.getAnim();
+        final boolean playing_full_anim = this.playingFullAnim(dog, pticks);
+        final var anim_manager = dog.animationManager;
+
+        final var captured_procedural =
+            anim_manager.getBlendState(pticks).hasProceduralCapture()
+                ? anim_manager.capturedProcedural
+                : DogCapturedProceduralState.NONE;
 
         var pose = dog.getDogPose();
+        if (!captured_procedural.isNone()) {
+            pose = captured_procedural.pose();
+        }
 
-        var anim = dog.getAnim();
-        if (anim != DogAnimation.NONE) {
-            if (anim.freeHead() && pose.canBeg)
-                this.translateBeggingDog(dog, limbSwing, limbSwingAmount, partialTickTime);
-            return;
-        };
+        final boolean should_beg =
+            pose.canBeg
+            && (!playing_full_anim || anim.freeHead());
 
-        boolean stand_pose = !DogPoseSetups.setupPose(pose, this, dog, limbSwing, limbSwingAmount, partialTickTime);
-        if (stand_pose)
-            this.setUpStandPose(dog, limbSwing, limbSwingAmount, partialTickTime);
+        final float shake_value = !captured_procedural.isNone() ?
+            captured_procedural.shakeAnim() : dog.getDogClassicalShakeAnim(pticks);
+        final float beg_value = !captured_procedural.isNone() ?
+            captured_procedural.begAnim() : dog.getDogClassicalBegAnim(pticks);
 
-        if (pose.canShake)
-        this.translateShakingDog(dog, limbSwing, limbSwingAmount, partialTickTime);
+        if (!playing_full_anim) {
+            boolean stand_pose = !DogPoseSetups.setupPose(pose, this, dog, limbSwing, limbSwingAmount, pticks);
+            if (stand_pose)
+                this.setUpStandPose(dog, limbSwing, limbSwingAmount, pticks);
 
-        if (pose.canBeg)
-        this.translateBeggingDog(dog, limbSwing, limbSwingAmount, partialTickTime);
+            if (pose.canShake)
+                this.translateShakingDog(dog, shake_value, limbSwing, limbSwingAmount, pticks);
+        }
 
+        if (should_beg)
+            this.translateBeggingDog(dog, shake_value, beg_value, limbSwing, limbSwingAmount, pticks);
+
+        if (pose.freeHead) {
+            if (!captured_procedural.isNone() && !anim.freeHeadXRot()) {
+                this.head.xRot = captured_procedural.headXRot() * Mth.DEG_TO_RAD;
+            } else {
+                this.head.xRot += headPitch * ((float)Math.PI / 180F);
+            }
+            this.head.yRot += relativeHeadYRot *  Mth.DEG_TO_RAD;
+        }
+        if (pose.freeTail) {
+            this.tail.xRot = dog.getTailRotation();
+            this.tail.yRot = DogClassicalAnimationState.wagAngle(limbSwing, limbSwingAmount, ageInTicks);
+        }
+    }
+
+    private boolean playingFullAnim(Dog dog, float pticks) {
+        return dog.animationManager.playingFullAnim(pticks);
     }
 
     public void setUpStandPose(Dog dog, float limbSwing, float limbSwingAmount, float partialTickTime) {
@@ -221,33 +266,32 @@ public class DogModel extends EntityModel<DogRenderState> {
     }
 
     @Deprecated
-    public void animateStandWalking(Dog dog, float limbSwing, float limbSwingAmount, float partialTickTime) {
+    public void animateStandWalking(
+        Dog dog, float limbSwing, float limbSwingAmount, float partialTickTime) {
         float w = Mth.cos(limbSwing * 0.6662F);
         float w1 = Mth.cos(limbSwing * 0.6662F + (float) Math.PI);
         float swing = Mth.clamp(limbSwingAmount, 0, 1);
         float modifier = 2.5f;
-        this.body.xRot += getAnimateWalkingValue(w, swing, modifier * -5f*Mth.DEG_TO_RAD);
-        this.body.y += getAnimateWalkingValue(w, swing, -0.25f*modifier);
-        this.body.z +=  getAnimateWalkingValue(w, swing, -0.25f*modifier);
+        this.body.xRot += getAnimateWalkingValue(w, swing, modifier * -5f * Mth.DEG_TO_RAD);
+        this.body.y += getAnimateWalkingValue(w, swing, -0.25f * modifier);
+        this.body.z += getAnimateWalkingValue(w, swing, -0.25f * modifier);
 
-        this.mane.xRot += getAnimateWalkingValue(w, swing, modifier * 2.5f*Mth.DEG_TO_RAD );
-        this.mane.y += getAnimateWalkingValue(w, swing, -0.25f*modifier);
+        this.mane.xRot += getAnimateWalkingValue(w, swing, modifier * 2.5f * Mth.DEG_TO_RAD);
+        this.mane.y += getAnimateWalkingValue(w, swing, -0.25f * modifier);
+        this.head.y += getAnimateWalkingValue(w, swing, -0.25f * modifier);
+        this.tail.y += getAnimateWalkingValue(w, swing, 0.5f * modifier);
+        this.tail.z += getAnimateWalkingValue(w, swing, -0.5f * modifier);
 
-        this.head.y += getAnimateWalkingValue(w, swing, -0.25f*modifier);
-
-        this.tail.y += getAnimateWalkingValue(w, swing, 0.5f*modifier);
-        this.tail.z += getAnimateWalkingValue(w, swing, -0.5f*modifier);
-
-        if (this.earRight.isPresent()) {
-            this.earRight.get().xRot += getAnimateWalkingValue(w, swing, -40f*Mth.DEG_TO_RAD );
-            this.earRight.get().zRot += getAnimateWalkingValue(w, swing, -27.5f*Mth.DEG_TO_RAD );
-            this.earRight.get().y += getAnimateWalkingValue(w, swing, 0.5f );
-        }
-        if (this.earLeft.isPresent()) {
-            this.earLeft.get().xRot += getAnimateWalkingValue(w, swing, -40f*Mth.DEG_TO_RAD );
-            this.earLeft.get().zRot += getAnimateWalkingValue(w, swing, 27.5f*Mth.DEG_TO_RAD );
-            this.earLeft.get().y += getAnimateWalkingValue(w, swing, 0.5f );
-        }
+        this.earRight.ifPresent(ear -> {
+            ear.xRot += getAnimateWalkingValue(w, swing, -40f * Mth.DEG_TO_RAD);
+            ear.zRot += getAnimateWalkingValue(w, swing, -27.5f * Mth.DEG_TO_RAD);
+            ear.y += getAnimateWalkingValue(w, swing, 0.5f);
+        });
+        this.earLeft.ifPresent(ear -> {
+            ear.xRot += getAnimateWalkingValue(w, swing, -40f * Mth.DEG_TO_RAD);
+            ear.zRot += getAnimateWalkingValue(w, swing, 27.5f * Mth.DEG_TO_RAD);
+            ear.y += getAnimateWalkingValue(w, swing, 0.5f);
+        });
 
         this.legBackRight.xRot += w * 1.4F * limbSwingAmount;
         this.legBackLeft.xRot += w1 * 1.4F * limbSwingAmount;
@@ -259,61 +303,159 @@ public class DogModel extends EntityModel<DogRenderState> {
     private float getAnimateWalkingValue(float w, float swingAmount, float amplitude) {
         int sign = Mth.sign(amplitude);
         amplitude = Math.abs(amplitude);
-        return sign*Math.abs(amplitude * swingAmount * w);
+        return sign * Math.abs(amplitude * swingAmount * w);
     }
 
-    public void translateShakingDog(Dog dog, float limbSwing, float limbSwingAmount, float partialTickTime) {
-        this.mane.zRot = dog.getShakeAngle(partialTickTime, -0.08F);
-        this.body.zRot = dog.getShakeAngle(partialTickTime, -0.16F);
-        this.realTail.zRot = dog.getShakeAngle(partialTickTime, -0.2F);
+    @Deprecated
+    public void translateShakingDog(
+        Dog dog, float limbSwing, float limbSwingAmount, float partialTickTime) {
+        translateShakingDog(
+            dog, dog.getDogClassicalShakeAnim(partialTickTime),
+            limbSwing, limbSwingAmount, partialTickTime);
     }
 
-    public void translateBeggingDog(Dog dog, float limbSwing, float limbSwingAmount, float partialTickTime) {
-        this.realHead.zRot = dog.getInterestedAngle(partialTickTime) + dog.getShakeAngle(partialTickTime, 0.0F);
+    public void translateShakingDog(Dog dog, float shakeValue, float limbSwing, float limbSwingAmount, float partialTickTime) {
+        this.mane.zRot = DogClassicalAnimationState.shakeAngle(shakeValue, -0.08F);
+        this.body.zRot = DogClassicalAnimationState.shakeAngle(shakeValue, -0.16F);
+        this.realTail.zRot = DogClassicalAnimationState.shakeAngle(shakeValue, -0.2F);
+    }
+
+    @Deprecated
+    public void translateBeggingDog(
+        Dog dog, float limbSwing, float limbSwingAmount, float partialTickTime) {
+        translateBeggingDog(
+            dog,
+            dog.getDogClassicalShakeAnim(partialTickTime),
+            dog.getDogClassicalBegAnim(partialTickTime),
+            limbSwing, limbSwingAmount, partialTickTime);
+    }
+
+    public void translateBeggingDog(Dog dog, float shakeValue, float begValue,
+        float limbSwing, float limbSwingAmount, float partialTickTime) {
+        this.realHead.zRot = DogClassicalAnimationState.begAngle(begValue)
+            + DogClassicalAnimationState.shakeAngle(shakeValue, 0);
     }
 
     Vector3f vecObj = new Vector3f();
     private float headXRot0 = 0, headYRot0 = 0, realHeadZRot0 = 0;
 
     public void setupAnim(Dog dog, float limbSwing, float limbSwingAmount, float ageInTicks, float relativeHeadYRot, float headPitch) {
-        var pose = dog.getDogPose();
-        var animationManager = dog.animationManager;
+        this.resetAllPose();
 
         if (dog.isDogInAnimDebug() && dog.getAnim().isNone()) {
             setDogUpDebugAnim(dog);
             return;
         }
 
-        if (pose.freeHead) {
-            this.head.xRot += headPitch * ((float)Math.PI / 180F); 
-            this.head.yRot += relativeHeadYRot *  Mth.DEG_TO_RAD;
-        }
-        if (pose.freeTail) {
-            this.tail.xRot = dog.getTailRotation();
-            this.tail.yRot = dog.getWagAngle(limbSwing, limbSwingAmount, ageInTicks);
+        final float pticks = ageInTicks - dog.tickCount;
+        this.setupProceduralPose(
+            dog,
+            limbSwing, limbSwingAmount,
+            relativeHeadYRot, headPitch,
+            pticks, ageInTicks);
+
+        final var anim_manager = dog.animationManager;
+        final var anim = dog.getAnim();
+
+        final boolean is_procedural_only =
+            anim.isNone() && anim_manager.getBlendState(pticks).isNone();
+
+        if (is_procedural_only)
+            return;
+
+        final var cached_procedural_val =
+            new CachedProceduralValues(this.head.xRot, this.head.yRot, this.realHead.zRot);
+
+        final long anim_time_millis = dog.animationManager.animationState
+            .updateTimeAndGet(ageInTicks, anim.getSpeedModifier());
+
+        if (this.playingFullAnim(dog, pticks)) {
+            setupKeyframeAnimationPose(dog, dog.getAnim(), anim_time_millis, cached_procedural_val);
+            return;
         }
 
-        var animState = animationManager.animationState;
-        var anim = dog.getAnim();
-        if (anim == DogAnimation.NONE) return;
+        final var blend_state = anim_manager.getBlendState(pticks);
+
+        final var pose_A = this.animSnapshot1;
+        final var pose_B = this.animSnapshot2;
+
+        if (blend_state == BlendState.ANIM_TO_ANIM) {
+            final var captured_keyframe = dog.animationManager.capturedKeyframeAnim;
+
+            if (!captured_keyframe.isNone()) {
+                setupKeyframeAnimationPose(dog, captured_keyframe.anim(),
+                    captured_keyframe.timestampMillis(), cached_procedural_val);
+            }
+        }
+
+        pose_A.store(this);
+
+        if (blend_state == BlendState.BLEND_OUT) {
+            final var captured_keyframe = dog.animationManager.capturedKeyframeAnim;
+
+            if (!captured_keyframe.isNone()) {
+                setupKeyframeAnimationPose(dog, captured_keyframe.anim(),
+                    captured_keyframe.timestampMillis(), cached_procedural_val);
+            }
+        } else {
+            setupKeyframeAnimationPose(dog, dog.getAnim(), anim_time_millis, cached_procedural_val);
+        }
+
+        pose_B.store(this);
+
+        final float blend_progress = blend_state == BlendState.BLEND_OUT ?
+            anim_manager.getBlendOutProgress(pticks)
+            : anim_manager.getBlendInProgress(pticks);
+
+        if (anim.blendIn().blendHeadRotAndChildrenOnly()) {
+            AnimSnapshot.blendAndApplyHeadRotAndChildrenOnly(blend_progress, pose_A, pose_B, this);
+        } else {
+            AnimSnapshot.blendAndApply(blend_progress, pose_A, pose_B, this);
+        }
+    }
+
+    private boolean setupKeyframeAnimationPose(Dog dog,
+        DogAnimation anim, long animTimeMillis,
+        CachedProceduralValues proceduralValues) {
+
+        if (anim.isNone())
+            return false;
+
         var sequence = this.getAnimationSequence(anim);
-        if (sequence == null) return;
-        if (pose.freeHead && anim.freeHead()) {
-            headXRot0 = this.head.xRot;
-            headYRot0 = this.head.yRot;
-            realHeadZRot0 = this.realHead.zRot;
-        } else if (pose.freeHead && anim.freeHeadXRotOnly()) {
-            headXRot0 = this.head.xRot;
+        if (sequence == null)
+            return false;
+
+        resetAllPoseForAnim(dog, anim, proceduralValues);
+
+        DogKeyframeAnimations.animate(this, dog, sequence, animTimeMillis, 1.0F, vecObj);
+
+        return true;
+    }
+
+    private static record CachedProceduralValues(
+        float headXRot, float headYRot, float realHeadZRot
+    ) {}
+
+    private void resetAllPoseForAnim(Dog dog, DogAnimation anim, CachedProceduralValues proceduralValues) {
+        this.resetAllPose();
+
+        if (anim.freeTail()) {
+            this.tail.xRot = dog.getTailRotation();
+        }
+
+        if (anim.freeHead() && dog.getDogPose().freeHead) {
+            this.head.xRot = proceduralValues.headXRot;
+            this.head.yRot = proceduralValues.headYRot;
+            this.realHead.zRot = proceduralValues.realHeadZRot;
+        }
+
+        if (anim.freeHeadXRotOnly()) {
+            this.head.xRot = proceduralValues.headXRot;
         }
 
         anim.rootRotation().ifPresent(x -> {
-            this.root.yRot += x * Mth.DEG_TO_RAD;
+            this.root.yRot = x * Mth.DEG_TO_RAD;
         });
-        
-        if (animState.isStarted()) {
-            animState.updateTime(ageInTicks, anim.getSpeedModifier());
-            DogKeyframeAnimations.animate(this, dog, sequence, animState.getAccumulatedTimeMillis(), 1.0F, vecObj);
-        }
     }
 
     private void setDogUpDebugAnim(Dog dog) {

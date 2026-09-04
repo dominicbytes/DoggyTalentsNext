@@ -11,16 +11,16 @@ public enum DogAnimation {
     STRETCH(1, 70),
     FAINT(2, 80),
     SIT_DOWN(3, 25, p -> p.speedMod(1.75f).interupting()),
-    STAND_UP(4, 40, p -> p.speedMod(1.25f).interupting()),
+    STAND_UP(4, 40, p -> p.speedMod(1.25f).interupting().blendInHeadRotAndChildrenOnly(BlendInConfig.DEFAULT.blendTick())),
     FAINT_2(5, 80),
     LYING_DOWN(6, 80),
-    STAND_QUICK(7, 15, p -> p.speedMod(1.25f).interupting()),
+    STAND_QUICK(7, 15, p -> p.speedMod(1.25f).interupting().blendIn(3)),
     DROWN(8, 145),
     HURT_1(9, 15, p -> p.speedMod(1.25f).interupting()),
     HURT_2(10, 10, p -> p.speedMod(1.25f).interupting()),
     FAINT_STAND_1(11, 80),
     FAINT_STAND_2(12, 80),
-    BACKFLIP(13, 20),
+    BACKFLIP(13, 20, p -> p.blendIn(3)),
     PROTEST(14, 120),
     STAND_IDLE_2(15, 80, p -> p.freeHead()),
     DIG(16, 120),
@@ -113,6 +113,8 @@ public enum DogAnimation {
     private final TimelineMode timelineMode;
     private final boolean interupting;
     private final Optional<Float> rootRotation;
+    private final BlendInConfig blendIn;
+    private final BlendOutConfig blendOut;
 
     private DogAnimation(int id, int lengthTicks, Function<Props, Props> props_consumer) {
         this.id = id;
@@ -125,6 +127,8 @@ public enum DogAnimation {
         this.timelineMode = props.timelineMode;
         this.interupting = props.interupting;
         this.rootRotation = props.rootRotation;
+        this.blendIn = props.blendIn;
+        this.blendOut = props.blendOut;
     }
     
     private DogAnimation(int id, int lengthTicks) {
@@ -145,10 +149,15 @@ public enum DogAnimation {
     public boolean freeHead() { return this.headHandling == HeadHandling.FREE_HEAD; }
     public boolean freeHeadXRotOnly() { return this.headHandling == HeadHandling.FREE_X_AND_REAL_Z; }
     public boolean convertHeadZRot() { return this.headHandling == HeadHandling.FREE_X_AND_REAL_Z; }
+    public boolean freeHeadXRot() { return this.freeHead() || this.freeHeadXRotOnly(); }
     public boolean looping() { return this.timelineMode == TimelineMode.LOOP; }
     public boolean holdOnLastTick() { return this.timelineMode == TimelineMode.HOLD_ON_LAST_TICK; }
     public boolean interupting() { return this.interupting; }
     public Optional<Float> rootRotation() { return this.rootRotation; }
+    public BlendInConfig blendIn() { return this.blendIn; }
+    public BlendOutConfig blendOut() { return this.blendOut; }
+    public boolean hasBlendIn() { return !this.blendIn.isNone(); }
+    public boolean hasBlendOut() { return !this.blendOut.isNone(); }
 
     public boolean isNone() { return this == DogAnimation.NONE; }
 
@@ -168,6 +177,8 @@ public enum DogAnimation {
         private TimelineMode timelineMode = TimelineMode.STOP_ON_LAST_TICK;
         private boolean interupting = false;
         private Optional<Float> rootRotation = Optional.empty();
+        private BlendInConfig blendIn = BlendInConfig.DEFAULT;
+        private BlendOutConfig blendOut = BlendOutConfig.DEFAULT;
 
         public Props speedMod(float val) {
             this.speedModifier = val;
@@ -209,6 +220,61 @@ public enum DogAnimation {
             return this;
         }
 
+        public Props noBlendIn() {
+            this.blendIn = BlendInConfig.NONE;
+            return this;
+        }
+
+        public Props blendIn(int ticks) {
+            this.blendIn = new BlendInConfig(DogAnimBlendInMode.BLEND, ticks);
+            return this;
+        }
+
+        public Props blendInHeadRotAndChildrenOnly(int ticks) {
+            this.blendIn = new BlendInConfig(DogAnimBlendInMode.HEAD_ROT_AND_CHILDREN_ONLY, ticks);
+            return this;
+        }
+
+        public Props noBlendOut() {
+            this.blendOut = new BlendOutConfig(DogAnimBlendOutMode.NONE, 0);
+            return this;
+        }
+
+        public Props blendOut(int ticks) {
+            this.blendOut = new BlendOutConfig(DogAnimBlendOutMode.CAPTURE_POSE, ticks);
+            return this;
+        }
     }
+
+    public static enum DogAnimBlendInMode { NONE, BLEND, HEAD_ROT_AND_CHILDREN_ONLY }
+
+    public static record BlendInConfig(DogAnimBlendInMode mode, int blendTick) {
+        public static final BlendInConfig NONE = new BlendInConfig(DogAnimBlendInMode.NONE, 0);
+        public static final BlendInConfig DEFAULT = new BlendInConfig(DogAnimBlendInMode.BLEND, 5);
+
+        public boolean blendHead() {
+            return this.mode() == DogAnimBlendInMode.BLEND || this.mode() == DogAnimBlendInMode.HEAD_ROT_AND_CHILDREN_ONLY;
+        }
+
+        public boolean blendHeadRotAndChildrenOnly() {
+            return this.mode() == DogAnimBlendInMode.HEAD_ROT_AND_CHILDREN_ONLY;
+        }
+
+        public boolean isNone() {
+            return this.mode() == DogAnimBlendInMode.NONE;
+        }
+    }
+
+    public static enum DogAnimBlendOutMode { NONE, CAPTURE_POSE }
+
+    public static record BlendOutConfig(DogAnimBlendOutMode mode, int blendTick) {
+        public static final BlendOutConfig NONE = new BlendOutConfig(DogAnimBlendOutMode.NONE, 0);
+        public static final BlendOutConfig DEFAULT = new BlendOutConfig(DogAnimBlendOutMode.CAPTURE_POSE, 3);
+
+        public boolean isNone() {
+            return this.mode() == DogAnimBlendOutMode.NONE;
+        }
+    }
+
 
 }

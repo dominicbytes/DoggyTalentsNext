@@ -76,6 +76,17 @@ public class AnimSnapshot {
         model_part.zRot = part.zrot;
     }
 
+    public static void blendAndApplyHeadRotAndChildrenOnly(float progress,
+        AnimSnapshot result1, AnimSnapshot result2,
+        DogModel model) {
+
+        blendPartAndApplyRotOnly(progress, result1.head, result2.head, model.head);
+        blendPartAndApplyRotOnly(progress, result1.realHead, result2.realHead, model.realHead);
+
+        model.earLeft.ifPresent(x -> blendPartAndApply(progress, result1.earLeft, result2.earLeft, x));
+        model.earRight.ifPresent(x -> blendPartAndApply(progress, result1.earRight, result2.earRight, x));
+    }
+
     public static void blendAndApply(float progress, 
         AnimSnapshot result1, AnimSnapshot result2,
         DogModel model) {
@@ -107,12 +118,20 @@ public class AnimSnapshot {
         model_part.zRot = interpRot(progress, part1.zrot, part2.zrot);
     }
 
+    private static void blendPartAndApplyRotOnly(float progress,
+        Part part1, Part part2, ModelPart model_part) {
+
+        model_part.xRot = interpRot(progress, part1.xrot, part2.xrot);
+        model_part.yRot = interpRot(progress, part1.yrot, part2.yrot);
+        model_part.zRot = interpRot(progress, part1.zrot, part2.zrot);
+    }
+
     private static float interp(float progress, float a, float b) {
         return Mth.lerp(progress, a, b);
     }
 
     private static float interpRot(float progress, float a, float b) {
-        return Mth.rotLerp(progress ,a, b);
+        return Mth.rotLerp(progress ,a * Mth.RAD_TO_DEG, b * Mth.RAD_TO_DEG) * Mth.DEG_TO_RAD;
     }
     
     public static class Part {

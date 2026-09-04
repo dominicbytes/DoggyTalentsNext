@@ -26,6 +26,14 @@ public class DogAnimationManager {
     private boolean holdOnLastTick = false;
     private boolean isHolding = false;
     private int tickTillSync = 0;
+    private int blendTick = 0;
+    private int blendDuration = 0;
+    private BlendState blendState = BlendState.NONE;
+    public DogCapturedProceduralState capturedProcedural = DogCapturedProceduralState.NONE;
+    public DogInterruptedAnimState capturedKeyframeAnim = DogInterruptedAnimState.NONE;
+
+    private DogAnimation lastAnim = DogAnimation.NONE;
+    private DogAnimation currentAnim = DogAnimation.NONE;
 
     //Common - Debug
     private boolean isDebug = false;
@@ -33,8 +41,29 @@ public class DogAnimationManager {
     public DogAnimationManager(Dog dog) { this.dog = dog; }
 
     public void onAnimationChange(DogAnimation anim) {
+        this.lastAnim = this.currentAnim;
+        this.currentAnim = anim;
+
         animationTime = 0;
         this.isHolding = false;
+        this.blendTick = 0;
+        this.blendDuration = 0;
+        this.capturedProcedural = DogCapturedProceduralState.NONE;
+
+        this.blendState = computeBlendState(this.lastAnim, this.currentAnim);
+        if (!this.blendState.isNone()) {
+            this.blendTick = 0;
+            this.blendDuration = pickBlendDuration(
+                this.lastAnim, this.currentAnim, this.blendState);
+        }
+        if (this.blendState.hasProceduralCapture()) {
+            this.capturedProcedural = DogCapturedProceduralState.capture(dog);
+        }
+        if (this.blendState.hasAnimPoseCapture()) {
+            this.capturedKeyframeAnim =
+                new DogInterruptedAnimState(this.lastAnim, this.animationState.getAccumulatedTimeMillis());
+        }
+
         if (anim != DogAnimation.NONE) {
             started = true;
             looping = anim.looping();
@@ -47,6 +76,22 @@ public class DogAnimationManager {
             looping = false;
             animationState.stop();
         }
+    }
+
+    static BlendState computeBlendState(DogAnimation fromAnim, DogAnimation toAnim) {
+        if (fromAnim.isNone() && toAnim.hasBlendIn())
+            return BlendState.BLEND_IN;
+        if (fromAnim.hasBlendOut() && toAnim.isNone())
+            return BlendState.BLEND_OUT;
+        return fromAnim.hasBlendOut() && toAnim.hasBlendIn() ?
+            BlendState.ANIM_TO_ANIM : BlendState.NONE;
+    }
+
+    static int pickBlendDuration(
+        DogAnimation fromAnim, DogAnimation toAnim, BlendState blendState) {
+        return blendState == BlendState.BLEND_OUT ?
+            fromAnim.blendOut().blendTick()
+            : toAnim.blendIn().blendTick();
     }
 
     public void tick() {
@@ -83,16 +128,25 @@ public class DogAnimationManager {
             }
         }
 
+        if (this.blendTick < this.blendDuration) {
+            this.blendTick++;
+        }
+
         if (isDebug)
             tickDebug();
     }
 
     public void onSyncTimeUpdated() {
-        if (this.dog.level().isClientSide())
-            resolveLatencyIfNeeded();
+        if (this.dog.level().isClientSide()) {
+            int sync_time = this.dog.getAnimSyncTime();
+            resolveLatencyIfNeeded(sync_time);
+        }
+
     }
 
-    private void resolveLatencyIfNeeded() {
+    private void resolveLatencyIfNeeded(int syncTime) {
+        if (syncTime < 0)
+            return;
         if (!started || looping)
             return;
         
@@ -103,7 +157,7 @@ public class DogAnimationManager {
         if (configMaxLatency > MIN_VAL_MAX_LATENCY)
             maxLatencyAllowed = configMaxLatency;
 
-        int correctTime = dog.getAnimSyncTime();
+        int correctTime = syncTime;
         int currentTime = this.animationTime;
         int latencyAbs = Mth.abs(correctTime - currentTime);
         if (latencyAbs <= maxLatencyAllowed)
@@ -114,9 +168,40 @@ public class DogAnimationManager {
         int correctPassedTime = 
             anim.getLengthTicks() - this.animationTime;
         
+        this.blendDuration = 0; this.blendTick = 0;
         animationState.resolveLatency(dog.tickCount, 
             correctPassedTime, 
             anim.getSpeedModifier());
+    }
+
+    public float getBlendInProgress(float partialTicks) {
+        if (this.blendDuration <= 0 || this.blendTick >= this.blendDuration) return 1.0f;
+        float ret = Mth.clamp((this.blendTick + partialTicks) / (float) this.blendDuration, 0.0f, 1.0f);
+        return Mth.equal(ret, 1) ? 1 : ret;
+    }
+
+    public float getBlendOutProgress(float pticks) {
+        float ret = 1 - getBlendInProgress(pticks);
+        ret = Mth.clamp(ret, 0, 1);
+        return Mth.equal(ret, 0) ? 0 : ret;
+    }
+
+    public boolean playingFullAnim(float pticks) {
+        final var anim = this.dog.getAnim();
+        return !anim.isNone() && (
+            anim.blendIn().isNone()
+            || getBlendInProgress(pticks) >= 1
+        );
+    }
+
+    public BlendState getBlendState(float pticks) {
+        if (this.blendState.isNone())
+            return this.blendState;
+        if (this.blendState == BlendState.BLEND_OUT)
+            return getBlendOutProgress(pticks) > 0 ?
+                this.blendState : BlendState.NONE;
+        return getBlendInProgress(pticks) < 1 ?
+            this.blendState : BlendState.NONE;
     }
 
     public boolean started() {
@@ -182,6 +267,50 @@ public class DogAnimationManager {
         timestamp = Mth.clamp(timestamp, 0, anim.getLengthTicks());
         var current_state = dog.getDogAnimDebugState();
         return DogAnimDebugState.of(anim, timestamp, current_state.yRot());
+    }
+
+    public static record DogCapturedProceduralState(
+        float headXRot, DogPose pose,
+        float shakeAnim, float begAnim
+    ) {
+        public static final DogCapturedProceduralState NONE =
+            new DogCapturedProceduralState(0, DogPose.STAND, 0, 0);
+
+        public static DogCapturedProceduralState capture(Dog dog) {
+            final float xrot = Mth.wrapDegrees(dog.getXRot());
+            return new DogCapturedProceduralState(
+                xrot, dog.getDogPose(),
+                dog.getDogClassicalShakeAnim(1), dog.getDogClassicalBegAnim(1)
+            );
+        }
+
+        public boolean isNone() {
+            return this == NONE;
+        }
+    }
+
+    public static record DogInterruptedAnimState(DogAnimation anim, long timestampMillis) {
+        public static final DogInterruptedAnimState NONE =
+            new DogInterruptedAnimState(DogAnimation.NONE, 0);
+        public boolean isNone() {
+            return this == NONE;
+        }
+    }
+
+    public static enum BlendState {
+        NONE, ANIM_TO_ANIM, BLEND_IN, BLEND_OUT;
+
+        public boolean isNone() {
+            return this == NONE;
+        }
+
+        public boolean hasProceduralCapture() {
+            return this == BLEND_IN || this == ANIM_TO_ANIM;
+        }
+
+        public boolean hasAnimPoseCapture() {
+            return this == ANIM_TO_ANIM || this == BLEND_OUT;
+        }
     }
 
     public static class DogAnimDebugState {

@@ -65,11 +65,19 @@ public interface IDog {
     public List<AccessoryInstance> getAccessories();
     public List<AccessoryInstance> removeAccessories();
 
-    public float getWagAngle(float limbSwing, float limbSwingAmount, float partialTickTime);
-    public float getShakeAngle(float partialTicks, float offset);
-    public float getInterestedAngle(float partialTicks);
-
     public boolean isLying();
+
+    /** @deprecated Use the classical animation state helpers. */
+    @Deprecated
+    public float getWagAngle(float limbSwing, float limbSwingAmount, float partialTickTime);
+
+    /** @deprecated Use the classical animation state helpers. */
+    @Deprecated
+    public float getShakeAngle(float partialTicks, float offset);
+
+    /** @deprecated Use the classical animation state helpers. */
+    @Deprecated
+    public float getInterestedAngle(float partialTicks);
 
     public List<IDogFoodHandler> getFoodHandlers();
 }
