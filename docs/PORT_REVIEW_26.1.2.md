@@ -38,9 +38,9 @@ The old plan said newer DashieDev changes were not scope authority. Subsequent u
 
 LOOT-02 is a contract erratum, not an additional registered test count. These checks call the real registered global modifiers with valid loot contexts; they do not simulate combat deaths or statistically prove drop rates. NeoForge 26.1.2 discovers typed loot-modifier JSON directly. Do not add the old `entries`/`replace` index format as a purported missing fix.
 
-## Inherited gameplay differences requiring a parity decision
+## Accepted inherited gameplay differences
 
-These are not necessary API migrations. They were inherited from MiiRaGe and must not silently be treated as original behavior. No rebalance is applied by this review while the user's retain/restore choice is outstanding.
+These differences were inherited from MiiRaGe. On 2026-09-04 the user explicitly chose to retain them, including the registered Hunter Dog talent. They are accepted parity exceptions, not missing port work. Their original motivation is not established by this review; do not assume they are required API/compatibility changes. No rebalance or registry removal is applied.
 
 | Talent | DashieDev behavior | Port behavior |
 |---|---|---|
@@ -52,7 +52,7 @@ These are not necessary API migrations. They were inherited from MiiRaGe and mus
 | Happy Eater | Talent handler's additional food is fish | Also accepts rotten flesh from level 3 |
 | Hunter Dog | Registration disabled; former looting implementation commented out | Registered talent with chance to duplicate mob drops |
 
-If strict original parity is selected, restore source-backed behavior and test outcomes at boundary levels. Hunter Dog needs a compatibility decision: do not simply delete a registry ID that existing port saves may contain. If retained, document it as an intentional extension, not original parity.
+Future gameplay tests should use these accepted fork behaviors as the oracle for the listed differences, and immutable DashieDev behavior elsewhere. Preserve Hunter Dog's registry ID and saved state. Boundary-level gameplay verification remains part of REVIEW-GAMEPLAY-01; accepting the design is not a runtime test pass.
 
 ## Evidence reconciliation
 
@@ -76,7 +76,7 @@ These appended review IDs define the next work; they do not retroactively mark o
 
 | ID | Work and acceptance criterion | Status |
 |---|---|---|
-| REVIEW-PARITY-01 | Decide inherited talent differences above; preserve saved IDs; lock approved source values with behavior tests | BLOCKED — user choice |
+| REVIEW-PARITY-01 | Decide and document inherited talent differences, retaining saved IDs; assign runtime verification to REVIEW-GAMEPLAY-01 | PASS — user chose to retain the fork differences on 2026-09-04 |
 | REVIEW-GAMEPLAY-01 | Exercise talent effects at relevant level boundaries, cooldowns/hunger, AI follow/attack/avoid/retrieve/fish, and incapacitation/recovery through actual events/ticks | BLOCKED — coverage incomplete |
 | REVIEW-COMMAND-01 | Execute locate/revive and tracking/whistle flows; test valid, invalid, unavailable-target and permission outcomes | BLOCKED — current command test is registration only |
 | REVIEW-VISUAL-01 | Final-artifact captures: adult/puppy and default/custom models, skins, armor/trim/helmet/accessories, wet/incapacitated states, nameplate settings, tints and bed materials in inventory/hand/ground; menus, reload, howl/audio manual acceptance | BLOCKED — partial earlier human review only |
@@ -85,7 +85,7 @@ These appended review IDs define the next work; they do not retroactively mark o
 | REVIEW-MP-01 | Two-client ownership, synchronization, reconnect, hostile packet/channel testing | WAIVED — user's upstream-only multiplayer scope |
 | REVIEW-PACK-01 | BytecraftPack/Passive Mobs compatibility and independent pack admission | DEFERRED — user request |
 
-Counts for these eight appended acceptance IDs: six required/incomplete, zero fully implemented/executed/passed, zero demonstrated failing acceptance runs, six blocked (one pending choice, five missing complete evidence), one waived, one deferred. Portions of the six required gates are already implemented/tested as described above. Visual and authentic-upgrade gates require manual evidence; these counts are not the automated suite totals.
+Counts for these eight appended acceptance IDs: six required, one passed by explicit scope decision, five blocked by incomplete acceptance evidence, zero demonstrated failing acceptance runs, one waived, one deferred. None of the five runtime/release gates has complete execution evidence; portions are already implemented/tested as described above. Visual and authentic-upgrade gates require manual evidence; these counts are not the automated suite totals.
 
 ## Better porting approach
 
