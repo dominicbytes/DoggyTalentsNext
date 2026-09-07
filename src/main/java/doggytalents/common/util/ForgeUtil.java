@@ -1,32 +1,25 @@
 package doggytalents.common.util;
 
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.Optional;
 
 import doggytalents.common.lib.Constants;
 import net.neoforged.fml.ModList;
+import net.neoforged.fml.jarcontents.JarContents;
+import net.neoforged.fml.jarcontents.JarResource;
 
 public class ForgeUtil {
 
-    public static Optional<Path> getBundledModResource(String assetPath) {
+    public static Optional<JarResource> getBundledModResource(String assetPath) {
         return getBundledModResource(Constants.MOD_ID, assetPath);
     }
 
-    public static Optional<Path> getBundledModResource(String modId, String assetPath) {
+    public static Optional<JarResource> getBundledModResource(String modId, String assetPath) {
         final var contents = ModList.get().getModFileById(modId).getFile().getContents();
-        return contents.getContentRoots().stream()
-            .map(root -> resolve(root, modId, assetPath))
-            .filter(Files::exists)
-            .findFirst();
+        return getBundledModResource(contents, modId, assetPath);
     }
 
-    private static Path resolve(Path root, String modId, String assetPath) {
-        var path = root.resolve("assets").resolve(modId);
-        for (var segment : assetPath.split("/")) {
-            path = path.resolve(segment);
-        }
-        return path;
+    static Optional<JarResource> getBundledModResource(JarContents contents, String modId, String assetPath) {
+        return Optional.ofNullable(contents.get("assets/" + modId + "/" + assetPath));
     }
 
 }

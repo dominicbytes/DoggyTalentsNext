@@ -1,18 +1,17 @@
 package doggytalents.common.util;
 
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.Optional;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import net.minecraft.util.GsonHelper;
+import net.neoforged.fml.jarcontents.JarResource;
 
 public class ResourceUtil {
 
     private static final Gson GSON = new Gson();
 
-    public static Optional<Path> getBundledResource(String path) {
+    public static Optional<JarResource> getBundledResource(String path) {
         return ForgeUtil.getBundledModResource(path);
     }
 
@@ -23,7 +22,7 @@ public class ResourceUtil {
         final var resource_path = resource_path_optional.get();
 
         JsonElement json = null;
-        try (var reader = Files.newBufferedReader(resource_path)) {
+        try (var reader = resource_path.bufferedReader()) {
             json = GsonHelper.fromJson(GSON, reader, JsonElement.class);
         } catch (Exception e) {
             e.printStackTrace();
